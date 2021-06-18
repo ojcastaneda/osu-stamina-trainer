@@ -1,0 +1,15 @@
+{
+  "name": "osu-stamina-trainer-bot",
+  "version": "1.0.0",
+  "description": "osu! bot for stamina training maps recommendations",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "author": "Sombrax79",
+  "license": "MIT",
+  "dependencies": {
+    "bancho.js": "^0.9.7",
+    "dotenv": "^10.0.0"
+  }
+}

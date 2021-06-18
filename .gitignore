@@ -1,0 +1,10 @@
+
+.env
+
+.idea/
+
+node_modules/
+
+osu-stamina-trainer-bot.iml
+
+package-lock.json
