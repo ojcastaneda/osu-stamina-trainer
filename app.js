@@ -1,15 +1,40 @@
+const authManager = require('./authManager');
+const commandProcessing = require('./commands/commandsManager');
 const bancho = require('bancho.js');
-const commandProcessing = require('./commandsManager').commandProcessing;
+const cron = require('node-cron');
+
+
 require('dotenv/config');
 
-console.log(process.env.BOT_USERNAME)
-console.log(process.env.PASSWORD)
+autoLogin = async () =>{
+    await authManager.osuTokenRequest();
+    await authManager.serverTokenRequest();
+}
 
-const client = new bancho.BanchoClient({username: process.env.BOT_USERNAME, password: process.env.PASSWORD});
+setup = async () => {
+    try {
+        await autoLogin();
+        cron.schedule('0 0 */23 * * *', async () => {
+            await autoLogin();
+        });
+        const client = new bancho.BanchoClient({
+            username: process.env.BOT_USERNAME,
+            password: process.env.BOT_PASSWORD
+        });
+        await client.connect();
+        console.log('osu! bot connected');
+        client.on('PM', async (message) => {
+            if(!message.self){
+                const response = await commandProcessing(message.message);
+                if (response) {
+                    message.user.sendMessage(response);
+                }
+            }
 
-client.connect().then(() => {
-    console.log('osu! bot connected');
-    client.on('PM', ({user, message}) => {
-        commandProcessing(user, message);
-    });
-}).catch((error) => console.log(error));
+        });
+    } catch (error) {
+        console.log(error);
+    }
+}
+
+setup();

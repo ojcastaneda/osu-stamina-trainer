@@ -1,11 +1,22 @@
-const sharedResources = require('./sharedResources').filterMessage;
+const sharedResources = require('./sharedResources');
+const dictionary = require('../dictionary/en.json');
 
-const recommend = (params) => {
+const recommend = (user, params) => {
     const beatmap = params.filter(sharedResources.filterMessage)[0];
     if (beatmap) {
-        //WIP
+        sharedResources.searchBeatmapServer(user, beatmap).then((response) => {
+                if (response) {
+                    sharedResources.createRecommendationServer(user, {
+                        beatmapID: response.id
+                    })
+                } else {
+                    user.sendMessage(dictionary.mapNotAvailable);
+                }
+            }
+        )
+    } else {
+        return dictionary.incorrectParams;
     }
-    return sharedResources.incorrectParams;
 };
 
 module.exports = recommend;
