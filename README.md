@@ -11,12 +11,12 @@ Values in parentheses `(` `)` can be inputted as either a number to use
 the default range or a range of numbers separated by the dash symbol
 `-` to request a custom range.
 
-Brackets and parentheses are not part of the commands.
+Brackets `[` `]` and parentheses `(` `)` are not part of the commands.
 
-- `!request` *`(bpm)`*: Requests a beatmap with a specified bpm, default 
+- `!request (bpm)`: Requests a beatmap with a specified bpm, default 
   range +-5 bpm **(required)**.
-    - *`stars=(beatmap star rating)`*: Specifies the beatmaps difficulty 
-      rating, default range +-0.5.
+    - `stars=(beatmap difficulty rating)`: Specifies the beatmaps difficulty 
+      rating, default range +-0.5 stars.
     - `type=[stream type]`:  Specifies the beatmap dominant type of streams 
       given the following possibilities, default value all types:
         - `b or bursts`: Specifies 3 to 8 notes to be de dominant type.
@@ -49,16 +49,16 @@ osu! para practicar stamina.
 
 Parámetros entre paréntesis `(` `)` pueden ser escritos como valores 
 individuales, los cuales van a llevar el rango por defecto, o pueden ser 
-escritos como rangos separados con un guion `-` para establecer un rango 
+escritos como rangos separados con un guión `-` para establecer un rango 
 customizado.
 
-Los corchetes y paréntesis no hacen parte de los comandos.
+Los corchetes `[` `]` y paréntesis `(` `)`no hacen parte de los comandos.
 
-- `!request` *`(bpm)`*: Solicita un beatmap con un bpm especificado
+- `!request` `(bpm)`: Solicita un beatmap con un bpm especificado
   rango por defecto +-5 bpm **(requerido)**.
-    - *`stars=(dific)`*: Especifica la dificultad del beatmap, 
-      rango por defecto +-0.5.
-    - `type=[stream type]`: Especifica el tipo de stream dominante dentro 
+    - `stars=(dificultad del beatmap)`: Especifica la dificultad del beatmap, 
+      rango por defecto +-0.5 estrellas.
+    - `type=[tipo de stream]`: Especifica el tipo de stream dominante dentro 
       del beatmap según las siguientes posibilidades, el valor por defecto
       incluye todos los tipos:
         - `b or bursts`: Especifica 3 a 8 notas como tipo dominante.
