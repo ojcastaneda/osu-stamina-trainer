@@ -1,12 +1,12 @@
 {
+  "beatmapNotAvailable": "This beatmap is no longer available on osu!",
+  "commandIncorrectParams": "Your inputted parameters for this command are incorrect, type !help to check the correct parameters for each command",
+  "commandNoPrefix": "No command detected, type !help to check the available commands",
+  "commandNotFound": "This command does not exists, type !help to check the available commands",
   "help": "Check our wiki to know about all the features [https://github.com/ojcastaneda/osu-stamina-trainer-bot Github Wiki]",
-  "incorrectParams": "Your inputted parameters for this command are incorrect, type !help to check the correct parameter for each command",
-  "mapNotAvailable": "This beatmap is no longer available on osu!",
-  "noPrefix": "No command detected, type !help to check the available commands",
-  "notFound": "This command does not exists, type !help to check the available commands",
+  "length": "Length",
+  "noBeatmapsFound": "No beatmaps available for the inputted parameters",
   "osuNotAvailable": "osu! servers are not available at the moment, please try again later",
   "serverNotAvailable": "Our servers are not available at the moment, please try again later",
-  "noBeatmapsAvailable": "No beatmaps available for the inputted parameters",
-  "type": "Type",
-  "length": "Length"
+  "type": "Type"
 }

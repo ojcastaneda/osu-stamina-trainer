@@ -6,22 +6,24 @@ const report = require('./report');
 const prefix = "!";
 
 const commandProcessing = async (message) => {
-    if (message[0] === prefix) {
-        const command = message.substring(1, message.indexOf(' '));
+    if (message.charAt(0) === prefix) {
+        let params = message.substring(1);
+        params = params.split(' ');
+        const command = params.shift();
         switch (command) {
             case "request":
-                return await request(message);
+                return await request(params);
             //case "report":
-            //    return await report(message);
+            //    return await report(params);
             //case "recommend":
-            //    return await recommend(message);
+            //    return await recommend(params);
             case "help":
-                return dictionary.help;
+                return dictionary.help
             default:
-                return dictionary.notFound;
+                return dictionary.commandNotFound;
         }
     } else {
-        return dictionary.noPrefix;
+        return dictionary.commandNoPrefix;
     }
 };
 

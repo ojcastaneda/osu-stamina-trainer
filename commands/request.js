@@ -26,9 +26,7 @@ const formatNumberRange = (name, param, defaultRange) => {
 
 }
 
-const request = async (parameters) => {
-    let params = parameters.split(" ");
-    params.shift();
+const request = async (params) => {
     if (params.length > 0) {
         let request = {filters: []};
         const bpm = formatNumberRange("bpm", params[0], 5);
@@ -58,7 +56,7 @@ const request = async (parameters) => {
                                 request.filters.push({type: "deathstreams"});
                                 break;
                             default:
-                                return dictionary.incorrectParams;
+                                return dictionary.commandIncorrectParams;
                         }
                         break;
                     }
@@ -68,20 +66,22 @@ const request = async (parameters) => {
                             request.filters.push(stars);
                             break;
                         } else {
-                            return dictionary.incorrectParams;
+                            return dictionary.commandIncorrectParams;
                         }
                 }
             }
             const response = await sharedResources.requestServer(request, 'bot/request');
             if (response)
-                return `[https://osu.ppy.sh/beatmaps/${response.beatmapId} ${response.name}] Bpm: ${response.bpm} ${dictionary.type}: ${response.type} AR: ${response.ar} OD: ${response.od} ${dictionary.length}: ${response.length}`
+                return `[https://osu.ppy.sh/b/${response.beatmapId} ${response.name}] Bpm: ${response.bpm} ${dictionary.type}: ${response.type} AR: ${response.ar} OD: ${response.od} ${dictionary.length}: ${response.length}s`
             else {
-                return dictionary.noBeatmapsAvailable;
+                return dictionary.noBeatmapsFound;
             }
+        } else {
+            return dictionary.commandIncorrectParams;
         }
-        return dictionary.incorrectParams;
+
     } else {
-        return dictionary.incorrectParams;
+        return dictionary.commandIncorrectParams;
     }
 
 }
