@@ -6,8 +6,8 @@ const formatNumberRange = (name, param, defaultRange) => {
         const range = param.split('-');
         if (isNaN(range[0]) || isNaN(range[1]))
             return;
-        const min = parseInt(range[0]);
-        const max = parseInt(range[1]);
+        const min = parseFloat(range[0]);
+        const max = parseFloat(range[1]);
         if (min < 0 || max < min) {
             return;
         }
@@ -15,7 +15,7 @@ const formatNumberRange = (name, param, defaultRange) => {
     } else {
         if (isNaN(param))
             return;
-        const number = parseInt(param);
+        const number = parseFloat(param);
         const min = number - defaultRange;
         if (min < 0) {
             return;
@@ -23,7 +23,6 @@ const formatNumberRange = (name, param, defaultRange) => {
         const max = number + defaultRange;
         return {name: name, min: min, max: max};
     }
-
 }
 
 const request = async (params) => {
