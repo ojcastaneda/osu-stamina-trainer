@@ -2,8 +2,10 @@
 
 ## English
 
-osu! recommendation [bot](https://osu.ppy.sh/users/6484647) 
+osu! standard recommendation [bot](https://osu.ppy.sh/users/6484647) 
 for stamina practice beatmaps.
+
+For bug reports and recommendations contact me via Discord Sombrax79#1333.
 
 ### Commands
 
@@ -26,6 +28,13 @@ Brackets `[` `]` and parentheses `(` `)` are not part of the commands.
 - `!recommend`: WIP
 - `!report`: WIP
 
+### Examples of use
+
+- `!request 180 stars=5 type=s`
+    - Requests a 175 bpm to 185 bpm, with a star rating between 4.5 stars to 5.5 stars that has a dominant tendency for 9-32 hit objects streams.
+- `!request 190-200 stars=5.5-6 type=b`
+    - Requests a 190 bpm to 200 bpm, with a star rating between 5.5 stars to 6 stars that has a dominant tendency for 3-8 hit objects streams.
+
 ### Tools
 
 This project uses the following dependencies:
@@ -43,7 +52,9 @@ This project uses the following dependencies:
 ## Español
 
 [bot](https://osu.ppy.sh/users/6484647) de recomendaciones de beatmaps de 
-osu! para practicar stamina.
+osu! standard para practicar stamina.
+
+Para sugerencias y reportes de bug por favor contactarme via Discord Sombrax79#1333
 
 ### Comandos
 
@@ -67,6 +78,17 @@ Los corchetes `[` `]` y paréntesis `(` `)`no hacen parte de los comandos.
 - `!help`: Redirecciona a la wiki de osu! stamina trainer bot
 - `!recommend`: WIP
 - `!report`: WIP
+
+### Ejemplos de uso
+
+- `!request 180 stars=5 type=s`
+    - Solicita un beatmap entre 175 bpm a 185 bpm, con dificultad entre 
+      4.5 estrellas a 5.5 estrellas con una tendencia dominante por streams
+      de 9-32 notas.
+- `!request 190-200 stars=5.5-6 type=b`
+    - Solicita un beatmap entre 190 bpm a 200 bpm, con dificultad entre
+      5.5 estrellas a 6 estrellas con una tendencia dominante por streams
+      de 3-8 notas.
 
 ### Herramientas
 
