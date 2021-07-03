@@ -3,42 +3,146 @@ const authManager = require('../authManager');
 const dictionary = require('../dictionary/en.json');
 require('dotenv/config');
 
-test('Recognizes base request command', async () => {
+
+
+test('Recognizes request command', async () => {
     await authManager.serverTokenRequest();
     expect(await commandProcessing("!request 180")).not.toBe(false);
 });
 
-test('Recognizes base request command no beatmaps', async () => {
+test('Recognizes request command no beatmaps', async () => {
     await authManager.serverTokenRequest();
     expect(await commandProcessing("!request 10")).toBe(dictionary.noBeatmapsFound);
 });
 
-test('Recognizes base request command bpm range', async () => {
+test('Recognizes request command bpm', async () => {
     await authManager.serverTokenRequest();
-    expect(await commandProcessing("!request 180-200")).not.toBe(false);
+    expect(await commandProcessing("!request 180")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180")).not.toBe(dictionary.serverNotAvailable);
 });
 
-test('Recognizes base request command type', async () => {
+test('Recognizes request command bpm range', async () => {
     await authManager.serverTokenRequest();
-    expect(await commandProcessing("!request 180 type=s")).not.toBe(false);
+    expect(await commandProcessing("!request 180-200")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180-200")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180-200")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180-200")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180-200")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180-200")).not.toBe(dictionary.serverNotAvailable);
 });
 
-test('Recognizes base request command bpm range and type', async () => {
+test('Recognizes request command bpm exact', async () => {
     await authManager.serverTokenRequest();
-    expect(await commandProcessing("!request 180-200 type=s")).not.toBe(false);
+    expect(await commandProcessing("!request 180-")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180-")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180-")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180-")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180-")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180-")).not.toBe(dictionary.serverNotAvailable);
 });
 
-test('Recognizes help request', async () => {
+test('Recognizes request command bpm and type', async () => {
     await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 type=s")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 type=s")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 type=s")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 type=s")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 type=s")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 type=s")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and stars', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 stars=5.5")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 stars=5.5")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 stars=5.5")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 stars=5.5")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 stars=5.5")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 stars=5.5")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and stars range', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 stars=5-6")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 stars=5-6")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 stars=5-6")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 stars=5-6")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 stars=5-6")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 stars=5-6")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and stars exact', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 stars=5-")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 stars=5-")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 stars=5-")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 stars=5-")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 stars=5-")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 stars=5-")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and ar', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 ar=9")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 ar=9")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 ar=9")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 ar=9")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 ar=9")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 ar=9")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and ar range', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 ar=9-10")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 ar=9-10")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 ar=9-10")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 ar=9-10")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 ar=9-10")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 ar=9-10")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and ar exact', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 ar=9-")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 ar=9-")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 ar=9-")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 ar=9-")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 ar=9-")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 ar=9-")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm, type, stars and ar', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes r command shortcut', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!r 180")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!r 180")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!r 180")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!r 180")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!r 180")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!r 180")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes help command', async () => {
     expect(await commandProcessing("!help")).toBe(dictionary.help);
 });
 
 test('Recognizes lack of commands', async () => {
-    await authManager.serverTokenRequest();
     expect(await commandProcessing("!random")).toBe(dictionary.commandNotFound);
 });
 
 test('Recognizes lack of prefix', async () => {
-    await authManager.serverTokenRequest();
     expect(await commandProcessing("hello")).toBe(dictionary.commandNoPrefix);
 });

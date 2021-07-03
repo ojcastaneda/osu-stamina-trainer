@@ -4,14 +4,27 @@ const sharedResources = require('./sharedResources');
 const formatNumberRange = (name, param, defaultRange) => {
     if (param.includes('-')) {
         const range = param.split('-');
-        if (isNaN(range[0]) || isNaN(range[1]))
-            return;
-        const min = parseFloat(range[0]);
-        const max = parseFloat(range[1]);
-        if (min < 0 || max < min) {
-            return;
+        let min, max;
+        if (range[1]) {
+            if (isNaN(range[0]) || isNaN(range[1]))
+                return;
+            min = parseFloat(range[0]);
+            max = parseFloat(range[1]);
+            if (min < 0 || max < min) {
+                return;
+            }
+        } else {
+            if (isNaN(range[0]))
+                return;
+            min = parseFloat(range[0]);
+            max = min;
+            if (min < 0 || max < min) {
+                return;
+            }
+
         }
         return {name: name, min: min, max: max};
+
     } else {
         if (isNaN(param))
             return;
@@ -67,11 +80,21 @@ const request = async (params) => {
                         } else {
                             return dictionary.commandIncorrectParams;
                         }
+                    case "ar":
+                        const ar = formatNumberRange("ar", param[1], 0.5);
+                        if (ar) {
+                            request.filters.push(ar);
+                            break;
+                        } else {
+                            return dictionary.commandIncorrectParams;
+                        }
                 }
             }
             const response = await sharedResources.requestServer(request, 'bot/request');
             if (response)
-                return `[https://osu.ppy.sh/b/${response.beatmapId} ${response.name}] Bpm: ${response.bpm} ${dictionary.type}: ${response.type} AR: ${response.ar} OD: ${response.od} ${dictionary.length}: ${response.length}s`
+                return `[https://osu.ppy.sh/b/${response.beatmapId} ${response.name}] BPM: ${response.bpm} ${dictionary.type}: ${response.type} \
+                AR: ${response.ar} OD: ${response.od} ${dictionary.length}: ${Math.floor(response.length / 60)}:${response.length % 60}\
+                [https://discord.gg/eNU3BE6bca new Discord server for suggestions]`;
             else {
                 return dictionary.noBeatmapsFound;
             }

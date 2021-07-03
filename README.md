@@ -15,6 +15,9 @@ the default range or a range of numbers separated by the dash symbol
 
 Brackets `[` `]` and parentheses `(` `)` are not part of the commands.
 
+Leaving values as `number-` on any parameter that accept ranges will
+match the exact value instead of a range.
+
 - `!request (bpm)`: Requests a beatmap with a specified bpm, default 
   range +-5 bpm **(required)**.
     - `stars=(beatmap difficulty rating)`: Specifies the beatmaps difficulty 
@@ -31,9 +34,14 @@ Brackets `[` `]` and parentheses `(` `)` are not part of the commands.
 ### Examples of use
 
 - `!request 180 stars=5 type=s`
-    - Requests a 175 bpm to 185 bpm, with a star rating between 4.5 stars to 5.5 stars that has a dominant tendency for 9-32 hit objects streams.
+    - Requests a 175 bpm to 185 bpm, with a star rating between 4.5 stars 
+      to 5.5 stars that has a dominant tendency for 9-32 hit objects streams.
 - `!request 190-200 stars=5.5-6 type=b`
-    - Requests a 190 bpm to 200 bpm, with a star rating between 5.5 stars to 6 stars that has a dominant tendency for 3-8 hit objects streams.
+    - Requests a 190 bpm to 200 bpm, with a star rating between 5.5 stars 
+      to 6 stars that has a dominant tendency for 3-8 hit objects streams.
+- `!r 180- stars=5.5- ar=9- type=d`
+    - Requests a 180 bpm, with a 5.5 star rating, and ar 9
+      that has a dominant tendency for +33 hit objects streams.
 
 ### Tools
 
@@ -89,7 +97,10 @@ Los corchetes `[` `]` y paréntesis `(` `)`no hacen parte de los comandos.
     - Solicita un beatmap entre 190 bpm a 200 bpm, con dificultad entre
       5.5 estrellas a 6 estrellas con una tendencia dominante por streams
       de 3-8 notas.
-
+- `!r 180- stars=5.5- ar=9- type=d`
+    - Solicita un beatmap de 180 bpm, con dificultad de 5.5 estrellas y
+      con 9 ar con una tendencia dominante por streams de +33 notas.
+      
 ### Herramientas
 
 Este proyecto usa las siguientes dependencias:

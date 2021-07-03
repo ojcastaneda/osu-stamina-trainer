@@ -13,6 +13,8 @@ const commandProcessing = async (message) => {
         switch (command) {
             case "request":
                 return await request(params);
+            case "r":
+                return await request(params);
             //case "report":
             //    return await report(params);
             //case "recommend":
