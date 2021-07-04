@@ -1,5 +1,7 @@
 # osu! stamina trainer bot
 
+[Discord server](https://discord.gg/eNU3BE6bca)
+
 ## English
 
 osu! standard recommendation [bot](https://osu.ppy.sh/users/6484647) 
@@ -18,6 +20,9 @@ Brackets `[` `]` and parentheses `(` `)` are not part of the commands.
 Leaving values as `number-` on any parameter that accept ranges will
 match the exact value instead of a range.
 
+By default the bot will send no mod and double time beatmaps 
+recommendations that match the filters specified.
+
 - `!request (bpm)`: Requests a beatmap with a specified bpm, default 
   range +-5 bpm **(required)**.
     - `stars=(beatmap difficulty rating)`: Specifies the beatmaps difficulty 
@@ -27,9 +32,13 @@ match the exact value instead of a range.
         - `b or bursts`: Specifies 3 to 8 notes to be de dominant type.
         - `s or streams`: Specifies 9 to 32 notes to be de dominant type.
         - `d or deathstreams`: Specifies +33 notes to be de dominant type.
+    - `ar=[ar number]`:  Specifies the ar present on the beatmap.
+    - `density=[stream density]`:  Specifies the ratio of streams to hit 
+       object of the beatmap, default range 0.1 (from 0.3 to 1).
+    - `dt`:  Specifies only beatmaps with dt modification.
+    - `nomod`:  Specifies only beatmaps with no modifications.
+- `!r`: Same as `!request`.
 - `!help`: Links to the osu! stamina trainer bot wiki
-- `!recommend`: WIP
-- `!report`: WIP
 
 ### Examples of use
 
@@ -50,12 +59,13 @@ This project uses the following dependencies:
 - [Sequelize](https://sequelize.org/master/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Nodejs](https://nodejs.org/en/)
+- [Oppai](https://github.com/Francesco149/oppai-ng)
 
 ### Other projects
 
 - [osu! stamina trainer server](https://github.com/ojcastaneda/osu-stamina-trainer-server)
-- [C# project for ranked beatmap streams analysis](https://github.com/ojcastaneda/osu-stream-detector)
-- osu! stamina trainer web (WIP)
+- C# project for ranked beatmap streams analysis (Not public at the moment 
+  because of possible bans if used)
 
 ## Español
 
@@ -73,6 +83,9 @@ customizado.
 
 Los corchetes `[` `]` y paréntesis `(` `)`no hacen parte de los comandos.
 
+Por defecto el bot envía recomendaciones de beatmaps sin modificaciones y
+con modificacion de dt que cumplan con los filtros especificados.
+
 - `!request` `(bpm)`: Solicita un beatmap con un bpm especificado
   rango por defecto +-5 bpm **(requerido)**.
     - `stars=(dificultad del beatmap)`: Especifica la dificultad del beatmap, 
@@ -83,9 +96,13 @@ Los corchetes `[` `]` y paréntesis `(` `)`no hacen parte de los comandos.
         - `b or bursts`: Especifica 3 a 8 notas como tipo dominante.
         - `s or streams`: Especifica 9 a 32 notas como tipo dominante.
         - `d or deathstreams`: Especifica +33 notas como tipo dominante.
+    - `ar=[ar number]`: Especifica el ar del beatmap.
+    - `density=[stream density]`: Especifica el ratio de stream a notas del
+      beatmap, rango por defecto 0.1 (de 0.3 a 1).
+    - `dt`: Especifica beatmaps con valores de dt.
+    - `nomod`: Especifica beatmaps sin modificaciones.
+- `!r`: Same as `!request`.
 - `!help`: Redirecciona a la wiki de osu! stamina trainer bot
-- `!recommend`: WIP
-- `!report`: WIP
 
 ### Ejemplos de uso
 
@@ -108,9 +125,10 @@ Este proyecto usa las siguientes dependencias:
 - [Sequelize](https://sequelize.org/master/)
 - [PostgreSQL](https://www.postgresql.org/)
 - [Nodejs](https://nodejs.org/en/)
+- [Oppai](https://github.com/Francesco149/oppai-ng)
 
 ### Otros proyectos
 
 - [osu! stamina trainer server](https://github.com/ojcastaneda/osu-stamina-trainer-server)
-- [Proyecto en C# para analizar streams de beatmaps rankeados](https://github.com/ojcastaneda/osu-stream-detector)
-- osu! stamina trainer web (WIP)
+- Proyecto en C# para analizar streams de beatmaps rankeados (No público 
+  de momento por posibilidades de ban si es usado)

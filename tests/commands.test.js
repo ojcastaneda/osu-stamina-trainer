@@ -115,14 +115,74 @@ test('Recognizes request command bpm and ar exact', async () => {
     expect(await commandProcessing("!request 180 ar=9-")).not.toBe(dictionary.serverNotAvailable);
 });
 
-test('Recognizes request command bpm, type, stars and ar', async () => {
+test('Recognizes request command bpm and density', async () => {
     await authManager.serverTokenRequest();
-    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.commandIncorrectParams);
-    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.commandNoPrefix);
-    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.commandNotFound);
-    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.noBeatmapsFound);
-    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.osuNotAvailable);
-    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5")).not.toBe(dictionary.serverNotAvailable);
+    expect(await commandProcessing("!request 180 density=0.4")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 density=0.4")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 density=0.4")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 density=0.4")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 density=0.4")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 density=0.4")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and density range', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 density=0.3-0.6")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 density=0.3-0.6")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 density=0.3-0.6")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 density=0.3-0.6")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 density=0.3-0.6")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 density=0.3-0.6")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and density exact', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 density=0.32-")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 density=0.32-")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 density=0.32-")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 density=0.32-")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 density=0.32-")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 density=0.32-")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and mod dt', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 270 dt")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 270 dt")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 270 dt")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 270 dt")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 270 dt")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 270 dt")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm and mod nomod', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 nomod")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 nomod")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 nomod")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 nomod")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 nomod")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 nomod")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm, type, stars, ar and density', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5 density=0.4")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5 density=0.4")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5 density=0.4")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5 density=0.4")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5 density=0.4")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!request 180 type=s stars=5.5 ar=9.5 density=0.4")).not.toBe(dictionary.serverNotAvailable);
+});
+
+test('Recognizes request command bpm, type, stars, ar and density on all caps', async () => {
+    await authManager.serverTokenRequest();
+    expect(await commandProcessing("!REQUEST 180 TYPE=S STARS=5.5 AR=9.5 DENSITY=0.4")).not.toBe(dictionary.commandIncorrectParams);
+    expect(await commandProcessing("!REQUEST 180 TYPE=S STARS=5.5 AR=9.5 DENSITY=0.4")).not.toBe(dictionary.commandNoPrefix);
+    expect(await commandProcessing("!REQUEST 180 TYPE=S STARS=5.5 AR=9.5 DENSITY=0.5")).not.toBe(dictionary.commandNotFound);
+    expect(await commandProcessing("!REQUEST 180 TYPE=S STARS=5.5 AR=9.5 DENSITY=0.4")).not.toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing("!REQUEST 180 TYPE=S STARS=5.5 AR=9.5 DENSITY=0.4")).not.toBe(dictionary.osuNotAvailable);
+    expect(await commandProcessing("!REQUEST 180 TYPE=S STARS=5.5 AR=9.5 DENSITY=0.4")).not.toBe(dictionary.serverNotAvailable);
 });
 
 test('Recognizes r command shortcut', async () => {

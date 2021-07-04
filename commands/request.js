@@ -39,11 +39,14 @@ const formatNumberRange = (name, param, defaultRange) => {
 }
 
 const request = async (params) => {
+
     if (params.length > 0) {
-        let request = {filters: []};
+        let request = {filters: [], modFilters: []};
         const bpm = formatNumberRange("bpm", params[0], 5);
         if (bpm) {
-            request.filters.push(bpm);
+            request.modFilters.push(bpm);
+            request["bpm"] = bpm;
+            let mod = "none";
             for (let i = 1; i < params.length; i++) {
                 let param = params[i].split("=");
                 switch (param[0]) {
@@ -75,7 +78,7 @@ const request = async (params) => {
                     case "stars":
                         const stars = formatNumberRange("stars", param[1], 0.5);
                         if (stars) {
-                            request.filters.push(stars);
+                            request.modFilters.push(stars);
                             break;
                         } else {
                             return dictionary.commandIncorrectParams;
@@ -83,19 +86,47 @@ const request = async (params) => {
                     case "ar":
                         const ar = formatNumberRange("ar", param[1], 0.5);
                         if (ar) {
-                            request.filters.push(ar);
+                            request.modFilters.push(ar);
                             break;
                         } else {
                             return dictionary.commandIncorrectParams;
                         }
+                    case "density":
+                        const density = formatNumberRange("density", param[1], 0.1);
+                        if (density) {
+                            request.filters.push(density);
+                            break;
+                        } else {
+                            return dictionary.commandIncorrectParams;
+                        }
+                    case "dt":
+                        mod = "dt";
+                        break;
+                    case "nomod":
+                        mod = "nomod"
+                        break;
+                    default:
+                        return dictionary.commandIncorrectParams;
                 }
             }
+            request["mod"] = mod;
             const response = await sharedResources.requestServer(request, 'bot/request');
-            if (response)
-                return `[https://osu.ppy.sh/b/${response.beatmapId} ${response.name}] BPM: ${response.bpm} ${dictionary.type}: ${response.type} \
-                AR: ${response.ar} OD: ${response.od} ${dictionary.length}: ${Math.floor(response.length / 60)}:${response.length % 60}\
-                [https://discord.gg/eNU3BE6bca new Discord server for suggestions]`;
-            else {
+            if (response) {
+                const modBeatmap = response.mod;
+                const beatmap = response.beatmap;
+                let seconds = beatmap.length % 60;
+                if (seconds < 10) {
+                    seconds = `0${seconds}`;
+                }
+                let additionalMods = "";
+                if (modBeatmap === "dt") {
+                    additionalMods = "+DT |"
+                }
+                return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
+                    `${dictionary.type}: ${beatmap.type} | ${dictionary.density}: ${beatmap.density} | AR: ${beatmap.ar} | OD: ${beatmap.od} | `,
+                    `CS: ${beatmap.cs} | ${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds} `,
+                    `[https://discord.gg/eNU3BE6bca new Discord server for suggestions]`);
+            } else {
                 return dictionary.noBeatmapsFound;
             }
         } else {
