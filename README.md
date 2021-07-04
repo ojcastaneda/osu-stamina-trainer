@@ -30,8 +30,8 @@ recommendations that match the filters specified.
     - `type=[stream type]`:  Specifies the beatmap dominant type of streams 
       given the following possibilities, default value all types:
         - `b or bursts`: Specifies 3 to 8 notes to be de dominant type.
-        - `s or streams`: Specifies 9 to 32 notes to be de dominant type.
-        - `d or deathstreams`: Specifies +33 notes to be de dominant type.
+        - `s or streams`: Specifies 9 to 24 notes to be de dominant type.
+        - `d or deathstreams`: Specifies +25 notes to be de dominant type.
     - `ar=[ar number]`:  Specifies the ar present on the beatmap.
     - `density=[stream density]`:  Specifies the ratio of streams to hit 
        object of the beatmap, default range 0.1 (from 0.3 to 1).
@@ -44,13 +44,17 @@ recommendations that match the filters specified.
 
 - `!request 180 stars=5 type=s`
     - Requests a 175 bpm to 185 bpm, with a star rating between 4.5 stars 
-      to 5.5 stars that has a dominant tendency for 9-32 hit objects streams.
+      to 5.5 stars that has a dominant tendency for 9-24 hit objects streams.
 - `!request 190-200 stars=5.5-6 type=b`
     - Requests a 190 bpm to 200 bpm, with a star rating between 5.5 stars 
       to 6 stars that has a dominant tendency for 3-8 hit objects streams.
 - `!r 180- stars=5.5- ar=9- type=d`
     - Requests a 180 bpm, with a 5.5 star rating, and ar 9
-      that has a dominant tendency for +33 hit objects streams.
+      that has a dominant tendency for +25 hit objects streams.
+- `!r 270 dt stars=7- ar=9-10.3 type=d density=0.7`
+    - Requests a 270 bpm, with a 7 star rating, and ar between 9 and 10.3
+      that has a dominant tendency for +25 hit objects streams, and 70% of 
+      its hit objects are streams.
 
 ### Tools
 
@@ -94,8 +98,8 @@ con modificacion de dt que cumplan con los filtros especificados.
       del beatmap según las siguientes posibilidades, el valor por defecto
       incluye todos los tipos:
         - `b or bursts`: Especifica 3 a 8 notas como tipo dominante.
-        - `s or streams`: Especifica 9 a 32 notas como tipo dominante.
-        - `d or deathstreams`: Especifica +33 notas como tipo dominante.
+        - `s or streams`: Especifica 9 a 24 notas como tipo dominante.
+        - `d or deathstreams`: Especifica +25 notas como tipo dominante.
     - `ar=[ar number]`: Especifica el ar del beatmap.
     - `density=[stream density]`: Especifica el ratio de stream a notas del
       beatmap, rango por defecto 0.1 (de 0.3 a 1).
@@ -109,15 +113,19 @@ con modificacion de dt que cumplan con los filtros especificados.
 - `!request 180 stars=5 type=s`
     - Solicita un beatmap entre 175 bpm a 185 bpm, con dificultad entre 
       4.5 estrellas a 5.5 estrellas con una tendencia dominante por streams
-      de 9-32 notas.
+      de 9-24 notas.
 - `!request 190-200 stars=5.5-6 type=b`
     - Solicita un beatmap entre 190 bpm a 200 bpm, con dificultad entre
       5.5 estrellas a 6 estrellas con una tendencia dominante por streams
       de 3-8 notas.
 - `!r 180- stars=5.5- ar=9- type=d`
     - Solicita un beatmap de 180 bpm, con dificultad de 5.5 estrellas y
-      con 9 ar con una tendencia dominante por streams de +33 notas.
-      
+      con 9 ar con una tendencia dominante por streams de +25 notas.
+- `!r 270 dt stars=7- ar=9-10.3 type=d density=0.7`
+    - Solicita un beatmap de 27 bpm, con dificultad de 7 estrellas y
+      con ar entre 9 y 0.3 con una tendencia dominante por 
+      streams de +25 notas y con streams representando el 70% las notas en 
+      el beatmap.
 ### Herramientas
 
 Este proyecto usa las siguientes dependencias:
