@@ -124,8 +124,7 @@ const request = async (params) => {
                 }
                 return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
                     `${dictionary.type}: ${beatmap.type} | ${dictionary.density}: ${beatmap.density} | AR: ${beatmap.ar} | OD: ${beatmap.od} | `,
-                    `CS: ${beatmap.cs} | ${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds} `,
-                    `[https://discord.gg/eNU3BE6bca new update check the changes on Discord]`);
+                    `CS: ${beatmap.cs} | ${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
             } else {
                 return dictionary.noBeatmapsFound;
             }

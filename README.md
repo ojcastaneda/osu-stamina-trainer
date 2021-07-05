@@ -2,6 +2,8 @@
 
 [Discord server](https://discord.gg/eNU3BE6bca)
 
+[Changelog](https://github.com/ojcastaneda/bot-changelog)
+
 ## English
 
 osu! standard recommendation [bot](https://osu.ppy.sh/users/6484647) 
