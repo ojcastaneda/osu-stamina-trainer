@@ -99,6 +99,30 @@ const request = async (params) => {
                         } else {
                             return dictionary.commandIncorrectParams;
                         }
+                    case "length":
+                        const length = formatNumberRange("length", param[1], 5);
+                        if (length) {
+                            request.modFilters.push(length);
+                            break;
+                        } else {
+                            return dictionary.commandIncorrectParams;
+                        }
+                    case "cs":
+                        const cs = formatNumberRange("cs", param[1], 0.5);
+                        if (cs) {
+                            request.filters.push(cs);
+                            break;
+                        } else {
+                            return dictionary.commandIncorrectParams;
+                        }
+                    case "od":
+                        const od = formatNumberRange("od", param[1], 0.5);
+                        if (od) {
+                            request.modFilters.push(od);
+                            break;
+                        } else {
+                            return dictionary.commandIncorrectParams;
+                        }
                     case "dt":
                         mod = "dt";
                         break;
@@ -123,8 +147,8 @@ const request = async (params) => {
                     additionalMods = "+DT |"
                 }
                 return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
-                    `${dictionary.type}: ${beatmap.type} | ${dictionary.density}: ${beatmap.density} | AR: ${beatmap.ar} | OD: ${beatmap.od} | `,
-                    `CS: ${beatmap.cs} | ${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
+                    `${dictionary.type}: ${beatmap.type} | ${dictionary.density}: ${beatmap.density} | ${beatmap.stars} ★ | AR: ${beatmap.ar}`,
+                    ` | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
             } else {
                 return dictionary.noBeatmapsFound;
             }
