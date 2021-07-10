@@ -50,7 +50,7 @@ const request = async (params) => {
             for (let i = 1; i < params.length; i++) {
                 let param = params[i].split("=");
                 switch (param[0]) {
-                    case "type": {
+                    case "type":
                         switch (param[1]) {
                             case "b":
                                 request.filters.push({type: "bursts"});
@@ -74,7 +74,38 @@ const request = async (params) => {
                                 return dictionary.commandIncorrectParams;
                         }
                         break;
-                    }
+                    case "status":
+                        switch (param[1]) {
+                            case "r":
+                                request.filters.push({osuStatus: "ranked"});
+                                break;
+                            case "ranked":
+                                request.filters.push({osuStatus: "ranked"});
+                                break;
+                            case "l":
+                                request.filters.push({osuStatus: "loved"});
+                                break;
+                            case "loved":
+                                request.filters.push({osuStatus: "loved"});
+                                break;
+                            case "u":
+                                request.filters.push({osuStatus: "unranked"});
+                                break;
+                            case "unranked":
+                                request.filters.push({osuStatus: "unranked"});
+                                break;
+                            default:
+                                return dictionary.commandIncorrectParams;
+                        }
+                        break;
+                    case "average":
+                        const average = formatNumberRange("average", param[1], 1);
+                        if (average) {
+                            request.filters.push(average);
+                            break;
+                        } else {
+                            return dictionary.commandIncorrectParams;
+                        }
                     case "stars":
                         const stars = formatNumberRange("stars", param[1], 0.5);
                         if (stars) {
@@ -144,11 +175,12 @@ const request = async (params) => {
                 }
                 let additionalMods = "";
                 if (modBeatmap === "dt") {
-                    additionalMods = "+DT |"
+                    additionalMods = " +DT |"
                 }
                 return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
-                    `${dictionary.type}: ${beatmap.type} | ${dictionary.density}: ${beatmap.density} | ${beatmap.stars} ★ | AR: ${beatmap.ar}`,
-                    ` | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
+                    `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
+                    `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
+                    `${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
             } else {
                 return dictionary.noBeatmapsFound;
             }

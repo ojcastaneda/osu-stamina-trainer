@@ -1,4 +1,5 @@
 {
+  "averageStreamLength": "Average stream length",
   "beatmapNotAvailable": "This beatmap is no longer available on osu!",
   "commandIncorrectParams": "Your inputted parameters for this command are incorrect, type !help to check the correct parameters for each command",
   "commandNoPrefix": "No command detected, type !help to check the available commands",
@@ -9,5 +10,6 @@
   "noBeatmapsFound": "No beatmaps available for the inputted parameters",
   "osuNotAvailable": "osu! servers are not available at the moment, please try again later",
   "serverNotAvailable": "Our servers are not available at the moment, please try again later",
+  "status": "Status",
   "type": "Type"
 }

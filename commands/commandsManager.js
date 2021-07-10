@@ -15,7 +15,7 @@ const commandProcessing = async (message) => {
             case "r":
                 return await request(params);
             case "help":
-                return dictionary.help
+                return dictionary.help;
             default:
                 return dictionary.commandNotFound;
         }
