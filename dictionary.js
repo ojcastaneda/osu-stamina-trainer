@@ -8,7 +8,7 @@ const length = "Length";
 const noBeatmapsFound = "No beatmaps available for the inputted parameters";
 const serverNotAvailable = "Our servers are not available at the moment, please try again later";
 const status = "Status";
-const submit = `Check our [${process.env.WIKI_URL} website] to submit beatmaps to the collection`;
+const submit = `Check our [${process.env.SUBMISSIONS_URL} website] to submit beatmaps to the collection`;
 const type = "Type";
 
 module.exports = {
