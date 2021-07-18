@@ -1,4 +1,4 @@
-const dictionary = require('../dictionary/en.json');
+const dictionary = require('../dictionary');
 const sharedResources = require('./sharedResources');
 
 const formatNumberRange = (name, param, defaultRange) => {
@@ -39,7 +39,6 @@ const formatNumberRange = (name, param, defaultRange) => {
 }
 
 const request = async (params) => {
-
     if (params.length > 0) {
         let request = {filters: [], modFilters: []};
         const bpm = formatNumberRange("bpm", params[0], 5);
@@ -48,120 +47,119 @@ const request = async (params) => {
             request["bpm"] = bpm;
             let mod = "none";
             for (let i = 1; i < params.length; i++) {
-                let param = params[i].split("=");
-                switch (param[0]) {
-                    case "type":
-                        switch (param[1]) {
-                            case "b":
-                                request.filters.push({type: "bursts"});
-                                break;
-                            case "bursts":
-                                request.filters.push({type: "bursts"});
-                                break;
-                            case "s":
-                                request.filters.push({type: "streams"});
-                                break;
-                            case "streams":
-                                request.filters.push({type: "streams"});
-                                break;
-                            case "d":
-                                request.filters.push({type: "deathstreams"});
-                                break;
-                            case "deathstreams":
-                                request.filters.push({type: "deathstreams"});
-                                break;
+                if (params[i].includes('=')) {
+                    let param = params[i].split("=");
+                    if (params.length >= 2) {
+                        switch (param[0]) {
+                            case "average":
+                                const average = formatNumberRange("average", param[1], 2);
+                                if (average) {
+                                    request.filters.push(average);
+                                    break;
+                                } else {
+                                    return dictionary.commandIncorrectParams;
+                                }
+                            case "stars":
+                                const stars = formatNumberRange("stars", param[1], 0.5);
+                                if (stars) {
+                                    request.modFilters.push(stars);
+                                    break;
+                                } else {
+                                    return dictionary.commandIncorrectParams;
+                                }
+                            case "ar":
+                                const ar = formatNumberRange("ar", param[1], 0.5);
+                                if (ar) {
+                                    request.modFilters.push(ar);
+                                    break;
+                                } else {
+                                    return dictionary.commandIncorrectParams;
+                                }
+                            case "density":
+                                const density = formatNumberRange("density", param[1], 0.1);
+                                if (density) {
+                                    request.filters.push(density);
+                                    break;
+                                } else {
+                                    return dictionary.commandIncorrectParams;
+                                }
+                            case "length":
+                                const length = formatNumberRange("length", param[1], 5);
+                                if (length) {
+                                    request.modFilters.push(length);
+                                    break;
+                                } else {
+                                    return dictionary.commandIncorrectParams;
+                                }
+                            case "cs":
+                                const cs = formatNumberRange("cs", param[1], 0.5);
+                                if (cs) {
+                                    request.filters.push(cs);
+                                    break;
+                                } else {
+                                    return dictionary.commandIncorrectParams;
+                                }
+                            case "od":
+                                const od = formatNumberRange("od", param[1], 0.5);
+                                if (od) {
+                                    request.modFilters.push(od);
+                                    break;
+                                } else {
+                                    return dictionary.commandIncorrectParams;
+                                }
                             default:
                                 return dictionary.commandIncorrectParams;
                         }
-                        break;
-                    case "status":
-                        switch (param[1]) {
-                            case "r":
-                                request.filters.push({osuStatus: "ranked"});
-                                break;
-                            case "ranked":
-                                request.filters.push({osuStatus: "ranked"});
-                                break;
-                            case "l":
-                                request.filters.push({osuStatus: "loved"});
-                                break;
-                            case "loved":
-                                request.filters.push({osuStatus: "loved"});
-                                break;
-                            case "u":
-                                request.filters.push({osuStatus: "unranked"});
-                                break;
-                            case "unranked":
-                                request.filters.push({osuStatus: "unranked"});
-                                break;
-                            default:
-                                return dictionary.commandIncorrectParams;
-                        }
-                        break;
-                    case "average":
-                        const average = formatNumberRange("average", param[1], 1);
-                        if (average) {
-                            request.filters.push(average);
-                            break;
-                        } else {
-                            return dictionary.commandIncorrectParams;
-                        }
-                    case "stars":
-                        const stars = formatNumberRange("stars", param[1], 0.5);
-                        if (stars) {
-                            request.modFilters.push(stars);
-                            break;
-                        } else {
-                            return dictionary.commandIncorrectParams;
-                        }
-                    case "ar":
-                        const ar = formatNumberRange("ar", param[1], 0.5);
-                        if (ar) {
-                            request.modFilters.push(ar);
-                            break;
-                        } else {
-                            return dictionary.commandIncorrectParams;
-                        }
-                    case "density":
-                        const density = formatNumberRange("density", param[1], 0.1);
-                        if (density) {
-                            request.filters.push(density);
-                            break;
-                        } else {
-                            return dictionary.commandIncorrectParams;
-                        }
-                    case "length":
-                        const length = formatNumberRange("length", param[1], 5);
-                        if (length) {
-                            request.modFilters.push(length);
-                            break;
-                        } else {
-                            return dictionary.commandIncorrectParams;
-                        }
-                    case "cs":
-                        const cs = formatNumberRange("cs", param[1], 0.5);
-                        if (cs) {
-                            request.filters.push(cs);
-                            break;
-                        } else {
-                            return dictionary.commandIncorrectParams;
-                        }
-                    case "od":
-                        const od = formatNumberRange("od", param[1], 0.5);
-                        if (od) {
-                            request.modFilters.push(od);
-                            break;
-                        } else {
-                            return dictionary.commandIncorrectParams;
-                        }
-                    case "dt":
-                        mod = "dt";
-                        break;
-                    case "nomod":
-                        mod = "nomod"
-                        break;
-                    default:
+                    } else {
                         return dictionary.commandIncorrectParams;
+                    }
+                } else {
+                    switch (params[i]) {
+                        case "dt":
+                            mod = "dt";
+                            break;
+                        case "nomod":
+                            mod = "nomod"
+                            break;
+                        case "r":
+                            request.filters.push({osuStatus: "ranked"});
+                            break;
+                        case "ranked":
+                            request.filters.push({osuStatus: "ranked"});
+                            break;
+                        case "l":
+                            request.filters.push({osuStatus: "loved"});
+                            break;
+                        case "loved":
+                            request.filters.push({osuStatus: "loved"});
+                            break;
+                        case "u":
+                            request.filters.push({osuStatus: "unranked"});
+                            break;
+                        case "unranked":
+                            request.filters.push({osuStatus: "unranked"});
+                            break;
+                        case "b":
+                            request.filters.push({type: "bursts"});
+                            break;
+                        case "bursts":
+                            request.filters.push({type: "bursts"});
+                            break;
+                        case "s":
+                            request.filters.push({type: "streams"});
+                            break;
+                        case "streams":
+                            request.filters.push({type: "streams"});
+                            break;
+                        case "d":
+                            request.filters.push({type: "deathstreams"});
+                            break;
+                        case "deathstreams":
+                            request.filters.push({type: "deathstreams"});
+                            break;
+                        default:
+                            return dictionary.commandIncorrectParams;
+                    }
                 }
             }
             request["mod"] = mod;

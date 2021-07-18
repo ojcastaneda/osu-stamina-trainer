@@ -1,4 +1,4 @@
-const dictionary = require('../dictionary/en.json');
+const dictionary = require('../dictionary');
 const request = require('./request');
 
 const prefix = "!";
@@ -14,6 +14,8 @@ const commandProcessing = async (message) => {
                 return await request(params);
             case "r":
                 return await request(params);
+            case "submit":
+                return dictionary.submit;
             case "help":
                 return dictionary.help;
             default:

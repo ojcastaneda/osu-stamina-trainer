@@ -2,20 +2,13 @@ const authManager = require('./authManager');
 const commandProcessing = require('./commands/commandsManager');
 const bancho = require('bancho.js');
 const cron = require('node-cron');
-
-
 require('dotenv/config');
-
-autoLogin = async () =>{
-    await authManager.osuTokenRequest();
-    await authManager.serverTokenRequest();
-}
 
 setup = async () => {
     try {
-        await autoLogin();
+        await authManager.serverTokenRequest();
         cron.schedule('0 0 */23 * * *', async () => {
-            await autoLogin();
+            await authManager.serverTokenRequest();
         });
         const client = new bancho.BanchoClient({
             username: process.env.BOT_USERNAME,
@@ -27,7 +20,7 @@ setup = async () => {
             if(!message.self){
                 const response = await commandProcessing(message.message);
                 if (response) {
-                    message.user.sendMessage(response);
+                    message.user.sendMessage(response).catch((error)=>console.log(error));
                 }
             }
 
