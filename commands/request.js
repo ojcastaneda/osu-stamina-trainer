@@ -175,6 +175,14 @@ const request = async (params) => {
                 if (modBeatmap === "dt") {
                     additionalMods = " +DT |"
                 }
+                const date = new Date();
+                if(date.getUTCDate()===27 && date.getUTCMonth() === 6)
+                {
+                    return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} Blue Zenith [FOUR DIMENSIONS]]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
+                        `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
+                        `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
+                        `${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
+                }
                 return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
                     `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
                     `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
