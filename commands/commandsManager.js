@@ -1,7 +1,7 @@
 const dictionary = require('../dictionary');
 const request = require('./request');
 
-const prefix = "!";
+const prefix = '!';
 
 const commandProcessing = async (message) => {
     message = message.toLowerCase();
@@ -10,13 +10,13 @@ const commandProcessing = async (message) => {
         params = params.split(' ');
         const command = params.shift();
         switch (command) {
-            case "request":
+            case 'request':
                 return await request(params);
-            case "r":
+            case 'r':
                 return await request(params);
-            case "submit":
+            case 'submit':
                 return dictionary.submit;
-            case "help":
+            case 'help':
                 return dictionary.help;
             default:
                 return dictionary.commandNotFound;

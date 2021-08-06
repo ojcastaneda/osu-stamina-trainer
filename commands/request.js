@@ -1,203 +1,192 @@
-const dictionary = require('../dictionary');
 const sharedResources = require('./sharedResources');
+const dictionary = require('../dictionary');
 
-const formatNumberRange = (name, param, defaultRange) => {
-    if (param.includes('-')) {
-        const range = param.split('-');
-        let min, max;
-        if (range[1]) {
-            if (isNaN(range[0]) || isNaN(range[1]))
+const numericRequests = {
+    ar: {range: 0.5, stats: true},
+    average: {range: 2, stats: false},
+    bpm: {range: 5, stats: true},
+    cs: {range: 0.5, stats: true},
+    density: {range: 0.1, stats: false},
+    length: {range: 5, stats: true},
+    od: {range: 0.5, stats: true},
+    stars: {range: 0.5, stats: true}
+};
+
+const valueRequests = {
+    r: {value: 'ranked', name: 'osuStatus'},
+    ranked: {value: 'ranked', name: 'osuStatus'},
+    l: {value: 'loved', name: 'osuStatus'},
+    loved: {value: 'loved', name: 'osuStatus'},
+    u: {value: 'unranked', name: 'osuStatus'},
+    unranked: {value: 'unranked', name: 'osuStatus'},
+    b: {value: 'bursts', name: 'type'},
+    bursts: {value: 'bursts', name: 'type'},
+    s: {value: 'streams', name: 'type'},
+    streams: {value: 'streams', name: 'type'},
+    d: {value: 'deathstreams', name: 'type'},
+    deathstreams: {value: 'deathstreams', name: 'type'}
+};
+
+const processNumericParameter = (name, parameter, format) => {
+    if (parameter != null && numericRequests.hasOwnProperty(name))
+        switch (format) {
+            case 'range':
+                const numbers = parameter.split('-');
+                if (numbers.length > 1)
+                    if (!isNaN(numbers[0]) && !isNaN(numbers[1])) {
+                        const min = parseFloat(numbers[0]);
+                        const max = parseFloat(numbers[1]);
+                        if (max >= 130 && min <= Number.MAX_SAFE_INTEGER && max >= min) return {
+                            stats: numericRequests[name].stats, query: {
+                                name: name,
+                                min: min,
+                                max: max
+                            }
+                        };
+                    }
+                break;
+            case 'exact':
+                const number = parameter.slice(0, -1);
+                if (!isNaN(number)) {
+                    const number = parseFloat(parameter);
+                    if (number >= 130 && number <= Number.MAX_SAFE_INTEGER) return {
+                        stats: numericRequests[name].stats, query: {
+                            name: name,
+                            min: number,
+                            max: number
+                        }
+                    };
+                }
+                break;
+            case 'default':
+                if (!isNaN(parameter)) {
+                    const number = parseFloat(parameter) + numericRequests[name].range;
+                    if (number >= 130 && number <= Number.MAX_SAFE_INTEGER) return {
+                        stats: numericRequests[name].stats, query: {
+                            name: name,
+                            min: number - numericRequests[name].range * 2,
+                            max: number
+                        }
+                    };
+                }
+                break;
+            case 'min':
+                if (!isNaN(parameter)) {
+                    const number = parseFloat(parameter);
+                    if (number >= 0 && number <= Number.MAX_SAFE_INTEGER) return {
+                        stats: numericRequests[name].stats,
+                        query: {name: name, min: number}
+                    };
+                }
+                break;
+            case 'max':
+                if (!isNaN(parameter)) {
+                    const number = parseFloat(parameter);
+                    if (number >= 130 && number <= Number.MAX_SAFE_INTEGER) return {
+                        stats: numericRequests[name].stats,
+                        query: {name: name, max: number}
+                    };
+                }
+                break;
+            default:
                 return;
-            min = parseFloat(range[0]);
-            max = parseFloat(range[1]);
-            if (min < 0 || max < min) {
-                return;
-            }
+        }
+}
+
+const processValueParameter = (parameter) => {
+    if (parameter != null && valueRequests.hasOwnProperty(parameter))
+        return {stats: false, query: {name: valueRequests[parameter].name, value: valueRequests[parameter].value}};
+}
+
+const processParameter = (fullParameter) => {
+    if (fullParameter.indexOf('=') > 0) {
+        let index = fullParameter.indexOf('=');
+        const name = fullParameter.slice(0, index);
+        const parameter = fullParameter.slice(index + 1);
+        index = parameter.indexOf('-');
+        if (index < 0) {
+            return processNumericParameter(name, parameter, 'default');
+        } else if (index === parameter.length - 1) {
+            return processNumericParameter(name, parameter, 'exact');
         } else {
-            if (isNaN(range[0]))
-                return;
-            min = parseFloat(range[0]);
-            max = min;
-            if (min < 0 || max < min) {
-                return;
-            }
-
+            return processNumericParameter(name, parameter, 'range');
         }
-        return {name: name, min: min, max: max};
+    } else if (fullParameter.indexOf('<') > 0) {
+        const index = fullParameter.indexOf('<');
+        const name = fullParameter.slice(0, index);
+        const parameter = fullParameter.slice(index + 1);
+        return processNumericParameter(name, parameter, 'max');
 
-    } else {
-        if (isNaN(param))
-            return;
-        const number = parseFloat(param);
-        const min = number - defaultRange;
-        if (min < 0) {
-            return;
-        }
-        const max = number + defaultRange;
-        return {name: name, min: min, max: max};
+    } else if (fullParameter.indexOf('>') > 0) {
+        const index = fullParameter.indexOf('>');
+        const name = fullParameter.slice(0, index);
+        const parameter = fullParameter.slice(index + 1);
+        return processNumericParameter(name, parameter, 'min');
     }
+    return processValueParameter(fullParameter);
+
+}
+
+const makeResponse = (requestResponse) => {
+    const modBeatmap = requestResponse.mod;
+    const beatmap = requestResponse.beatmap;
+    let seconds = beatmap.length % 60;
+    if (seconds < 10) seconds = `0${seconds}`;
+    let additionalMods = '';
+    if (modBeatmap === 'dt') additionalMods = ' +DT |'
+    const date = new Date();
+    if (date.getUTCDate() === 27 && date.getUTCMonth() === 6)
+        return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} Blue Zenith [FOUR DIMENSIONS]]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
+            `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
+            `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
+            `${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
+    return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
+        `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
+        `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
+        `${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
 }
 
 const request = async (params) => {
+    params = params.filter((param) => param != null);
     if (params.length > 0) {
         let request = {filters: [], modFilters: []};
-        const bpm = formatNumberRange("bpm", params[0], 5);
+        if (params[0][0] === '<' || params[0][0] === '>') params[0] = `bpm${params[0]}`;
+        else params[0] = `bpm=${params[0]}`;
+        const bpm = processParameter(params[0]);
         if (bpm) {
-            request.modFilters.push(bpm);
-            request["bpm"] = bpm;
-            let mod = "none";
+            request.modFilters.push(bpm.query);
             for (let i = 1; i < params.length; i++) {
-                if (params[i].includes('=')) {
-                    let param = params[i].split("=");
-                    if (params.length >= 2) {
-                        switch (param[0]) {
-                            case "average":
-                                const average = formatNumberRange("average", param[1], 2);
-                                if (average) {
-                                    request.filters.push(average);
-                                    break;
-                                } else {
-                                    return dictionary.commandIncorrectParams;
-                                }
-                            case "stars":
-                                const stars = formatNumberRange("stars", param[1], 0.5);
-                                if (stars) {
-                                    request.modFilters.push(stars);
-                                    break;
-                                } else {
-                                    return dictionary.commandIncorrectParams;
-                                }
-                            case "ar":
-                                const ar = formatNumberRange("ar", param[1], 0.5);
-                                if (ar) {
-                                    request.modFilters.push(ar);
-                                    break;
-                                } else {
-                                    return dictionary.commandIncorrectParams;
-                                }
-                            case "density":
-                                const density = formatNumberRange("density", param[1], 0.1);
-                                if (density) {
-                                    request.filters.push(density);
-                                    break;
-                                } else {
-                                    return dictionary.commandIncorrectParams;
-                                }
-                            case "length":
-                                const length = formatNumberRange("length", param[1], 5);
-                                if (length) {
-                                    request.modFilters.push(length);
-                                    break;
-                                } else {
-                                    return dictionary.commandIncorrectParams;
-                                }
-                            case "cs":
-                                const cs = formatNumberRange("cs", param[1], 0.5);
-                                if (cs) {
-                                    request.filters.push(cs);
-                                    break;
-                                } else {
-                                    return dictionary.commandIncorrectParams;
-                                }
-                            case "od":
-                                const od = formatNumberRange("od", param[1], 0.5);
-                                if (od) {
-                                    request.modFilters.push(od);
-                                    break;
-                                } else {
-                                    return dictionary.commandIncorrectParams;
-                                }
-                            default:
-                                return dictionary.commandIncorrectParams;
+                switch (params[i]) {
+                    case 'nomod':
+                        request.mod = 'nomod';
+                        break;
+                    case 'dt':
+                        request.mod = 'dt';
+                        break;
+                    default:
+                        const processedParameter = processParameter(params[i]);
+                        if (processedParameter) {
+                            if (processedParameter.stats) request.modFilters.push(processedParameter.query);
+                            else request.filters.push(processedParameter.query);
                         }
-                    } else {
                         return dictionary.commandIncorrectParams;
-                    }
-                } else {
-                    switch (params[i]) {
-                        case "dt":
-                            mod = "dt";
-                            break;
-                        case "nomod":
-                            mod = "nomod"
-                            break;
-                        case "r":
-                            request.filters.push({osuStatus: "ranked"});
-                            break;
-                        case "ranked":
-                            request.filters.push({osuStatus: "ranked"});
-                            break;
-                        case "l":
-                            request.filters.push({osuStatus: "loved"});
-                            break;
-                        case "loved":
-                            request.filters.push({osuStatus: "loved"});
-                            break;
-                        case "u":
-                            request.filters.push({osuStatus: "unranked"});
-                            break;
-                        case "unranked":
-                            request.filters.push({osuStatus: "unranked"});
-                            break;
-                        case "b":
-                            request.filters.push({type: "bursts"});
-                            break;
-                        case "bursts":
-                            request.filters.push({type: "bursts"});
-                            break;
-                        case "s":
-                            request.filters.push({type: "streams"});
-                            break;
-                        case "streams":
-                            request.filters.push({type: "streams"});
-                            break;
-                        case "d":
-                            request.filters.push({type: "deathstreams"});
-                            break;
-                        case "deathstreams":
-                            request.filters.push({type: "deathstreams"});
-                            break;
-                        default:
-                            return dictionary.commandIncorrectParams;
-                    }
+
                 }
             }
-            request["mod"] = mod;
-            const response = await sharedResources.requestServer(request, 'bot/request');
-            if (response) {
-                const modBeatmap = response.mod;
-                const beatmap = response.beatmap;
-                let seconds = beatmap.length % 60;
-                if (seconds < 10) {
-                    seconds = `0${seconds}`;
-                }
-                let additionalMods = "";
-                if (modBeatmap === "dt") {
-                    additionalMods = " +DT |"
-                }
-                const date = new Date();
-                if(date.getUTCDate()===27 && date.getUTCMonth() === 6)
-                {
-                    return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} Blue Zenith [FOUR DIMENSIONS]]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
-                        `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
-                        `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
-                        `${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
-                }
-                return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
-                    `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
-                    `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
-                    `${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
-            } else {
-                return dictionary.noBeatmapsFound;
+            const requestResponse = await sharedResources.requestServer(request, 'bot/request');
+            switch (requestResponse) {
+                case 404:
+                    return dictionary.noBeatmapsFound;
+                case 500:
+                    return dictionary.serverNotAvailable;
+                case 400:
+                    return dictionary.commandIncorrectParams;
+                default:
+                    return makeResponse(requestResponse);
             }
-        } else {
-            return dictionary.commandIncorrectParams;
         }
-
-    } else {
-        return dictionary.commandIncorrectParams;
     }
-
+    return dictionary.commandIncorrectParams;
 }
 
 module.exports = request;

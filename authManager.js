@@ -1,22 +1,27 @@
-const fetch = require('cross-fetch');
+const fetch = require('node-fetch');
 
 const serverTokenRequest = async () => {
-    const response = await fetch(`${process.env.SERVER_API}auth/signIn`, {
-        method: 'post',
-        headers: {
-            'Accept': 'application/json',
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({
-            "username": process.env.SERVER_USERNAME,
-            "password": process.env.SERVER_PASSWORD
-        })
-    });
-    global.serverRequestHeaders = {
+    const headers = {
         'Accept': 'application/json',
         'Content-Type': 'application/json',
-        'Authorization': `Bearer ${(await response.json()).token}`
+        'withCredentials': true,
+        cookie: null
     };
+
+    const request = await fetch(`${process.env.SERVER_API}auth/signIn`, {
+        method: 'POST',
+        headers: {
+            'Accept': 'application/json',
+            'Content-Type': 'application/json',
+            'withCredentials': true
+        },
+        body: JSON.stringify({
+            'username': process.env.SERVER_USERNAME,
+            'password': process.env.SERVER_PASSWORD
+        })
+    });
+    headers.cookie = [request.headers.get('set-cookie')];
+    global.headers = headers;
 }
 
 module.exports = {serverTokenRequest};

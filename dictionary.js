@@ -1,15 +1,15 @@
-const averageStreamLength = "Average stream length";
-const commandIncorrectParams = "Your inputted parameters for this command are incorrect, type !help to check the correct parameters for each command";
-const commandNoPrefix = "No command detected, type !help to check the available commands";
-const commandNotFound = "This command does not exists, type !help to check the available commands";
-const density = "Density";
-const help = `Check our [${process.env.WIKI_URL} wiki] to know about all the commands`;
-const length = "Length";
-const noBeatmapsFound = "No beatmaps available for the inputted parameters";
-const serverNotAvailable = "Our servers are not available at the moment, please try again later";
-const status = "Status";
+const commandIncorrectParams = `Your inputted parameters for this command are incorrect or not allowed, [${process.env.WIKI_URL} check out the wiki to learn more]`;
+const commandNotFound = `This command does not exists, [${process.env.WIKI_URL} check out the wiki to learn more]`;
+const commandNoPrefix = `No command detected, [${process.env.WIKI_URL} check out the wiki to learn more]`;
 const submit = `Check our [${process.env.SUBMISSIONS_URL} website] to submit beatmaps to the collection`;
-const type = "Type";
+const help = `Check out the [${process.env.WIKI_URL} wiki] to learn about all the available commands`;
+const serverNotAvailable = 'Our servers are not available at the moment, please try again later';
+const noBeatmapsFound = 'No beatmaps available for the inputted parameters';
+const averageStreamLength = 'Average stream length';
+const density = 'Density';
+const length = 'Length';
+const status = 'Status';
+const type = 'Type';
 
 module.exports = {
     averageStreamLength,

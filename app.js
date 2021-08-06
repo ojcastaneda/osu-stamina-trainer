@@ -1,5 +1,5 @@
-const authManager = require('./authManager');
 const commandProcessing = require('./commands/commandsManager');
+const authManager = require('./authManager');
 const bancho = require('bancho.js');
 const cron = require('node-cron');
 require('dotenv/config');
@@ -17,13 +17,10 @@ setup = async () => {
         await client.connect();
         console.log('osu! bot connected');
         client.on('PM', async (message) => {
-            if(!message.self){
+            if (!message.self) {
                 const response = await commandProcessing(message.message);
-                if (response) {
-                    message.user.sendMessage(response).catch((error)=>console.log(error));
-                }
+                if (response) message.user.sendMessage(response).catch((error) => console.log(error));
             }
-
         });
     } catch (error) {
         console.log(error);
