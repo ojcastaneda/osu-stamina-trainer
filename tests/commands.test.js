@@ -3,11 +3,13 @@ const authManager = require('../authManager');
 const dictionary = require('../dictionary');
 require('dotenv/config');
 
-const possibleErrors = [dictionary.commandIncorrectParams,
+const possibleErrors = [
+    dictionary.commandIncorrectParams,
     dictionary.commandNoPrefix,
     dictionary.commandNotFound,
     dictionary.noBeatmapsFound,
-    dictionary.serverNotAvailable]
+    dictionary.serverNotAvailable
+];
 
 beforeAll(async () => {
     return await authManager.serverTokenRequest();
@@ -18,7 +20,7 @@ test('Recognizes request command', async () => {
 });
 
 test('Recognizes request command no beatmaps', async () => {
-    expect(await commandProcessing('!request 10000')).toBe(dictionary.noBeatmapsFound);
+    expect(await commandProcessing('!request <129')).toBe(dictionary.noBeatmapsFound);
 });
 
 test('Recognizes request command bpm', async () => {

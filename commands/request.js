@@ -2,14 +2,14 @@ const sharedResources = require('./sharedResources');
 const dictionary = require('../dictionary');
 
 const numericRequests = {
-    ar: {range: 0.5, stats: true},
-    average: {range: 2, stats: false},
-    bpm: {range: 5, stats: true},
-    cs: {range: 0.5, stats: true},
-    density: {range: 0.1, stats: false},
-    length: {range: 5, stats: true},
-    od: {range: 0.5, stats: true},
-    stars: {range: 0.5, stats: true}
+    ar: {range: 0.5, modification: true},
+    average: {range: 2, modification: false},
+    bpm: {range: 5, modification: true},
+    cs: {range: 0.5, modification: false},
+    density: {range: 0.1, modification: false},
+    length: {range: 5, modification: true},
+    od: {range: 0.5, modification: true},
+    stars: {range: 0.5, modification: true}
 };
 
 const valueRequests = {
@@ -28,7 +28,7 @@ const valueRequests = {
 };
 
 const processNumericParameter = (name, parameter, format) => {
-    if (parameter != null && numericRequests.hasOwnProperty(name))
+    if (parameter && numericRequests.hasOwnProperty(name))
         switch (format) {
             case 'range':
                 const numbers = parameter.split('-');
@@ -36,8 +36,9 @@ const processNumericParameter = (name, parameter, format) => {
                     if (!isNaN(numbers[0]) && !isNaN(numbers[1])) {
                         const min = parseFloat(numbers[0]);
                         const max = parseFloat(numbers[1]);
-                        if (max >= 130 && min <= Number.MAX_SAFE_INTEGER && max >= min) return {
-                            stats: numericRequests[name].stats, query: {
+                        if (max >= 0 && min <= Number.MAX_SAFE_INTEGER && max >= min) return {
+                            modification: numericRequests[name].modification,
+                            query: {
                                 name: name,
                                 min: min,
                                 max: max
@@ -49,8 +50,9 @@ const processNumericParameter = (name, parameter, format) => {
                 const number = parameter.slice(0, -1);
                 if (!isNaN(number)) {
                     const number = parseFloat(parameter);
-                    if (number >= 130 && number <= Number.MAX_SAFE_INTEGER) return {
-                        stats: numericRequests[name].stats, query: {
+                    if (number >= 0 && number <= Number.MAX_SAFE_INTEGER) return {
+                        modification: numericRequests[name].modification,
+                        query: {
                             name: name,
                             min: number,
                             max: number
@@ -61,8 +63,9 @@ const processNumericParameter = (name, parameter, format) => {
             case 'default':
                 if (!isNaN(parameter)) {
                     const number = parseFloat(parameter) + numericRequests[name].range;
-                    if (number >= 130 && number <= Number.MAX_SAFE_INTEGER) return {
-                        stats: numericRequests[name].stats, query: {
+                    if (number >= 0 && number <= Number.MAX_SAFE_INTEGER) return {
+                        modification: numericRequests[name].modification,
+                        query: {
                             name: name,
                             min: number - numericRequests[name].range * 2,
                             max: number
@@ -74,7 +77,7 @@ const processNumericParameter = (name, parameter, format) => {
                 if (!isNaN(parameter)) {
                     const number = parseFloat(parameter);
                     if (number >= 0 && number <= Number.MAX_SAFE_INTEGER) return {
-                        stats: numericRequests[name].stats,
+                        modification: numericRequests[name].modification,
                         query: {name: name, min: number}
                     };
                 }
@@ -82,8 +85,8 @@ const processNumericParameter = (name, parameter, format) => {
             case 'max':
                 if (!isNaN(parameter)) {
                     const number = parseFloat(parameter);
-                    if (number >= 130 && number <= Number.MAX_SAFE_INTEGER) return {
-                        stats: numericRequests[name].stats,
+                    if (number >= 0 && number <= Number.MAX_SAFE_INTEGER) return {
+                        modification: numericRequests[name].modification,
                         query: {name: name, max: number}
                     };
                 }
@@ -91,12 +94,12 @@ const processNumericParameter = (name, parameter, format) => {
             default:
                 return;
         }
-}
+};
 
 const processValueParameter = (parameter) => {
     if (parameter != null && valueRequests.hasOwnProperty(parameter))
         return {stats: false, query: {name: valueRequests[parameter].name, value: valueRequests[parameter].value}};
-}
+};
 
 const processParameter = (fullParameter) => {
     if (fullParameter.indexOf('=') > 0) {
@@ -125,7 +128,7 @@ const processParameter = (fullParameter) => {
     }
     return processValueParameter(fullParameter);
 
-}
+};
 
 const makeResponse = (requestResponse) => {
     const modBeatmap = requestResponse.mod;
@@ -133,18 +136,16 @@ const makeResponse = (requestResponse) => {
     let seconds = beatmap.length % 60;
     if (seconds < 10) seconds = `0${seconds}`;
     let additionalMods = '';
-    if (modBeatmap === 'dt') additionalMods = ' +DT |'
+    if (modBeatmap === 'dt') additionalMods = ' +DT |';
     const date = new Date();
-    if (date.getUTCDate() === 27 && date.getUTCMonth() === 6)
-        return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} Blue Zenith [FOUR DIMENSIONS]]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
-            `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
-            `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
-            `${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
-    return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(` ${additionalMods} BPM: ${beatmap.bpm} | `,
-        `${dictionary.type}: ${beatmap.type} | ${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | `,
-        `${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
+    const response = `${additionalMods} BPM: ${beatmap.bpm} | `.concat(`${dictionary.type}: ${beatmap.type} | `,
+        `${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | ${beatmap.stars} ★ | AR: ${beatmap.ar} | `,
+        `OD: ${beatmap.od} | CS: ${beatmap.cs} | ${dictionary.status}: ${beatmap.osuStatus} | `,
         `${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
-}
+    if (date.getUTCDate() === 27 && date.getUTCMonth() === 6)
+        return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} Blue Zenith [FOUR DIMENSIONS]]`).concat(response);
+    return (`[https://osu.ppy.sh/b/${beatmap.beatmapId} ${beatmap.name}]`).concat(response);
+};
 
 const request = async (params) => {
     params = params.filter((param) => param != null);
@@ -166,11 +167,12 @@ const request = async (params) => {
                     default:
                         const processedParameter = processParameter(params[i]);
                         if (processedParameter) {
-                            if (processedParameter.stats) request.modFilters.push(processedParameter.query);
+                            if (processedParameter.modification) request.modFilters.push(processedParameter.query);
                             else request.filters.push(processedParameter.query);
+                        } else {
+                            return dictionary.commandIncorrectParams;
                         }
-                        return dictionary.commandIncorrectParams;
-
+                        break;
                 }
             }
             const requestResponse = await sharedResources.requestServer(request, 'bot/request');
@@ -187,6 +189,6 @@ const request = async (params) => {
         }
     }
     return dictionary.commandIncorrectParams;
-}
+};
 
 module.exports = request;

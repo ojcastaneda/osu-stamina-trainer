@@ -8,7 +8,7 @@ const serverTokenRequest = async () => {
         cookie: null
     };
 
-    const request = await fetch(`${process.env.SERVER_API}auth/signIn`, {
+    const request = await fetch(`${process.env.SERVER_API}authentication/signIn`, {
         method: 'POST',
         headers: {
             'Accept': 'application/json',
