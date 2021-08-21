@@ -12,16 +12,16 @@ const status = 'Status';
 const type = 'Type';
 
 module.exports = {
-    averageStreamLength,
-    commandIncorrectParams,
-    commandNoPrefix,
-    commandNotFound,
-    density,
-    help,
-    length,
-    noBeatmapsFound,
-    serverNotAvailable,
-    status,
-    submit,
-    type
-}
+	averageStreamLength,
+	commandIncorrectParams,
+	commandNoPrefix,
+	commandNotFound,
+	density,
+	help,
+	length,
+	noBeatmapsFound,
+	serverNotAvailable,
+	status,
+	submit,
+	type
+};

@@ -10,6 +10,7 @@ for stamina practice beatmaps.
 ## Tools
 
 This project uses the following dependencies:
+
 - [Nodejs](https://nodejs.org/en/)
 - [Banchojs](https://bancho.js.org/)
 
