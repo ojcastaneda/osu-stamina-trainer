@@ -169,10 +169,10 @@ const request = async (params) => {
 			for (let i = 1; i < params.length; i++) {
 				switch (params[i]) {
 					case 'nomod':
-						request.mod = 'nomod';
+						request.modification = 'noModification';
 						break;
 					case 'dt':
-						request.mod = 'dt';
+						request.modification = 'doubleTime';
 						break;
 					default:
 						const processedParameter = processParameter(params[i]);
