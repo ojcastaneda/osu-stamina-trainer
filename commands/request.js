@@ -141,12 +141,12 @@ const processParameter = (fullParameter) => {
 };
 
 const makeResponse = (requestResponse) => {
-	const modBeatmap = requestResponse.mod;
+	const modBeatmap = requestResponse.modification;
 	const beatmap = requestResponse.beatmap;
 	let seconds = beatmap.length % 60;
 	if (seconds < 10) seconds = `0${seconds}`;
 	let additionalMods = '';
-	if (modBeatmap === 'dt') additionalMods = ' +DT |';
+	if (modBeatmap === 'doubleTime') additionalMods = ' +DT |';
 	const date = new Date();
 	const response = `${additionalMods} BPM: ${beatmap.bpm} | `.concat(`${dictionary.type}: ${beatmap.type} | `,
 		`${dictionary.averageStreamLength}: ${beatmap.average} | ${dictionary.density}: ${beatmap.density} | ${beatmap.stars} ★ | AR: ${beatmap.ar} | `,
