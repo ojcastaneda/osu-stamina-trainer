@@ -1,6 +1,7 @@
-const commandIncorrectParams = `Your inputted parameters for this command are incorrect or not allowed, [${process.env.WIKI_URL} check out the wiki to learn more]`;
+const commandIncorrectParams = `Your provided parameters for this command are incorrect or not allowed, [${process.env.WIKI_URL} check out the wiki to learn more]`;
+const internalBotError = `The bot failed unexpectedly, please report this error via [${process.env.DISCORD_URL} Discord]`
 const commandNotFound = `This command does not exist, [${process.env.WIKI_URL} check out the wiki to learn more]`;
-const commandNoPrefix = `No command detected, [${process.env.WIKI_URL} check out the wiki to learn more]`;
+const commandNoPrefix = `No commands detected, [${process.env.WIKI_URL} check out the wiki to learn more]`;
 const submit = `Check our [${process.env.SUBMISSIONS_URL} website] to submit beatmaps to the collection`;
 const help = `Check out the [${process.env.WIKI_URL} wiki] to learn about all the available commands`;
 const serverNotAvailable = 'Our servers are not available at the moment, please try again later';
@@ -23,5 +24,6 @@ module.exports = {
 	serverNotAvailable,
 	status,
 	submit,
-	type
+	type,
+	internalBotError
 };

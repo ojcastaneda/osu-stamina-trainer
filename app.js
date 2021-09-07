@@ -1,5 +1,6 @@
 const commandProcessing = require('./commands/commandsManager');
 const authManager = require('./authManager');
+const dictionary = require('./dictionary');
 const bancho = require('bancho.js');
 const cron = require('node-cron');
 require('dotenv/config');
@@ -7,7 +8,7 @@ require('dotenv/config');
 setup = async () => {
 	try {
 		await authManager.serverTokenRequest();
-		cron.schedule('0 0 */23 * * *', async () => {
+		cron.schedule('0 0 */11 * * *', async () => {
 			await authManager.serverTokenRequest();
 		});
 		const client = new bancho.BanchoClient({
@@ -18,8 +19,11 @@ setup = async () => {
 		console.log('osu! bot connected');
 		client.on('PM', async (message) => {
 			if (!message.self) {
-				const response = await commandProcessing(message.message);
-				if (response) message.user.sendMessage(response).catch((error) => console.log(error));
+				try {
+					await message.user.sendMessage(await commandProcessing(message.message));
+				} catch (error) {
+					await message.user.sendMessage(dictionary.internalBotError);
+				}
 			}
 		});
 	} catch (error) {
