@@ -107,10 +107,10 @@ const makeResponse = (requestResponse) => {
 	if (seconds < 10) seconds = `0${seconds}`;
 	let additionalMods = '', type;
 	if (isDoubleTime) additionalMods = ' +DT |';
-	if(beatmap.average<9)
+	if (beatmap.average < 9)
 		type = 'bursts';
-	else if(beatmap.average<25)
-		type = 'streams'
+	else if (beatmap.average < 25)
+		type = 'streams';
 	else
 		type = 'deathstreams';
 	const date = new Date();
@@ -120,7 +120,6 @@ const makeResponse = (requestResponse) => {
 		`${dictionary.length}: ${Math.floor(beatmap.length / 60)}:${seconds}`);
 	if (date.getUTCDate() === 27 && date.getUTCMonth() === 6)
 		return (`[https://osu.ppy.sh/b/${beatmap.id} Blue Zenith [FOUR DIMENSIONS]]`).concat(response);
-	console.log((`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.name}]`).concat(response));
 	return (`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.name}]`).concat(response);
 };
 
@@ -152,25 +151,17 @@ const request = async (params) => {
 						break;
 				}
 			}
-			try{
-
-				const requestResponse = await sharedResources.requestServer(request, 'bot/request');
-				switch (requestResponse) {
-					case 404:
-						return dictionary.noBeatmapsFound;
-					case 500:
-						return dictionary.serverNotAvailable;
-					case 400:
-						return dictionary.commandIncorrectParams;
-					default:
-						return makeResponse(requestResponse);
-				}
+			const requestResponse = await sharedResources.requestServer(request, 'bot/request');
+			switch (requestResponse) {
+				case 404:
+					return dictionary.noBeatmapsFound;
+				case 500:
+					return dictionary.serverNotAvailable;
+				case 400:
+					return dictionary.commandIncorrectParams;
+				default:
+					return makeResponse(requestResponse);
 			}
-			catch (e) {
-				console.log(request);
-				console.log(e);
-			}
-
 		}
 	}
 	return dictionary.commandIncorrectParams;
