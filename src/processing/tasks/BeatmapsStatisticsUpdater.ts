@@ -2,6 +2,7 @@ import BaseTask from './baseTask';
 
 class BeatmapsStatisticsUpdater extends BaseTask {
 	public updateFavorites = async () => {
+		console.log('Update favorites start');
 		await this.apiService.retrieveToken();
 		await this.osuService.retrieveToken();
 		const beatmaps = await this.apiService.retrieveBeatmaps();
@@ -34,6 +35,7 @@ class BeatmapsStatisticsUpdater extends BaseTask {
 			});
 		}
 		await this.promiseQueue.onIdle();
+		console.log('Update favorites end');
 	};
 }
 

@@ -4,9 +4,10 @@ import SubmissionsProcessor from './processing/tasks/submissionsProcessor';
 import BeatmapsStatisticsUpdater from './processing/tasks/BeatmapsStatisticsUpdater';
 import cron from 'node-cron';
 import ApiService from './processing/services/api';
-const {BanchoClient, PrivateMessage} = require('bancho.js');
 import dictionary from './bot/dictionary';
 import commandProcessing from './bot/commands';
+
+const {BanchoClient} = require('bancho.js');
 
 if (process.env.NODE_ENV !== 'production') dotenv.config({path: './.env.development'});
 else dotenv.config();
@@ -22,7 +23,7 @@ const setup = async () => {
 		const apiService = new ApiService();
 		await apiService.retrieveToken();
 		cron.schedule('0 0 0 */25 * *', async () => {
-		try {
+			try {
 				await apiService.retrieveToken();
 				await submissionsProcessor.checkSubmissionsLastUpdate();
 				await submissionsProcessor.approveSubmissions();
@@ -35,7 +36,7 @@ const setup = async () => {
 			username: process.env.BOT_USERNAME!,
 			password: process.env.BOT_PASSWORD!
 		});
-		//await client.connect();
+		if (process.env.NODE_ENV === 'production') await client.connect();
 		console.log('osu! bot connected');
 		client.on('PM', async (message: any) => {
 			if (!message.self) {
@@ -48,7 +49,7 @@ const setup = async () => {
 		});
 		await submissionsProcessor.checkSubmissionsLastUpdate();
 		await submissionsProcessor.approveSubmissions();
-		//await beatmapsStatisticsUpdater.updateFavorites();
+		await beatmapsStatisticsUpdater.updateFavorites();
 	} catch (error) {
 		console.log(error);
 	}

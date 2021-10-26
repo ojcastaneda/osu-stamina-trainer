@@ -2,6 +2,7 @@ import BaseTask from './baseTask';
 
 class RankedBeatmapsProcessor extends BaseTask {
 	public processRankedBeatmaps = async () => {
+		console.log('Process ranked beatmaps start');
 		await this.apiService.retrieveToken();
 		await this.osuService.retrieveToken();
 		const state = await this.apiService.retrieveState();
@@ -20,6 +21,7 @@ class RankedBeatmapsProcessor extends BaseTask {
 			[beatmaps, lastDate, lastBeatmapset, beatmapsLeft] = await this.osuService.retrieveRankedBeatmaps(lastDate, lastBeatmapset);
 		}
 		await this.apiService.updateCollection();
+		console.log('Process ranked beatmaps end');
 	};
 }
 

@@ -12,7 +12,6 @@ const commandProcessing = async (message: string, apiService: ApiService) => {
 		const command = params.shift();
 		switch (command) {
 			case 'request':
-				console.log(await request(params, apiService));
 				return await request(params, apiService);
 			case 'r':
 				return await request(params, apiService);

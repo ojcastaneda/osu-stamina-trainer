@@ -8,6 +8,7 @@ const writeFileAsync = util.promisify(fs.writeFile);
 
 class SubmissionsProcessor extends BaseTask {
 	public approveSubmissions = async () => {
+		console.log('Approve submissions start');
 		if (!fs.existsSync('beatmaps'))
 			fs.mkdirSync('beatmaps');
 		await this.apiService.retrieveToken();
@@ -42,13 +43,16 @@ class SubmissionsProcessor extends BaseTask {
 		}
 		await this.promiseQueue.onIdle();
 		await this.apiService.updateCollection();
+		console.log('Approve submissions end');
 	};
 
 	public checkSubmissionsLastUpdate = async () => {
+		console.log('Submissions update start');
 		await this.apiService.retrieveToken();
 		await this.osuService.retrieveToken();
 		await this.checkSubmissionLastUpdate(await this.apiService.retrieveBeatmapsFromSubmissions());
 		await this.checkSubmissionLastUpdate(await this.apiService.retrieveHonoredBeatmaps());
+		console.log('Submissions update end');
 	};
 
 	private checkSubmissionLastUpdate = async (beatmaps: HonoredBeatmap[] | Beatmap[]) => {
