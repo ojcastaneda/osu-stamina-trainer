@@ -142,7 +142,6 @@ const request = async (params: string[], apiService: ApiService): Promise<string
 					default:
 						try {
 							const processedParameter = processParameter(params[i]);
-							console.log(processedParameter);
 							if (!processedParameter.includes(undefined)) request.filters = request.filters.concat(processedParameter);
 							else return dictionary.commandIncorrectParams;
 						} catch (error) {
