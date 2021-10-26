@@ -1,8 +1,14 @@
 
 .env
 
+.env.development
+
 .idea/
 
 node_modules/
 
 osu-stamina-trainer-bot.iml
+
+beatmaps/
+
+build/
