@@ -9,6 +9,7 @@
     "postinstall": "tsc",
     "start:dev": "tsc && cross-env NODE_ENV=development node build/src/index.js",
     "start": "cross-env NODE_ENV=production node build/src/index.js",
+    "process": "ts-node src/process.ts",
     "test": "jest"
   },
   "author": "Sombrax79",

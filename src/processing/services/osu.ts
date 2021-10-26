@@ -90,7 +90,7 @@ class OsuService {
 		});
 		if (response.ok) {
 			const currentDate = new Date();
-			this.lastMonth = Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth() - 1, 1);
+			this.lastMonth = Date.UTC(currentDate.getUTCFullYear(), currentDate.getUTCMonth(), 1);
 			this.authorizationHeaders = new AuthorizationHeaders(await response.json());
 			return true;
 		}

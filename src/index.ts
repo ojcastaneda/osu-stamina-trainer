@@ -1,5 +1,4 @@
 import dotenv from 'dotenv';
-import RankedBeatmapsProcessor from './processing/tasks/rankedBeatmapsProcessor';
 import SubmissionsProcessor from './processing/tasks/submissionsProcessor';
 import BeatmapsStatisticsUpdater from './processing/tasks/BeatmapsStatisticsUpdater';
 import cron from 'node-cron';
@@ -11,8 +10,6 @@ const {BanchoClient} = require('bancho.js');
 
 if (process.env.NODE_ENV !== 'production') dotenv.config({path: './.env.development'});
 else dotenv.config();
-
-const rankedBeatmapsProcessor = new RankedBeatmapsProcessor();
 
 const submissionsProcessor = new SubmissionsProcessor();
 
