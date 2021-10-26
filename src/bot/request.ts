@@ -85,7 +85,7 @@ const processParameter = (fullParameter: string): any[] => {
 			return processNumericParameter(name, parameter, 'exact');
 		} else {
 			parameter = parameter.split('-');
-			return processNumericParameter(name, parameter[0], 'minimum'), processNumericParameter(name, parameter[1], 'maximum');
+			return processNumericParameter(name, parameter[0], 'minimum').concat(processNumericParameter(name, parameter[1], 'maximum'));
 		}
 	} else if (fullParameter.indexOf('<') > 0) {
 		const index = fullParameter.indexOf('<');

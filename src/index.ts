@@ -36,8 +36,10 @@ const setup = async () => {
 			username: process.env.BOT_USERNAME!,
 			password: process.env.BOT_PASSWORD!
 		});
-		if (process.env.NODE_ENV === 'production') await client.connect();
-		console.log('osu! bot connected');
+		if (process.env.NODE_ENV === 'production') {
+			await client.connect();
+			console.log('osu! bot connected');
+		}
 		client.on('PM', async (message: any) => {
 			if (!message.self) {
 				try {
