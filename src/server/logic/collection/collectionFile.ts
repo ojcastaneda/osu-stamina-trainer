@@ -12,11 +12,7 @@ const generateCollectionFile = async (): Promise<any> => {
 	const collectionDatabase = new osucolle.Database();
 	const collections = ['Bursts', 'Streams', 'Deathstreams'];
 	collections.forEach(collection => collectionDatabase.appendCollection(collection));
-	const beatmaps = await Beatmap.retrieveBeatmaps(['hash'], [{
-		filterProperty: 'active_status',
-		value: 'true',
-		operator: 'exact'
-	}]);
+	const beatmaps = await Beatmap.retrieveBeatmaps(['hash', 'average'], [], [`active_status = 'true'`]);
 	beatmaps.forEach(beatmap => {
 		if (beatmap.average! < 9) collectionDatabase.collection(collections[0]).appendBeatmap(beatmap.hash);
 		else if (beatmap.average! < 25) collectionDatabase.collection(collections[1]).appendBeatmap(beatmap.hash);
