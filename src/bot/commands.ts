@@ -1,10 +1,9 @@
 import dictionary from './dictionary';
-import ApiService from '../processing/services/api';
 import request from './request';
 
 const prefix = '!';
 
-const commandProcessing = async (message: string, apiService: ApiService) => {
+const commandProcessing = async (message: string) => {
 	message = message.toLowerCase();
 	if (message.charAt(0) === prefix) {
 		message = message.substring(1);
@@ -12,9 +11,9 @@ const commandProcessing = async (message: string, apiService: ApiService) => {
 		const command = params.shift();
 		switch (command) {
 			case 'request':
-				return await request(params, apiService);
+				return await request(params);
 			case 'r':
-				return await request(params, apiService);
+				return await request(params);
 			case 'submit':
 				return dictionary.submit;
 			case 'help':
@@ -22,9 +21,7 @@ const commandProcessing = async (message: string, apiService: ApiService) => {
 			default:
 				return dictionary.commandNotFound;
 		}
-	} else {
-		return dictionary.commandNoPrefix;
-	}
+	} else return dictionary.commandNoPrefix;
 };
 
 export default commandProcessing;

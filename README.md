@@ -1,4 +1,4 @@
-# osu! stamina trainer bot
+# osu! stamina trainer bot/server
 
 Server for the osu! standard recommendation
 [bot](https://osu.ppy.sh/users/6484647) for stamina intensive beatmaps.
@@ -12,11 +12,11 @@ Server for the osu! standard recommendation
 This project uses the following dependencies:
 
 - [Nodejs](https://nodejs.org/en/)
-- [Sequelize](https://sequelize.org/master/)
 - [Expressjs](https://expressjs.com/)
 - [osuColle](https://www.npmjs.com/package/osucolle)
+- [oppai](https://github.com/Francesco149/oppai-ng)
 
-## Other projects
+## Other related projects
 
-- [osu! Stamina Trainer server](https://github.com/ojcastaneda/osu-stamina-trainer-server)
-- [osu! Stamina Trainer website](https://github.com/ojcastaneda/osu-stamina-trainer-web)
+- [osu! Stamina Trainer Website](https://github.com/ojcastaneda/osu-stamina-trainer-web)
+- [osu! Stream Detector](https://github.com/ojcastaneda/osu-stream-detector)

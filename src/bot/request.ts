@@ -1,6 +1,7 @@
+import {requestBeatmap} from '../server/logic/bot/beatmaps.logic';
+import Beatmap from '../server/models/beatmap';
+import Filter from '../server/models/filter';
 import dictionary from './dictionary';
-import {Filter, Request, RequestResponse} from './models';
-import ApiService from '../processing/services/api';
 
 const ranges = {
 	ar: 0.5,
@@ -21,10 +22,9 @@ const processNumericParameter = (name: string, parameter: string, format: string
 				const exactNumber = Number(parameter.slice(0, -1));
 				if (!isNaN(exactNumber))
 					if (exactNumber >= 0 && exactNumber <= Number.MAX_SAFE_INTEGER) {
-						if (name === 'year') {
+						if (name === 'year')
 							return [new Filter('last_updated', 'minimum', `${exactNumber}-01-01`),
 								new Filter('last_updated', 'maximum', `${exactNumber + 1}-01-01`)];
-						}
 						return [new Filter(name, 'exact', exactNumber)];
 					}
 				break;
@@ -32,8 +32,7 @@ const processNumericParameter = (name: string, parameter: string, format: string
 				const minimumNumber = Number(parameter);
 				if (!isNaN(minimumNumber))
 					if (minimumNumber >= 0 && minimumNumber <= Number.MAX_SAFE_INTEGER) {
-						if (name === 'year')
-							return [new Filter('last_updated', 'minimum', `${minimumNumber}-01-01`)];
+						if (name === 'year') return [new Filter('last_updated', 'minimum', `${minimumNumber}-01-01`)];
 						return [new Filter(name, 'minimum', minimumNumber)];
 					}
 				break;
@@ -95,23 +94,19 @@ const processParameter = (fullParameter: string): any[] => {
 		const index = fullParameter.indexOf('>');
 		const numericFilter = processNumericParameter(fullParameter.slice(0, index), fullParameter.slice(index + 1), 'minimum');
 		return numericFilter;
-	} else
-		return processValueParameter(fullParameter);
+	} else return processValueParameter(fullParameter);
 	return [undefined];
 };
 
-const makeResponse = (requestResponse: RequestResponse) => {
-	const {beatmap, isDoubleTime} = requestResponse;
+const makeResponse = (request: { beatmap: Beatmap, isDoubleTime: boolean }) => {
+	const {beatmap, isDoubleTime} = request;
 	let seconds: any = beatmap.length! % 60;
 	if (seconds < 10) seconds = `0${seconds}`;
 	let additionalMods = '', type;
 	if (isDoubleTime) additionalMods = ' +DT |';
-	if (beatmap.average! < 9)
-		type = 'bursts';
-	else if (beatmap.average! < 25)
-		type = 'streams';
-	else
-		type = 'deathstreams';
+	if (beatmap.average! < 9) type = 'bursts';
+	else if (beatmap.average! < 25) type = 'streams';
+	else type = 'deathstreams';
 	const date = new Date();
 	const response = `${additionalMods} BPM: ${beatmap.bpm} | `.concat(`Type: ${type} | `,
 		`Average stream length: ${beatmap.average} | Density: ${beatmap.density} | ${beatmap.stars} ★ | AR: ${beatmap.ar} | `,
@@ -122,45 +117,37 @@ const makeResponse = (requestResponse: RequestResponse) => {
 	return (`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.name}]`).concat(response);
 };
 
-const request = async (params: string[], apiService: ApiService): Promise<string> => {
-	params = params.filter((param) => param != null);
+const request = async (params: string[]): Promise<string> => {
+	params = params.filter((param) => param != undefined);
 	if (params.length > 0) {
-		let request = new Request();
+		let isDoubleTime = false;
+		let filters: Filter[] = [];
 		if (params[0][0] === '<' || params[0][0] === '>') params[0] = `bpm${params[0]}`;
 		else params[0] = `bpm=${params[0]}`;
 		const bpm = processParameter(params[0]);
 		if (bpm !== undefined) {
-			request.filters = request.filters.concat(bpm);
-			for (let i = 1; i < params.length; i++) {
-				switch (params[i]) {
+			filters = filters.concat(bpm);
+			for (let index = 0; index< params.length; index++)
+				switch (params[index]) {
 					case 'nomod':
-						request.isDoubleTime = false;
+						isDoubleTime = false;
 						break;
 					case 'dt':
-						request.isDoubleTime = true;
+						isDoubleTime = true;
 						break;
 					default:
 						try {
-							const processedParameter = processParameter(params[i]);
-							if (!processedParameter.includes(undefined)) request.filters = request.filters.concat(processedParameter);
+							const processedParameter = processParameter(params[index]);
+							if (!processedParameter.includes(undefined)) filters = filters.concat(processedParameter);
 							else return dictionary.commandIncorrectParams;
 						} catch (error) {
 							return dictionary.commandIncorrectParams;
 						}
 						break;
 				}
-			}
-			const requestResponse = await apiService.retrieveRequest(request);
-			if (typeof requestResponse === 'number')
-				switch (requestResponse) {
-					case 404:
-						return dictionary.noBeatmapsFound;
-					case 500:
-						return dictionary.serverNotAvailable;
-					case 400:
-						return dictionary.commandIncorrectParams;
-				}
-			else return makeResponse(requestResponse);
+			const {beatmap} = await requestBeatmap(isDoubleTime, filters);
+			if (beatmap !== undefined) return makeResponse({beatmap, isDoubleTime});
+			return dictionary.noBeatmapsFound;
 		}
 	}
 	return dictionary.commandIncorrectParams;

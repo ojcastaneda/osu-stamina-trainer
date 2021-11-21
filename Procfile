@@ -1,1 +1,0 @@
-worker: cross-env NODE_ENV=production node build/src/index.js
