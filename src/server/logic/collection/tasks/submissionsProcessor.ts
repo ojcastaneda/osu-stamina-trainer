@@ -22,17 +22,12 @@ class SubmissionsProcessor extends BaseTask {
 		const osuDownloadQueue = new PQueue({interval: 5000, intervalCap: 1, concurrency: 1});
 		for (let index = 0; index < submissions.length; index++)
 			osuDownloadQueue.add(async () => {
-				switch (await this.downloadSubmissionFile(submissions[index].id!)) {
-					case 'delete':
-						await deleteSubmission(submissions[index].id!);
-						submissionsToProcess[index] = false;
-						break;
-					case 'process':
-						submissionsToProcess[index] = true;
-					default:
-						submissionsToProcess[index] = false;
-						break;
-				}
+				const downloadResult = await this.downloadSubmissionFile(submissions[index].id!);
+				if (downloadResult === 'delete') {
+					await deleteSubmission(submissions[index].id!);
+					submissionsToProcess[index] = false;
+				} else if ('process') submissionsToProcess[index] = true;
+				 else submissionsToProcess[index] = false;
 			}).catch(error => console.log(error));
 		await osuDownloadQueue.onIdle();
 		this.promiseQueue.addAll(submissions.map((submission, index) =>
@@ -42,7 +37,9 @@ class SubmissionsProcessor extends BaseTask {
 					const beatmap = await this.osuService.retrieveBeatmap(submission.id!);
 					if (beatmap === undefined) return;
 					await writeFileAsync(`beatmaps/${submission.id!}.osu`, (await retrieveSubmissionFile(submission.id!))!);
-					if (await this.processBeatmap(beatmap, true) && beatmap.ranked_status === 'ranked') await rankSubmission(beatmap.id!);
+					if (await this.processBeatmap(beatmap, true)) {
+						if (beatmap.ranked_status === 'ranked') await rankSubmission(beatmap.id!);
+					} else await deleteSubmission(submission.id!);
 				} catch (error) {
 					console.log(error);
 				}
