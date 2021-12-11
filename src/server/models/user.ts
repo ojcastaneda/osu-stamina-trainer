@@ -33,7 +33,7 @@ class User {
 	 */
 	public static createUser = async (user: User): Promise<void> => {
 		const { username, password, role } = user;
-		await Database.client.none('INSERT INTO table_users (username, password, role) VALUES ($1, $2, $3)', [username, password, role]);
+		await Database.client.none(`INSERT INTO table_users (username, password, role) VALUES ($1, $2, $3)`, [username, password, role]);
 	};
 
 	/**
@@ -80,7 +80,7 @@ class User {
 	 * @returns A promise of the number of deleted users
 	 */
 	public static deleteUser = async (id: number): Promise<number> =>
-		Database.client.result('DELETE FROM table_users WHERE id = $1', [id], result => result.rowCount);
+		Database.client.result(`DELETE FROM table_users WHERE id = $1`, [id], result => result.rowCount);
 }
 
 export default User;

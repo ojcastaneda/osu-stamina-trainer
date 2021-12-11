@@ -42,7 +42,7 @@ class Submission {
 	 */
 	public static createSubmission = async (submission: Submission): Promise<void> => {
 		const { id } = submission;
-		await Database.client.none('INSERT INTO table_submissions (id) VALUES ($1)', [id]);
+		await Database.client.none(`INSERT INTO table_submissions (id) VALUES ($1)`, [id]);
 	};
 
 	/**
@@ -98,7 +98,7 @@ class Submission {
 	 * @returns A promise of the number of deleted submissions
 	 */
 	public static deleteSubmission = async (id: number): Promise<number> =>
-		Database.client.result('DELETE FROM table_submissions WHERE id = $1', [id], result => result.rowCount);
+		Database.client.result(`DELETE FROM table_submissions WHERE id = $1`, [id], result => result.rowCount);
 
 	/**
 	 * Retrieves an array of submissions from the database composed by the specified properties, filtered by dynamic and raw filters,
