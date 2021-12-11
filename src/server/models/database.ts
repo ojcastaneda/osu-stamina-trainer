@@ -1,7 +1,7 @@
-import pgPromise, {IDatabase, QueryFile} from 'pg-promise';
+import pgPromise, { IDatabase, QueryFile } from 'pg-promise';
 import path from 'path';
 
-const database = pgPromise({query: (query) => console.log(query.query.replace(/\s\s+/g, ' '))});
+const database = pgPromise({ query: query => console.log(query.query.replace(/\s\s+/g, ' ')) });
 
 /**
  * Class that represents the pg-promise connection with the database
@@ -23,8 +23,8 @@ class Database {
 	 * @param reset - The specification for dropping and crating all the SQL entities needed
 	 */
 	public static setupConnection = async (reset: boolean = false) => {
-		if (reset) await Database.client.none(new QueryFile(path.join(path.resolve('./resources/database'), 'reset.sql'), {minify: true}));
-		await Database.client.none(new QueryFile(path.join(path.resolve('./resources/database'), 'setup.sql'), {minify: true}));
+		if (reset) await Database.client.none(new QueryFile(path.join(path.resolve('./resources/database'), 'reset.sql'), { minify: true }));
+		await Database.client.none(new QueryFile(path.join(path.resolve('./resources/database'), 'setup.sql'), { minify: true }));
 	};
 }
 

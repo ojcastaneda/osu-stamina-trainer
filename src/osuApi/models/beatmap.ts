@@ -99,8 +99,7 @@ class Beatmap {
 		this.ranked = json.ranked;
 		this.lastUpdated = new Date(json.last_updated);
 		this.stars = json.difficulty_rating;
-		if (json.beatmapset)
-			this.beatmapset = new Beatmapset(json.beatmapset);
+		if (json.beatmapset) this.beatmapset = new Beatmapset(json.beatmapset);
 	}
 }
 

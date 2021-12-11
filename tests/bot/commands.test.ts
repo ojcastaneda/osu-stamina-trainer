@@ -1,5 +1,5 @@
 import dotenv from 'dotenv';
-dotenv.config({path: './.env.development'});
+dotenv.config({ path: './.env.development' });
 import commandProcessing from '../../src/bot/commands';
 import dictionary from '../../src/bot/dictionary';
 

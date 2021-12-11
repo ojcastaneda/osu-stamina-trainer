@@ -1,16 +1,11 @@
-import {
-	approveSubmission,
-	createSubmission,
-	deleteSubmission,
-	retrieveFilteredSubmissionsByPage
-} from '../logic/web/submissions.logic';
-import {retrieveCollectionFile, retrieveFilteredBeatmapsByPage, updateBeatmapStatus} from '../logic/web/beatmaps.logic';
-import {adminMiddleware, optionalAdminMiddleware, superAdminMiddleware} from './middleware';
+import { approveSubmission, createSubmission, deleteSubmission, retrieveFilteredSubmissionsByPage } from '../logic/web/submissions.logic';
+import { retrieveCollectionFile, retrieveFilteredBeatmapsByPage, updateBeatmapStatus } from '../logic/web/beatmaps.logic';
+import { adminMiddleware, optionalAdminMiddleware, superAdminMiddleware } from './middleware';
 import expressRateLimit from 'express-rate-limit';
-import {Router} from 'express';
-import {registerUser} from '../logic/web/authentication';
+import { Router } from 'express';
+import { registerUser } from '../logic/web/authentication';
 
-const router = Router({mergeParams: true});
+const router = Router({ mergeParams: true });
 
 const downloadLimit = expressRateLimit({
 	windowMs: 15 * 60 * 1000,

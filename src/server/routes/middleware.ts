@@ -1,17 +1,16 @@
-import {NextFunction, Request, Response} from 'express';
+import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 
 const superAdminMiddleware = async (request: Request, response: Response, next: NextFunction) => {
 	try {
 		let token = request.headers['authorization'];
 		token = token!.slice(7, token!.length);
-		const decoded = await jwt.verify(token, process.env.SECRET_KEY!) as {
-			id: number,
-			role: string
+		const decoded = (jwt.verify(token, process.env.SECRET_KEY!)) as {
+			id: number;
+			role: string;
 		};
 		if (decoded) {
-			if (decoded.role! === 'bot' || decoded.role === 'super_admin')
-				return next();
+			if (decoded.role! === 'bot' || decoded.role === 'super_admin') return next();
 			return response.status(403).send('User not authorized');
 		}
 	} catch (error) {
@@ -25,9 +24,8 @@ const adminMiddleware = async (request: Request, response: Response, next: NextF
 		if (token) {
 			if (token.startsWith('Bearer ')) {
 				token = token.slice(7, token.length);
-				const decoded = await jwt.verify(token, process.env.SECRET_KEY!);
-				if (decoded)
-					return next();
+				const decoded = jwt.verify(token, process.env.SECRET_KEY!);
+				if (decoded) return next();
 				return response.status(403).send('User not authorized');
 			}
 		}
@@ -44,7 +42,7 @@ const optionalAdminMiddleware = async (request: Request, response: Response, nex
 		if (token)
 			if (token.startsWith('Bearer ')) {
 				token = token.slice(7, token.length);
-				const decoded = await jwt.verify(token, process.env.SECRET_KEY!);
+				const decoded = jwt.verify(token, process.env.SECRET_KEY!);
 				if (decoded) request.body.is_admin = true;
 			}
 		next();
@@ -53,4 +51,4 @@ const optionalAdminMiddleware = async (request: Request, response: Response, nex
 	}
 };
 
-export {superAdminMiddleware, adminMiddleware, optionalAdminMiddleware};
+export { superAdminMiddleware, adminMiddleware, optionalAdminMiddleware };

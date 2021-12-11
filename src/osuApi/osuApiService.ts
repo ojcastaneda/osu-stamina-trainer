@@ -1,6 +1,6 @@
 import OsuBeatmapset from './models/beatmapset';
 import Beatmap from '../server/models/beatmap';
-import fetch, {Headers} from 'cross-fetch';
+import fetch, { Headers } from 'cross-fetch';
 import OsuBeatmap from './models/beatmap';
 
 /**
@@ -39,9 +39,9 @@ class AuthorizationHeaders extends Headers {
 	 */
 	constructor(json: any) {
 		super({
-			'Accept': 'application/json',
+			Accept: 'application/json',
 			'Content-Type': 'application/json',
-			'Authorization': `Bearer ${json['access_token']}`
+			Authorization: `Bearer ${json['access_token']}`
 		});
 	}
 }
@@ -78,14 +78,14 @@ class OsuService {
 		const response = await fetch('https://osu.ppy.sh/oauth/token', {
 			method: 'POST',
 			headers: new Headers({
-				'Accept': 'application/json',
+				Accept: 'application/json',
 				'Content-Type': 'application/json'
 			}),
 			body: JSON.stringify({
-				'client_id': process.env.OSU_ID,
-				'client_secret': process.env.OSU_SECRET,
-				'grant_type': 'client_credentials',
-				'scope': 'public'
+				client_id: process.env.OSU_ID,
+				client_secret: process.env.OSU_SECRET,
+				grant_type: 'client_credentials',
+				scope: 'public'
 			})
 		});
 		if (response.ok) {
@@ -105,17 +105,13 @@ class OsuService {
 	 * The promise of an array with the beatmaps found, the ID of the last beatmapset, the date when the last beatmapset was ranked and the
 	 * continuation signal if there are more beatmaps available given the date limit of the last dumped data
 	 */
-	public retrieveRankedBeatmaps = async (lastDate: number, lastBeatmapset: number):
-		Promise<[beatmaps: Beatmap[], lastDate: number, lastBeatmapset: number, beatmapsLeft: boolean]> => {
+	public retrieveRankedBeatmaps = async (
+		lastDate: number,
+		lastBeatmapset: number
+	): Promise<[beatmaps: Beatmap[], lastDate: number, lastBeatmapset: number, beatmapsLeft: boolean]> => {
 		try {
 			const beatmaps: Beatmap[] = [];
-			const params = [
-				`m=0`,
-				'sort=ranked_asc',
-				'nsfw=true',
-				`cursor[_id]=${lastBeatmapset}`,
-				`cursor[approved_date]=${lastDate}`
-			];
+			const params = [`m=0`, 'sort=ranked_asc', 'nsfw=true', `cursor[_id]=${lastBeatmapset}`, `cursor[approved_date]=${lastDate}`];
 			const response = await fetch(`${OsuService.apiUrl}beatmapsets/search?${params.join('&')}`, {
 				method: 'GET',
 				headers: this.authorizationHeaders
@@ -138,8 +134,7 @@ class OsuService {
 					return [beatmaps, cursor.lastDate, cursor.lastBeatmapset, false];
 				}
 			}
-		} catch (error) {
-		}
+		} catch (error) {}
 		return [[], lastDate, lastBeatmapset, false];
 	};
 
@@ -155,7 +150,8 @@ class OsuService {
 		});
 		if (response.ok) {
 			const beatmap = new OsuBeatmap(await response.json());
-			if (beatmap.stars > 3 && beatmap.mode === 'osu' && beatmap.beatmapset) return Beatmap.createBeatmapFromOsuApi(beatmap, beatmap.beatmapset);
+			if (beatmap.stars > 3 && beatmap.mode === 'osu' && beatmap.beatmapset)
+				return Beatmap.createBeatmapFromOsuApi(beatmap, beatmap.beatmapset);
 		}
 	};
 
@@ -173,5 +169,5 @@ class OsuService {
 	};
 }
 
-export {Cursor};
+export { Cursor };
 export default OsuService;

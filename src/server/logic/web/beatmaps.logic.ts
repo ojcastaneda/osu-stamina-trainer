@@ -1,4 +1,4 @@
-import {NextFunction, Request, Response} from 'express';
+import { NextFunction, Request, Response } from 'express';
 import Beatmap from '../../models/beatmap';
 import FileManager from '../fileManager';
 import Filter from '../../models/filter';
@@ -14,7 +14,7 @@ const retrieveCollectionFile = async (request: Request, response: Response, next
 
 const retrieveFilteredBeatmapsByPage = async (request: Request, response: Response, next: NextFunction) => {
 	try {
-		const {page, filters, sort}: { page: number, filters: Filter[], sort: Sort } = request.body;
+		const { page, filters, sort }: { page: number; filters: Filter[]; sort: Sort } = request.body;
 		let rawFilters: string[] | undefined;
 		if (!request.body.is_admin) rawFilters = ['active_status = true'];
 		const [rows, count] = await Beatmap.retrieveBeatmapsPagination(page, sort, filters, rawFilters);
@@ -30,10 +30,13 @@ const retrieveFilteredBeatmapsByPage = async (request: Request, response: Respon
 const updateBeatmapStatus = async (request: Request, response: Response, next: NextFunction) => {
 	try {
 		const id = Number(request.params.id);
-		const beatmapsUpdated = await Beatmap.updateBeatmap({id, active_status: request.body.active_status}, {
-			id,
-			active_status: request.body.active_status
-		});
+		const beatmapsUpdated = await Beatmap.updateBeatmap(
+			{ id, active_status: request.body.active_status },
+			{
+				id,
+				active_status: request.body.active_status
+			}
+		);
 		if (beatmapsUpdated === 0) return response.status(404).send('Beatmap not found');
 		response.status(204).send();
 	} catch (error) {
@@ -41,4 +44,4 @@ const updateBeatmapStatus = async (request: Request, response: Response, next: N
 	}
 };
 
-export {retrieveCollectionFile, retrieveFilteredBeatmapsByPage, updateBeatmapStatus};
+export { retrieveCollectionFile, retrieveFilteredBeatmapsByPage, updateBeatmapStatus };

@@ -32,9 +32,8 @@ class User {
 	 * @returns An empty promise
 	 */
 	public static createUser = async (user: User): Promise<void> => {
-		const {username, password, role} = user;
-		await Database.client.none('INSERT INTO table_users (username, password, role) VALUES ($1, $2, $3)',
-			[username, password, role]);
+		const { username, password, role } = user;
+		await Database.client.none('INSERT INTO table_users (username, password, role) VALUES ($1, $2, $3)', [username, password, role]);
 	};
 
 	/**
@@ -45,10 +44,7 @@ class User {
 	 * @returns A promise of the requested user or undefined if not found
 	 */
 	public static retrieveUser = async (id: number, properties: string[] = ['id']): Promise<User | undefined> => {
-		const user = await Database.client.oneOrNone<User>(`SELECT ${properties}
-                                                            FROM table_users
-                                                            WHERE id = $1
-                                                            LIMIT 1`, [id]);
+		const user = await Database.client.oneOrNone<User>(`SELECT ${properties} FROM table_users WHERE id = $1 LIMIT 1`, [id]);
 		return user !== null ? user : undefined;
 	};
 
@@ -60,10 +56,7 @@ class User {
 	 * @returns A promise of the requested user or undefined if not found
 	 */
 	public static retrieveUserByUsername = async (username: string, properties: string[] = ['id']): Promise<User | undefined> => {
-		const user = await Database.client.oneOrNone<User>(`SELECT ${properties}
-                                                            FROM table_users
-                                                            WHERE username ILIKE $1
-                                                            LIMIT 1`, [username]);
+		const user = await Database.client.oneOrNone<User>(`SELECT ${properties} FROM table_users WHERE username ILIKE $1 LIMIT 1`, [username]);
 		return user !== null ? user : undefined;
 	};
 

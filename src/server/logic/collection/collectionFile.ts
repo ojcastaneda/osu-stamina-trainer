@@ -21,4 +21,4 @@ const generateCollectionFile = async (): Promise<any> => {
 	return collectionDatabase;
 };
 
-export {updateCollectionFile};
+export { updateCollectionFile };

@@ -2,7 +2,6 @@
  * Class that represents the filters used in the prepared statements queries
  */
 class Filter {
-
 	/**
 	 * The filter's dynamic property to filter by in the prepared statements
 	 */
@@ -50,9 +49,7 @@ class Filter {
 		}
 		if (properties.length === 0) return [undefined, []];
 		values.push(instance.id);
-		return [`UPDATE ${table}
-                 SET ${properties}
-                 WHERE id = $${values.length}`, values];
+		return [`UPDATE ${table} SET ${properties} WHERE id = $${values.length}`, values];
 	};
 
 	/**
@@ -64,17 +61,19 @@ class Filter {
 	 * @param rawFilters - The raw filters that are directly provided in the query
 	 * @returns An array with the where clause of the prepared statement in the first position and the values in the second position
 	 */
-	public static generateSelectConditionQuery = (filters: Filter[], numericFilters: string[], stringFilters: string[], rawFilters: string[]):
-		[conditionQuery: string, values: any[]] => {
+	public static generateSelectConditionQuery = (
+		filters: Filter[],
+		numericFilters: string[],
+		stringFilters: string[],
+		rawFilters: string[]
+	): [conditionQuery: string, values: any[]] => {
 		const values: any[] = [];
 		let filterQueries: string[] = rawFilters;
 		filters.forEach((filter, index) => {
-			const {filterProperty, value, operator} = filter;
+			const { filterProperty, value, operator } = filter;
 			let filterQuery: string | undefined;
-			if (numericFilters.includes(filterProperty))
-				filterQuery = Filter.generateNumericFilterQuery(filterProperty, operator, index + 1);
-			else if (stringFilters.includes(filterProperty))
-				filterQuery = Filter.generateStringFilterQuery(filterProperty, operator, index + 1);
+			if (numericFilters.includes(filterProperty)) filterQuery = Filter.generateNumericFilterQuery(filterProperty, operator, index + 1);
+			else if (stringFilters.includes(filterProperty)) filterQuery = Filter.generateStringFilterQuery(filterProperty, operator, index + 1);
 			if (filterQuery !== undefined) {
 				values.push(value);
 				filterQueries.push(filterQuery);

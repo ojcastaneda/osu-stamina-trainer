@@ -1,4 +1,4 @@
-import {ITask, txMode} from 'pg-promise';
+import { ITask, txMode } from 'pg-promise';
 import Database from './database';
 import Filter from './filter';
 import Sort from './sort';
@@ -41,9 +41,8 @@ class Submission {
 	 * @returns An empty promise
 	 */
 	public static createSubmission = async (submission: Submission): Promise<void> => {
-		const {id} = submission;
-		await Database.client.none('INSERT INTO table_submissions (id) VALUES ($1)',
-			[id]);
+		const { id } = submission;
+		await Database.client.none('INSERT INTO table_submissions (id) VALUES ($1)', [id]);
 	};
 
 	/**
@@ -54,9 +53,7 @@ class Submission {
 	 * @returns A promise of the requested submission or undefined if not found
 	 */
 	public static retrieveSubmission = async (id: number, properties: string[] = ['id']): Promise<Submission | undefined> => {
-		const submission = await Database.client.oneOrNone<Submission>(`SELECT ${properties}
-                                                                        FROM table_submissions
-                                                                        WHERE id = $1`, [id]);
+		const submission = await Database.client.oneOrNone<Submission>(`SELECT ${properties} FROM table_submissions WHERE id = $1`, [id]);
 		return submission !== null ? submission : undefined;
 	};
 
@@ -68,12 +65,18 @@ class Submission {
 	 * @param rawFilters - The raw filters that are directly provided in the query
 	 * @returns A promise of an array of all the submissions that match the filters
 	 */
-	public static retrieveSubmissions = async (properties: string[] = ['id'], filters: Filter[] = [], rawFilters: string[] = []): Promise<Submission[]> => {
-		const [conditionQuery, values] = Filter.generateSelectConditionQuery(filters, Submission.numericFilters,
-			Submission.stringFilters, rawFilters);
-		return await Database.client.manyOrNone<Submission>(`SELECT ${properties}
-                                                             FROM table_submissions ${conditionQuery}`, values);
-
+	public static retrieveSubmissions = async (
+		properties: string[] = ['id'],
+		filters: Filter[] = [],
+		rawFilters: string[] = []
+	): Promise<Submission[]> => {
+		const [conditionQuery, values] = Filter.generateSelectConditionQuery(
+			filters,
+			Submission.numericFilters,
+			Submission.stringFilters,
+			rawFilters
+		);
+		return await Database.client.manyOrNone<Submission>(`SELECT ${properties} FROM table_submissions ${conditionQuery}`, values);
 	};
 
 	/**
@@ -108,26 +111,41 @@ class Submission {
 	 * @returns A promise of an array with the submissions that match the filters and the page offset in the specified order in the first position and
 	 * the total amount of submissions that match the filters in the second position
 	 */
-	public static retrieveSubmissionsPagination = async (page: number, sort: Sort, filters: Filter[] = [], rawFilters: string[] = []):
-		Promise<[rows: Submission[], count: number]> => {
-		const [conditionQuery, values] = Filter.generateSelectConditionQuery(filters, Submission.numericFilters, Submission.stringFilters, rawFilters);
-		const {sortProperty, order} = sort;
+	public static retrieveSubmissionsPagination = async (
+		page: number,
+		sort: Sort,
+		filters: Filter[] = [],
+		rawFilters: string[] = []
+	): Promise<[rows: Submission[], count: number]> => {
+		const [conditionQuery, values] = Filter.generateSelectConditionQuery(
+			filters,
+			Submission.numericFilters,
+			Submission.stringFilters,
+			rawFilters
+		);
+		const { sortProperty, order } = sort;
 		const sortQuery = Sort.generateOrderQuery(sortProperty, order, ['last_updated']);
 		values.push((page - 1) * 10);
-		return await Database.client.tx<[rows: Submission[], count: number]>({
-			mode: new txMode.TransactionMode({
-				tiLevel: txMode.isolationLevel.readCommitted,
-				readOnly: true
-			})
-		}, async (transaction: ITask<any>) => {
-			const rows = await transaction.manyOrNone<Submission>(`SELECT id, approved_status
-                                                                   FROM table_submissions ${conditionQuery} ${sortQuery}
-                                                                   LIMIT 10 OFFSET $${values.length}`, values);
-			const count = await transaction.one<number>(`SELECT COUNT(id)
-                                                         FROM table_submissions ${conditionQuery}`, values, (data: { count: number }) => data.count);
-			return [rows, count];
-
-		});
+		return await Database.client.tx<[rows: Submission[], count: number]>(
+			{
+				mode: new txMode.TransactionMode({
+					tiLevel: txMode.isolationLevel.readCommitted,
+					readOnly: true
+				})
+			},
+			async (transaction: ITask<any>) => {
+				const rows = await transaction.manyOrNone<Submission>(
+					`SELECT id, approved_status FROM table_submissions ${conditionQuery} ${sortQuery} LIMIT 10 OFFSET $${values.length}`,
+					values
+				);
+				const count = await transaction.one<number>(
+					`SELECT COUNT(id) FROM table_submissions ${conditionQuery}`,
+					values,
+					(data: { count: number }) => data.count
+				);
+				return [rows, count];
+			}
+		);
 	};
 }
 

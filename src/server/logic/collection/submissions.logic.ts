@@ -9,11 +9,12 @@ const retrieveSubmissionFile = async (id: number): Promise<string | undefined> =
 
 const createSubmission = async (id: number): Promise<void> => {
 	const submission = await Submission.retrieveSubmission(id, ['id', 'approved_status']);
-	if (submission === undefined) await Submission.createSubmission({id});
-	else if (submission.approved_status === 'pending') await Submission.updateSubmission({
-		id: submission.id,
-		last_updated: new Date()
-	});
+	if (submission === undefined) await Submission.createSubmission({ id });
+	else if (submission.approved_status === 'pending')
+		await Submission.updateSubmission({
+			id: submission.id,
+			last_updated: new Date()
+		});
 };
 
 const rankSubmission = async (id: number): Promise<void> => {
@@ -31,9 +32,4 @@ const deleteSubmission = async (id: number): Promise<void> => {
 	await fileManager.deleteFile(`beatmaps/${id}.osu`);
 };
 
-export {
-	retrieveSubmissionFile,
-	createSubmission,
-	rankSubmission,
-	deleteSubmission
-};
+export { retrieveSubmissionFile, createSubmission, rankSubmission, deleteSubmission };

@@ -1,7 +1,7 @@
-import {requestToken} from '../logic/authentication';
+import { requestToken } from '../logic/authentication';
 import expressRateLimit from 'express-rate-limit';
 import webRouter from './web.routes';
-import {Router} from 'express';
+import { Router } from 'express';
 
 const requestTokenLimit = expressRateLimit({
 	windowMs: 15 * 60 * 1000,

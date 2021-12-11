@@ -1,4 +1,4 @@
-import {NextFunction, Request, Response} from 'express';
+import { NextFunction, Request, Response } from 'express';
 import User from '../models/user';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
@@ -9,8 +9,8 @@ const generatePassword = async (password: string): Promise<string | undefined> =
 
 const generateToken = (user: User) => {
 	const expiration = new Date();
-	expiration.setTime(expiration.getTime() + (90000000));
-	const token = jwt.sign({role: user.role}, process.env.SECRET_KEY!, {expiresIn: '26h'});
+	expiration.setTime(expiration.getTime() + 90000000);
+	const token = jwt.sign({ role: user.role }, process.env.SECRET_KEY!, { expiresIn: '26h' });
 	return {
 		role: user.role,
 		token: token,
@@ -20,7 +20,7 @@ const generateToken = (user: User) => {
 
 const requestToken = async (request: Request, response: Response, next: NextFunction) => {
 	try {
-		const {username, password}: { username: string, password: string } = request.body;
+		const { username, password }: { username: string; password: string } = request.body;
 		const user = await User.retrieveUserByUsername(username, ['password', 'role']);
 		if (user) {
 			const result = await bcrypt.compare(password, user.password!);
@@ -33,4 +33,4 @@ const requestToken = async (request: Request, response: Response, next: NextFunc
 	}
 };
 
-export {generatePassword, requestToken};
+export { generatePassword, requestToken };
