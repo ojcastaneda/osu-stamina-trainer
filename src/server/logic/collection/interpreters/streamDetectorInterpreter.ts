@@ -1,4 +1,4 @@
-import { process_beatmap } from '../../../../../resources/osu-stream-detector/osu_stream_detector';
+import { process_beatmap } from 'osu-stream-detector';
 import Beatmap from '../../../models/beatmap';
 
 class StreamDetectorInterpreter {
