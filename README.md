@@ -14,7 +14,7 @@ This project uses the following dependencies:
 - [Nodejs](https://nodejs.org/en/)
 - [Expressjs](https://expressjs.com/)
 - [osuColle](https://www.npmjs.com/package/osucolle)
-- [oppai](https://github.com/Francesco149/oppai-ng)
+- [rosu-pp](https://crates.io/crates/rosu-pp)
 
 ## Other related projects
 

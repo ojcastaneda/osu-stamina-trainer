@@ -17,14 +17,6 @@ const createSubmission = async (id: number): Promise<void> => {
 		});
 };
 
-const rankSubmission = async (id: number): Promise<void> => {
-	const beatmap = await Beatmap.retrieveBeatmap(id, ['id']);
-	if (beatmap) {
-		const result = await Submission.deleteSubmission(id);
-		if (result !== 0) await fileManager.deleteFile(`beatmaps/${id}.osu`);
-	}
-};
-
 const deleteSubmission = async (id: number): Promise<void> => {
 	const submissionsDeleted = await Submission.deleteSubmission(id);
 	if (submissionsDeleted === 0) return;
@@ -32,4 +24,4 @@ const deleteSubmission = async (id: number): Promise<void> => {
 	await fileManager.deleteFile(`beatmaps/${id}.osu`);
 };
 
-export { retrieveSubmissionFile, createSubmission, rankSubmission, deleteSubmission };
+export { retrieveSubmissionFile, createSubmission, deleteSubmission };

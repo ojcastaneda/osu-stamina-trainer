@@ -1,20 +1,18 @@
+import { process_beatmap } from '../../../../../resources/osu-stream-detector/osu_stream_detector';
 import Beatmap from '../../../models/beatmap';
-import { execFile } from 'child_process';
-import util from 'util';
-import os from 'os';
-
-const execFileAsync = util.promisify(execFile);
 
 class StreamDetectorInterpreter {
-	public static calculateStreamStatistics = async (beatmap: Beatmap): Promise<void> => {
-		const { stdout } =
-			os.platform() === 'win32'
-				? await execFileAsync('resources/streamDetector/osu-stream-detector.exe', [`beatmaps/${beatmap.id}.osu`, '130'])
-				: await execFileAsync('resources/streamDetector/osu-stream-detector', [`beatmaps/${beatmap.id}.osu`, '130']);
-		const response = JSON.parse(stdout);
-		beatmap.bpm = response.suggested_bpm.bpm;
-		beatmap.average = Math.round(response.average_stream_length);
-		beatmap.density = Number(response.density.toFixed(2));
+	public static calculateStreamStatistics = async (beatmap: Beatmap): Promise<Beatmap> => {
+		const processedBeatmap = await process_beatmap(`beatmaps/${beatmap.id}.osu`, 130);
+		if (processedBeatmap === undefined) throw Error;
+		beatmap.bpm = processedBeatmap.suggested_bpm;
+		beatmap.average = Math.round(processedBeatmap.average_stream_length);
+		beatmap.density = Number(processedBeatmap.stream_density.toFixed(2));
+		return Beatmap.createDoubleTimeBeatmap(beatmap.bpm, beatmap.length!, {
+			ar: processedBeatmap.ar_double_time,
+			od: processedBeatmap.od_double_time,
+			stars: processedBeatmap.difficulty_double_time
+		});
 	};
 }
 

@@ -1,6 +1,6 @@
 {
   "name": "osu-stamina-trainer-bot",
-  "version": "1.6.0",
+  "version": "1.6.1",
   "private": true,
   "description": "Server for processing data and recommending beatmaps for osu! Stamina Trainer Bot",
   "main": "build/src/index.js",
@@ -10,6 +10,7 @@
     "start:dev": "tsc && cross-env NODE_ENV=development node build/src/index.js",
     "start": "cross-env NODE_ENV=production node build/src/index.js",
     "process": "cross-env NODE_ENV=production ts-node src/process.ts",
+    "updateCollection": "cross-env NODE_ENV=production ts-node src/updateCollection.ts",
     "test": "jest ./tests/"
   },
   "author": "Sombrax79",

@@ -3,6 +3,8 @@
 
 .env.development
 
+package-lock.json
+
 node_modules/
 
 beatmaps/
