@@ -1,0 +1,11 @@
+{
+  "name": "osu-stream-detector",
+  "version": "1.6.1",
+  "files": [
+    "osu_stream_detector_bg.wasm",
+    "osu_stream_detector.js",
+    "osu_stream_detector.d.ts"
+  ],
+  "main": "osu_stream_detector.js",
+  "types": "osu_stream_detector.d.ts"
+}
