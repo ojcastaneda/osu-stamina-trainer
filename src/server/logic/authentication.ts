@@ -1,16 +1,16 @@
 import { NextFunction, Request, Response } from 'express';
+import { hash, genSalt, compare } from 'bcrypt';
+import { sign } from 'jsonwebtoken';
 import User from '../models/user';
-import jwt from 'jsonwebtoken';
-import bcrypt from 'bcrypt';
 
 const generatePassword = async (password: string): Promise<string | undefined> => {
-	if (password) return bcrypt.hash(password, await bcrypt.genSalt(10));
+	if (password) return hash(password, await genSalt(10));
 };
 
 const generateToken = (user: User) => {
 	const expiration = new Date();
 	expiration.setTime(expiration.getTime() + 90000000);
-	const token = jwt.sign({ role: user.role }, process.env.SECRET_KEY!, { expiresIn: '26h' });
+	const token = sign({ role: user.role }, process.env.SECRET_KEY!, { expiresIn: '26h' });
 	return {
 		role: user.role,
 		token: token,
@@ -23,7 +23,7 @@ const requestToken = async (request: Request, response: Response, next: NextFunc
 		const { username, password }: { username: string; password: string } = request.body;
 		const user = await User.retrieveUserByUsername(username, ['password', 'role']);
 		if (user) {
-			const result = await bcrypt.compare(password, user.password!);
+			const result = await compare(password, user.password!);
 			if (result) return response.status(200).json(generateToken(user));
 			return response.status(404).send('Incorrect credentials');
 		}

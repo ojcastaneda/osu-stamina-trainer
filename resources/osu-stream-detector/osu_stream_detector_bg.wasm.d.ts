@@ -16,4 +16,3 @@ export function __wbg_set_beatmap_od_double_time(a: number, b: number): void;
 export function __wbg_get_beatmap_ar_double_time(a: number): number;
 export function __wbg_set_beatmap_ar_double_time(a: number, b: number): void;
 export function __wbindgen_malloc(a: number): number;
-export function __wbindgen_realloc(a: number, b: number, c: number): number;

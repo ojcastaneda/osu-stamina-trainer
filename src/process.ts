@@ -4,4 +4,4 @@ import RankedBeatmapsProcessor from './server/logic/collection/tasks/rankedBeatm
 
 const rankedBeatmapsProcessor = new RankedBeatmapsProcessor();
 
-rankedBeatmapsProcessor.processRankedBeatmaps().catch(error => console.log(error));
+rankedBeatmapsProcessor.processRankedBeatmaps().catch(error => console.warn(error));

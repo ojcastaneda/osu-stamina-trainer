@@ -4,4 +4,4 @@ import BeatmapsStatisticsUpdater from './server/logic/collection/tasks/BeatmapsS
 
 const rankedBeatmapsProcessor = new BeatmapsStatisticsUpdater();
 
-rankedBeatmapsProcessor.updateAllStatistics().catch(error => console.log(error));
+rankedBeatmapsProcessor.updateAllStatistics().catch(error => console.warn(error));

@@ -37,11 +37,11 @@ const serverSetup = async (): Promise<void> => {
 				role: 'super_admin'
 			});
 		else await User.createUser({ username: process.env.DEFAULT_USERNAME, password: password, role: 'super_admin' });
-		console.log('DB connected');
+		console.info('DB connected');
 		await app.listen(process.env.PORT || '3001');
-		console.log('Server live');
+		console.info('Server live');
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 	}
 };
 

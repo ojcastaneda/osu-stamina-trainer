@@ -4,7 +4,7 @@ import BaseTask from './baseTask';
 
 class RankedBeatmapsProcessor extends BaseTask {
 	public processRankedBeatmaps = async () => {
-		console.log('Process ranked beatmaps start');
+		console.info('Process ranked beatmaps start');
 		await this.osuService.retrieveToken();
 		const state = await retrieveState();
 		let [beatmaps, lastDate, lastBeatmapset, beatmapsLeft] = await this.osuService.retrieveRankedBeatmaps(state!.lastDate, state!.lastBeatmapset);
@@ -15,17 +15,17 @@ class RankedBeatmapsProcessor extends BaseTask {
 						try {
 							await this.processBeatmap(beatmap);
 						} catch (error) {
-							console.log(error);
+							console.warn(error);
 						}
 					})
 				)
-				.catch(error => console.log(error));
+				.catch(error => console.warn(error));
 			await this.promiseQueue.onIdle();
 			await updateState(lastDate, lastBeatmapset);
 			[beatmaps, lastDate, lastBeatmapset, beatmapsLeft] = await this.osuService.retrieveRankedBeatmaps(lastDate, lastBeatmapset);
 		}
 		await updateCollectionFile();
-		console.log('Process ranked beatmaps end');
+		console.info('Process ranked beatmaps end');
 	};
 }
 

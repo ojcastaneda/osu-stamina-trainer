@@ -26,7 +26,7 @@ const setup = async () => {
 			!process.env.AWS_ACCESS_KEY ||
 			!process.env.AWS_SECRET_KEY
 		)
-			return console.log('Credentials required not provided');
+			return console.error('Credentials required not provided');
 		await serverSetup();
 
 		if (process.env.NODE_ENV === 'production' && process.env.BOT_USERNAME && process.env.BOT_PASSWORD) {
@@ -44,7 +44,7 @@ const setup = async () => {
 				}
 			});
 			await client.connect();
-			console.log('osu! bot connected');
+			console.info('osu! bot connected');
 		}
 
 		if (process.env.OSU_ID && process.env.OSU_SECRET) {
@@ -57,12 +57,12 @@ const setup = async () => {
 					await submissionsProcessor.approveSubmissions();
 					await beatmapsStatisticsUpdater.updateFavorites();
 				} catch (error) {
-					console.log(error);
+					console.error(error);
 				}
 			});
 		}
 	} catch (error) {
-		console.log(error);
+		console.error(error);
 	}
 };
 

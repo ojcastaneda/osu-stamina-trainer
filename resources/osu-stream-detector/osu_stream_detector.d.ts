@@ -1,12 +1,12 @@
 /* tslint:disable */
 /* eslint-disable */
 /**
-* @param {string} file
+* @param {Uint8Array} file
 * @param {number | undefined} minimum_bpm
 * @param {number | undefined} maximum_bpm
 * @returns {Beatmap | undefined}
 */
-export function process_beatmap(file: string, minimum_bpm?: number, maximum_bpm?: number): Beatmap | undefined;
+export function process_beatmap(file: Uint8Array, minimum_bpm?: number, maximum_bpm?: number): Beatmap | undefined;
 /**
 */
 export class Beatmap {

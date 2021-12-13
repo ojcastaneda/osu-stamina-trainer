@@ -1,20 +1,20 @@
 import { createSubmission, deleteSubmission, retrieveSubmissionFile } from '../submissions.logic';
 import { updateCollectionFile } from '../collectionFile';
+import { writeFile, existsSync, mkdirSync } from 'fs';
 import Submission from '../../../models/submission';
 import Beatmap from '../../../models/beatmap';
-import BaseTask from './baseTask';
-import util from 'util';
-import fs from 'fs';
-import PQueue from 'p-queue';
-import fetch from 'cross-fetch';
 import fileManager from '../../fileManager';
+import BaseTask from './baseTask';
+import { promisify } from 'util';
+import fetch from 'cross-fetch';
+import PQueue from 'p-queue';
 
-const writeFileAsync = util.promisify(fs.writeFile);
+const writeFileAsync = promisify(writeFile);
 
 class SubmissionsProcessor extends BaseTask {
 	public approveSubmissions = async () => {
-		console.log('Approve submissions start');
-		if (!fs.existsSync('beatmaps')) fs.mkdirSync('beatmaps');
+		console.info('Approve submissions start');
+		if (!existsSync('beatmaps')) mkdirSync('beatmaps');
 		await this.osuService.retrieveToken();
 		const submissions = await Submission.retrieveSubmissions(['id'], [], [`approved_status = 'pending_approved'`]);
 		const submissionsToProcess: boolean[] = [];
@@ -22,14 +22,18 @@ class SubmissionsProcessor extends BaseTask {
 		for (let index = 0; index < submissions.length; index++)
 			osuDownloadQueue
 				.add(async () => {
-					const downloadResult = await this.downloadSubmissionFile(submissions[index].id!);
-					if (downloadResult === 'delete') {
-						await deleteSubmission(submissions[index].id!);
-						submissionsToProcess[index] = false;
-					} else if ('process') submissionsToProcess[index] = true;
-					else submissionsToProcess[index] = false;
+					try {
+						const downloadResult = await this.downloadSubmissionFile(submissions[index].id!);
+						if (downloadResult === 'delete') {
+							await deleteSubmission(submissions[index].id!);
+							submissionsToProcess[index] = false;
+						} else if ('process') submissionsToProcess[index] = true;
+						else submissionsToProcess[index] = false;
+					} catch (error) {
+						console.warn(error);
+					}
 				})
-				.catch(error => console.log(error));
+				.catch(error => console.warn(error));
 		await osuDownloadQueue.onIdle();
 		this.promiseQueue
 			.addAll(
@@ -43,18 +47,18 @@ class SubmissionsProcessor extends BaseTask {
 							(await Submission.deleteSubmission(beatmap.id!)) !== 0 && (await fileManager.deleteFile(`beatmaps/${beatmap.id!}.osu`));
 						else await deleteSubmission(submission.id!);
 					} catch (error) {
-						console.log(error);
+						console.warn(error);
 					}
 				})
 			)
-			.catch(error => console.log(error));
+			.catch(error => console.warn(error));
 		await this.promiseQueue.onIdle();
 		await updateCollectionFile();
-		console.log('Approve submissions end');
+		console.info('Approve submissions end');
 	};
 
 	public checkSubmissionsLastUpdate = async () => {
-		console.log('Submissions update start');
+		console.info('Submissions update start');
 		await this.osuService.retrieveToken();
 		const beatmaps = await Beatmap.retrieveBeatmaps(['id', 'last_updated'], [], [`ranked_status != 'ranked'`]);
 		this.promiseQueue
@@ -68,14 +72,14 @@ class SubmissionsProcessor extends BaseTask {
 							await createSubmission(beatmap.id!);
 						}
 					} catch (error) {
-						console.log(error);
+						console.warn(error);
 					}
 				})
 			)
-			.catch(error => console.log(error));
+			.catch(error => console.warn(error));
 		await this.promiseQueue.onIdle();
 		await updateCollectionFile();
-		console.log('Submissions update end');
+		console.info('Submissions update end');
 	};
 
 	private downloadSubmissionFile = async (id: number): Promise<string> => {
