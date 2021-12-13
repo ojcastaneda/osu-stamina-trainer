@@ -41,9 +41,8 @@ class BeatmapsStatisticsUpdater extends BaseTask {
 					try {
 						const retrievedBeatmap = await this.osuService.retrieveBeatmap(beatmap.id!);
 						if (retrievedBeatmap !== undefined) {
-							/**
 							if (beatmap.ranked_status !== 'ranked')
-								await writeFileAsync(`beatmaps/${beatmap.id!}.osu`, (await retrieveSubmissionFile(beatmap.id!))!);*/
+								await writeFileAsync(`beatmaps/${beatmap.id!}.osu`, (await retrieveSubmissionFile(beatmap.id!))!);
 							await this.processBeatmap(retrievedBeatmap);
 						}
 					} catch (error) {
