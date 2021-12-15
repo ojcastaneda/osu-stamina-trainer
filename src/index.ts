@@ -3,13 +3,15 @@ if (process.env.NODE_ENV !== 'production') dotenv.config({ path: './.env.develop
 else dotenv.config();
 import { approveSubmissions, checkSubmissionsLastUpdate } from './server/logic/collection/tasks/submissionsTasks';
 import { updateFavorites } from './server/logic/collection/tasks/beatmapsTaks';
-import { BanchoClient, PrivateMessage } from 'bancho.js';
+
 import OsuService from './osuApi/osuApiService';
 import commandProcessing from './bot/commands';
 import dictionary from './bot/dictionary';
 import serverSetup from './server/app';
 import cron from 'node-cron';
 import PQueue from 'p-queue';
+
+const { BanchoClient } = require('bancho.js');
 
 /**
  * Initializes the server, the bot and the batch jobs used for updating the collection.
@@ -33,8 +35,10 @@ const setup = async (): Promise<void> => {
 		client.on(
 			'PM',
 			process.env.NODE_ENV !== 'production'
-				? (message: PrivateMessage) => {}
-				: async (message: PrivateMessage) => {
+				? (message: any) => {
+						console.info(message.message);
+				  }
+				: async (message: any) => {
 						if (message.self) return;
 						try {
 							await message.user.sendMessage(await commandProcessing(message.message));
