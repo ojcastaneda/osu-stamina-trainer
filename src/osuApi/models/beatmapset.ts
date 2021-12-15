@@ -1,48 +1,43 @@
 import Beatmap from './beatmap';
 
 /**
- * Class that represents the beatmapsets retrieved from the osu! API
+ * Class that represents the beatmapsets retrieved from the osu! API.
  */
 class Beatmapset {
 	/**
-	 * The beatmapset's id
-	 * @type number
+	 * The beatmapset's id.
 	 */
-	public id!: number;
+	public id: number;
 
 	/**
-	 * The beatmapset's song's name
-	 * @type string
+	 * The beatmapset's song's name.
 	 */
-	public title!: string;
+	public title: string;
 
 	/**
-	 * The beatmapset's date where it was ranked
-	 * @type {(Date| undefined)}
+	 * The beatmapset's date when it was ranked.
 	 */
-	public rankedDate!: Date | undefined;
+	public rankedDate?: Date;
 
 	/**
-	 * The beatmapset's ranked status
-	 * @type string
+	 * The beatmapset's ranked status.
 	 */
-	public ranked!: number;
+	public ranked: number;
 
 	/**
-	 * The beatmapset's number of favorites from users
-	 * @type number
+	 * The beatmapset's number of favorites.
 	 */
-	public favourites!: number;
+	public favourites: number;
 
 	/**
-	 * The beatmapset's beatmaps
-	 * @type {(Beatmap | undefined)}
+	 * The beatmapset's beatmaps.
 	 */
-	public beatmaps!: Beatmap[] | undefined;
+	public beatmaps?: Beatmap[];
 
 	/**
-	 * Creates an instance of a beatmapset based on the osu! API beatmapset model
-	 * @param json The json object which contains osu! API retrieved information for a specific beatmapset
+	 * Creates an instance of a beatmapset based on the osu! API beatmapset model.
+	 *
+	 * @param json - The json object which contains osu! API retrieved information for a specific beatmapset.
 	 */
 	constructor(json: any) {
 		this.id = json.id;

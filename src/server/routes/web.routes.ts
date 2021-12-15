@@ -1,5 +1,5 @@
-import { approveSubmission, createSubmission, deleteSubmission, retrieveFilteredSubmissionsByPage } from '../logic/web/submissions.logic';
-import { retrieveCollectionFile, retrieveFilteredBeatmapsByPage, updateBeatmapStatus } from '../logic/web/beatmaps.logic';
+import { approveSubmissionWeb, createSubmissionWeb, deleteSubmissionWeb, retrieveSubmissionsByPageWeb } from '../logic/web/submissions.logic';
+import { retrieveCollectionFileWeb, retrieveBeatmapsByPageWeb, updateBeatmapStatusWeb } from '../logic/web/beatmaps.logic';
 import { adminMiddleware, optionalAdminMiddleware, superAdminMiddleware } from './middleware';
 import { registerUser } from '../logic/web/authentication';
 import expressRateLimit from 'express-rate-limit';
@@ -7,26 +7,20 @@ import { Router } from 'express';
 
 const router = Router({ mergeParams: true });
 
-const downloadLimit = expressRateLimit({
-	windowMs: 15 * 60 * 1000,
-	max: 5,
-	message: 'Too many requests from this IP, please try again after 15 minutes'
-});
-
 router.post('/register', superAdminMiddleware, registerUser);
 
-router.get('/collection', downloadLimit, retrieveCollectionFile);
+router.post('/beatmaps/ByPage', optionalAdminMiddleware, retrieveBeatmapsByPageWeb);
 
-router.post('/beatmaps/ByPage', optionalAdminMiddleware, retrieveFilteredBeatmapsByPage);
+router.get('/collection', expressRateLimit({ windowMs: 900000, max: 5, message: 'Too many requests' }), retrieveCollectionFileWeb);
 
-router.put('/beatmaps/:id/status', adminMiddleware, updateBeatmapStatus);
+router.put('/beatmaps/:id/status', adminMiddleware, updateBeatmapStatusWeb);
 
-router.post('/submissions', createSubmission);
+router.post('/submissions', createSubmissionWeb);
 
-router.post('/submissions/byPage', adminMiddleware, retrieveFilteredSubmissionsByPage);
+router.post('/submissions/byPage', adminMiddleware, retrieveSubmissionsByPageWeb);
 
-router.put('/submissions/:id/approve', adminMiddleware, approveSubmission);
+router.put('/submissions/:id/approve', adminMiddleware, approveSubmissionWeb);
 
-router.delete('/submissions/:id', adminMiddleware, deleteSubmission);
+router.delete('/submissions/:id', adminMiddleware, deleteSubmissionWeb);
 
 export default router;

@@ -1,90 +1,78 @@
 import Beatmapset from './beatmapset';
 
 /**
- * Class that represents the beatmaps retrieved from the osu! API
+ * Class that represents the beatmaps retrieved from the osu! API.
  */
 class Beatmap {
 	/**
-	 * The beatmap's id
-	 * @type number
+	 * The beatmap's id.
 	 */
-	public id!: number;
+	public id: number;
 
 	/**
-	 * The beatmap's game mode
-	 * @type string
+	 * The beatmap's game mode.
 	 */
-	public mode!: string;
+	public mode: string;
 
 	/**
-	 * The beatmap's circle size
-	 * @type number
+	 * The beatmap's circle size.
 	 */
-	public ar!: number;
+	public ar: number;
 
 	/**
-	 * The beatmap's circle size
-	 * @type number
+	 * The beatmap's overall difficulty.
 	 */
-	public od!: number;
+	public od: number;
 
 	/**
-	 * The beatmap's circle size
-	 * @type number
+	 * The beatmap's approach rate.
 	 */
-	public cs!: number;
+	public cs: number;
 
 	/**
-	 * The beatmap's version of the beatmapset
-	 * @type string
+	 * The beatmap's version of the beatmapset.
 	 */
-	public version!: string;
+	public version: string;
 
 	/**
-	 * The beatmap's drain length measured in seconds
-	 * @type number
+	 * The beatmap's drain length measured in seconds.
 	 */
-	public length!: number;
+	public length: number;
 
 	/**
-	 * The beatmap's most frequent beats per minute
-	 * @type number
+	 * The beatmap's suggested beats per minute.
 	 */
-	public bpm!: number;
+	public bpm: number;
 
 	/**
-	 * The beatmap's hash identifier
-	 * @type string
+	 * The beatmap's hash identifier.
 	 */
-	public hash!: string;
+	public hash: string;
 
 	/**
-	 * The beatmap's ranked status
-	 * @type string
+	 * The beatmap's ranked status.
 	 */
-	public ranked!: number;
+	public ranked: number;
 
 	/**
-	 * The beatmap's last update's date
-	 * @type Date
+	 * The beatmap's date when it was last updated.
 	 */
-	public lastUpdated!: Date;
+	public lastUpdated: Date;
 
 	/**
-	 * The beatmap's difficulty
-	 * @type number
+	 * The beatmap's difficulty.
 	 */
-	public stars!: number;
+	public stars: number;
 
 	/**
-	 * The beatmap's beatmapset where it belongs to
-	 * @type {(number | undefined)}
+	 * The beatmap's beatmapset where it belongs to.
 	 */
-	public beatmapset!: Beatmapset;
+	public beatmapset?: Beatmapset;
 
 	/**
-	 * Creates an instance of a beatmap based on the osu! API beatmap model
-	 * @param json The json object which contains osu! API retrieved information for a specific beatmap
+	 * Creates an instance of a beatmap based on the osu! API beatmap model.
+	 *
+	 * @param json - The json object which contains osu! API retrieved information for a specific beatmap.
 	 */
 	constructor(json: any) {
 		this.id = json.id;

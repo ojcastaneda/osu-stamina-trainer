@@ -1,5 +1,6 @@
 import dotenv from 'dotenv';
 dotenv.config({ path: './.env.development' });
+import Database from '../../src/server/models/database';
 import commandProcessing from '../../src/bot/commands';
 import dictionary from '../../src/bot/dictionary';
 
@@ -10,6 +11,8 @@ const possibleErrors = [
 	dictionary.noBeatmapsFound,
 	dictionary.serverNotAvailable
 ];
+
+afterAll(Database.$pool.end);
 
 test('Recognizes request command', async () => {
 	expect(possibleErrors.includes(await commandProcessing('!request 180'))).toBe(false);

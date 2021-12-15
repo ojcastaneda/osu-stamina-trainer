@@ -1,3 +1,6 @@
+/**
+ * The possible message responses for the bot.
+ */
 const dictionary = {
 	commandIncorrectParams: `Your provided parameters for this command are incorrect or not allowed, [${process.env.WIKI_URL} check out the wiki to learn more]`,
 	internalBotError: `The bot failed unexpectedly, please report this error via [${process.env.DISCORD_URL} Discord]`,

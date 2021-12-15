@@ -1,54 +1,69 @@
 import { NextFunction, Request, Response } from 'express';
 import { verify } from 'jsonwebtoken';
 
+/**
+ * Middleware for access restriction to non super administrator users.
+ * 
+ * @param request - The express request.
+ * @param response - The express response.
+ * @param next - The express next function.
+ */
 const superAdminMiddleware = async (request: Request, response: Response, next: NextFunction) => {
 	try {
-		let token = request.headers['authorization'];
-		token = token!.slice(7, token!.length);
-		const decoded = verify(token, process.env.SECRET_KEY!) as {
-			id: number;
-			role: string;
-		};
-		if (decoded) {
-			if (decoded.role! === 'bot' || decoded.role === 'super_admin') return next();
-			return response.status(403).send('User not authorized');
-		}
+		if (extractTokenRole(request) !== 'super_admin') return response.status(403).send('User not authorized');
+		next();
 	} catch (error) {
 		return response.status(403).send('User not authorized');
 	}
 };
 
+/**
+ * Middleware for access restriction to non administrator users.
+ * 
+ * @param request - The express request.
+ * @param response - The express response.
+ * @param next - The express next function.
+ */
 const adminMiddleware = async (request: Request, response: Response, next: NextFunction) => {
 	try {
-		let token = request.headers['authorization'];
-		if (token) {
-			if (token.startsWith('Bearer ')) {
-				token = token.slice(7, token.length);
-				const decoded = verify(token, process.env.SECRET_KEY!);
-				if (decoded) return next();
-				return response.status(403).send('User not authorized');
-			}
-		}
-		return response.status(403).send('No authentication token provided');
+		if (extractTokenRole(request) === undefined) return response.status(403).send('User not authorized');
+		next();
 	} catch (error) {
 		return response.status(403).send('User not authorized');
 	}
 };
 
+/**
+ * Middleware for indicating whether or not an user is an administrator.
+ * 
+ * @param request - The express request.
+ * @param response - The express response.
+ * @param next - The express next function.
+ */
 const optionalAdminMiddleware = async (request: Request, response: Response, next: NextFunction) => {
 	try {
-		request.body.is_admin = false;
-		let token = request.headers['authorization'];
-		if (token)
-			if (token.startsWith('Bearer ')) {
-				token = token.slice(7, token.length);
-				const decoded = verify(token, process.env.SECRET_KEY!);
-				if (decoded) request.body.is_admin = true;
-			}
+		if (extractTokenRole(request) !== undefined) request.body.is_admin = true;
 		next();
 	} catch (error) {
 		next();
 	}
+};
+
+/**
+ * Extracts the role of the user that sent the request.
+ * 
+ * @param request - The express request.
+ * @returns A role associated with the request or undefined if not found.
+ */
+const extractTokenRole = (request: Request): string | undefined => {
+	try {
+		let token = request.headers['authorization'];
+		if (!token || !token.startsWith('Bearer ')) return;
+		token = token.slice(7, token.length);
+		const decoded = verify(token, process.env.SECRET_KEY!) as { id: number; role: string };
+		if (!decoded || decoded.role !== 'super_admin') return;
+		return decoded.role;
+	} catch (error) {}
 };
 
 export { superAdminMiddleware, adminMiddleware, optionalAdminMiddleware };

@@ -1,11 +1,15 @@
 import dictionary from './dictionary';
 import request from './request';
 
-const prefix = '!';
-
-const commandProcessing = async (message: string) => {
+/**
+ * Generates a response message based on the provided command.
+ *
+ * @param message - The command provided.
+ * @returns A promise of the response message.
+ */
+const commandProcessing = async (message: string): Promise<string> => {
 	message = message.toLowerCase();
-	if (message.charAt(0) === prefix) {
+	if (message.charAt(0) === '!') {
 		message = message.substring(1);
 		const params = message.split(' ');
 		const command = params.shift();

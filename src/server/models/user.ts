@@ -1,86 +1,82 @@
+import { generateUpdateQuery } from './filter';
 import Database from './database';
-import Filter from './filter';
 
 /**
- * Class that represents the users of the app
+ * Interface that represents the users of the app
  */
-class User {
+interface User {
 	/**
-	 * The user's ID
+	 * The user's ID.
 	 */
-	public id?: number;
+	id?: number;
 
 	/**
-	 * The user's username
+	 * The user's username.
 	 */
-	public username?: string;
+	username?: string;
 
 	/**
-	 * The user's password
+	 * The user's password.
 	 */
-	public password?: string;
+	password?: string;
 
 	/**
-	 * The user's role ('super_admin', 'bot', 'admin' and 'guest')
+	 * The user's role ('super_admin' or 'admin').
 	 */
-	public role?: string;
-
-	/**
-	 * Creates an user in the database based on an user instance
-	 *
-	 * @param user - The user instance with all the values expected by the database
-	 * @returns An empty promise
-	 */
-	public static createUser = async (user: User): Promise<void> => {
-		const { username, password, role } = user;
-		await Database.client.none(`INSERT INTO table_users (username, password, role) VALUES ($1, $2, $3)`, [username, password, role]);
-	};
-
-	/**
-	 * Retrieves an user from the database composed by the specified properties that matches the provided ID
-	 *
-	 * @param id - The ID of the user requested
-	 * @param properties - The properties that are expected to be part of the returned user
-	 * @returns A promise of the requested user or undefined if not found
-	 */
-	public static retrieveUser = async (id: number, properties: string[] = ['id']): Promise<User | undefined> => {
-		const user = await Database.client.oneOrNone<User>(`SELECT ${properties} FROM table_users WHERE id = $1 LIMIT 1`, [id]);
-		return user !== null ? user : undefined;
-	};
-
-	/**
-	 * Retrieves an user from the database composed by the specified properties that matches the provided username
-	 *
-	 * @param username - The username of the user requested
-	 * @param properties - The properties that are expected to be part of the returned user
-	 * @returns A promise of the requested user or undefined if not found
-	 */
-	public static retrieveUserByUsername = async (username: string, properties: string[] = ['id']): Promise<User | undefined> => {
-		const user = await Database.client.oneOrNone<User>(`SELECT ${properties} FROM table_users WHERE username ILIKE $1 LIMIT 1`, [username]);
-		return user !== null ? user : undefined;
-	};
-
-	/**
-	 * Updates the properties present in the user in the database
-	 *
-	 * @param user - The user's properties that will be updated except for the ID, which is required but not updated
-	 * @returns A promise of the number of updated users
-	 */
-	public static updateUser = async (user: User): Promise<number> => {
-		const [query, values] = Filter.generateUpdateQuery('table_users', user);
-		if (!query) return 0;
-		const result = await Database.client.result(query, values);
-		return result.rowCount;
-	};
-
-	/**
-	 * Deletes an user from the database with a specified ID
-	 *
-	 * @param id - The ID of the user that will be removed
-	 * @returns A promise of the number of deleted users
-	 */
-	public static deleteUser = async (id: number): Promise<number> =>
-		Database.client.result(`DELETE FROM table_users WHERE id = $1`, [id], result => result.rowCount);
+	role?: string;
 }
 
+/**
+ * Creates an user in the database based on an user instance.
+ *
+ * @param user - The user instance with all the values expected by the database.
+ */
+const createUser = async (user: User): Promise<null> =>
+	Database.none(`INSERT INTO table_users (username, password, role) VALUES ($1, $2, $3)`, [user.username, user.password, user.role]);
+
+/**
+ * Retrieves an user from the database composed by the provided properties that matches the provided ID.
+ *
+ * @param id - The ID of the user requested.
+ * @param properties - The properties that are expected to be part of the returned user.
+ * @returns A promise of the requested user or undefined if not found.
+ */
+const retrieveUser = async (id: number, properties: string[] = ['id']): Promise<User | undefined> => {
+	const user = await Database.oneOrNone<User>(`SELECT ${properties} FROM table_users WHERE id = $1 LIMIT 1`, [id]);
+	return user !== null ? user : undefined;
+};
+
+/**
+ * Retrieves an user from the database composed by the provided properties that matches the provided username.
+ *
+ * @param username - The username of the user requested.
+ * @param properties - The properties that are expected to be part of the returned user.
+ * @returns A promise of the requested user or undefined if not found.
+ */
+const retrieveUserByUsername = async (username: string, properties: string[] = ['id']): Promise<User | undefined> => {
+	const user = await Database.oneOrNone<User>(`SELECT ${properties} FROM table_users WHERE username ILIKE $1 LIMIT 1`, [username]);
+	return user !== null ? user : undefined;
+};
+
+/**
+ * Updates the properties present in the user in the database.
+ *
+ * @param user - The user's properties that will be updated except for the ID, which is required but not updated.
+ * @returns A promise of whether or not the user was updated.
+ */
+const updateUser = async (user: User): Promise<boolean> => {
+	const [query, values] = generateUpdateQuery('table_users', user);
+	if (!query) return false;
+	return (await Database.result(query, values)).rowCount > 0;
+};
+
+/**
+ * Deletes an user from the database with a provided ID.
+ *
+ * @param id - The ID of the user that will be removed.
+ * @returns A promise of whether or not the user was deleted.
+ */
+const deleteUser = async (id: number): Promise<boolean> => (await Database.result(`DELETE FROM table_users WHERE id = $1`, [id])).rowCount > 0;
+
 export default User;
+export { createUser, retrieveUser, retrieveUserByUsername, updateUser, deleteUser };
