@@ -200,7 +200,7 @@ const retrieveBeatmapRequest = async (isDoubleTime: boolean = false, filters: Fi
 	const tableName: string = isDoubleTime ? 'table_double_time_beatmaps' : 'table_beatmaps';
 	const beatmap = await Database.oneOrNone<Beatmap>(
 		`UPDATE ${tableName} SET last_requested = now() WHERE id = (SELECT id FROM ${tableName} ${conditionQuery} ORDER BY last_requested ASC LIMIT 1) 
-			RETURNING id, bpm, length, average, ar, od, od, cs, stars, density, name, ranked_status`,
+			RETURNING id, bpm, length, average, ar, od, od, cs, stars, density, name, ranked_status, last_updated`,
 		values
 	);
 	return beatmap !== null ? beatmap : undefined;

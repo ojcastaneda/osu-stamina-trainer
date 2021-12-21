@@ -1,12 +1,11 @@
 import { requestBeatmap } from '../server/logic/bot/beatmaps.logic';
 import Beatmap from '../server/models/beatmap';
 import Filter from '../server/models/filter';
-import dictionary from './dictionary';
 
 /**
- * The default ranges of the numeric filters.
+ * The default ranges and limits of the numeric filters.
  */
-const ranges = { ar: 0.5, average: 2, bpm: 5, cs: 0.5, density: 0.1, length: 5, od: 0.5, stars: 0.5, year: 0 };
+import filtersProperties from './filtersProperties.json';
 
 /**
  * Transforms an array of raw filters into a response message. If not, return an error message.
@@ -14,53 +13,36 @@ const ranges = { ar: 0.5, average: 2, bpm: 5, cs: 0.5, density: 0.1, length: 5, 
  * @param rawFilters - The array of raw filters to transform.
  * @returns A promise of the response or error message.
  */
-const request = async (rawFilters: string[]): Promise<string> => {
+const request = async (rawFilters: string[]): Promise<{ beatmap: Beatmap | undefined; isDoubleTime: boolean } | string> => {
 	rawFilters = rawFilters.filter(rawFilters => rawFilters != undefined);
-	if (rawFilters.length < 1) return dictionary.commandIncorrectParams;
+	if (rawFilters.length < 1) return '!r 180';
+	const guessedCommand: string[] = [];
+	const filters: Filter[] = [];
+	let incorrectFilters = false;
 	let isDoubleTime;
-	if (rawFilters[0][0] === '<' || rawFilters[0][0] === '>') rawFilters[0] = `bpm${rawFilters[0]}`;
-	else rawFilters[0] = `bpm=${rawFilters[0]}`;
-	const bpm = processRawFilter(rawFilters.shift()!);
-	if (bpm.includes(undefined)) return dictionary.commandIncorrectParams;
-	let filters = bpm;
+	const rawBpm = rawFilters.shift();
+	const bpm = rawBpm![0] === '<' || rawBpm![0] === '>' ? `bpm${rawBpm!}` : `bpm=${rawBpm!}`;
+	processRawFilter(bpm, true).forEach(parameter => {
+		if (typeof parameter !== 'string') return filters.push(parameter);
+		guessedCommand.push(parameter);
+		incorrectFilters = true;
+	});
+	if (!incorrectFilters) guessedCommand.push(rawBpm!);
 	for (const rawFilter of rawFilters) {
-		switch (rawFilter) {
-			case 'nomod':
-				isDoubleTime = false;
-				break;
-			case 'dt':
-				isDoubleTime = true;
-				break;
-			default:
-				const processedParameter = processRawFilter(rawFilter);
-				if (!processedParameter.includes(undefined)) filters = filters.concat(processedParameter);
-				else return dictionary.commandIncorrectParams;
-				break;
-		}
+		const processedParameter = processRawFilter(rawFilter);
+		let incorrectFilter = false;
+		processedParameter.forEach(parameter => {
+			if (typeof parameter !== 'string') {
+				if (parameter.filterProperty !== 'modification') return filters.push(parameter);
+				return isDoubleTime = parameter.value;
+			}
+			guessedCommand.push(parameter);
+			incorrectFilter = true;
+		});
+		if (!incorrectFilter) guessedCommand.push(rawFilter);
+		else incorrectFilters = true;
 	}
-	return makeResponse(await requestBeatmap(isDoubleTime, filters));
-};
-
-/**
- * Formats a response message based off of a beatmap and based on the modification used for the beatmap statistics.
- *
- * @param request - The request containing the beatmap and the modification used for the beatmap statistics.
- * @returns A string of the formatted response message.
- */
-const makeResponse = (request: { beatmap: Beatmap | undefined; isDoubleTime: boolean }): string => {
-	const { beatmap, isDoubleTime } = request;
-	if (beatmap === undefined) return dictionary.noBeatmapsFound;
-	let seconds: any = beatmap.length! % 60;
-	if (seconds < 10) seconds = `0${seconds}`;
-	const additionalMods = isDoubleTime ? ' +DT |' : '';
-	const type = beatmap.average! < 9 ? 'bursts' : beatmap.average! < 25 ? 'streams' : 'deathstreams';
-	const response =
-		`${additionalMods} BPM: ${beatmap.bpm} | Type: ${type} | Average stream length: ${beatmap.average} | Density: ${beatmap.density} | ` +
-		`${beatmap.stars} ★ | AR: ${beatmap.ar} | OD: ${beatmap.od} | CS: ${beatmap.cs} | Status: ${beatmap.ranked_status} | ` +
-		`Length: ${Math.floor(beatmap.length! / 60)}:${seconds}`;
-	const date = new Date();
-	if (date.getUTCDate() === 27 && date.getUTCMonth() === 6) return `[https://osu.ppy.sh/b/${beatmap.id} Blue Zenith [FOUR DIMENSIONS]] ${response}`;
-	return `[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.name}] ${response}`;
+	return incorrectFilters ? `${guessedCommand.join(' ')}` : await requestBeatmap(isDoubleTime, filters);
 };
 
 /**
@@ -69,91 +51,172 @@ const makeResponse = (request: { beatmap: Beatmap | undefined; isDoubleTime: boo
  * @param rawFilter - The raw filter.
  * @returns An array with the generated filter objects or undefined.
  */
-const processRawFilter = (rawFilter: string): any[] => {
+const processRawFilter = (rawFilter: string, isBpm: boolean = false): any[] => {
 	if (rawFilter.indexOf('=') > 0) {
-		let index = rawFilter.indexOf('=');
-		const name = rawFilter.slice(0, index);
-		let parameter: any = rawFilter.slice(index + 1);
-		index = parameter.indexOf('-');
-		if (index < 0) {
+		let splitIndex = rawFilter.indexOf('=');
+		const name = rawFilter.slice(0, splitIndex);
+		//@ts-ignore
+		if (filtersProperties[name] === undefined) return processNonNumericFilter(rawFilter, isBpm);
+		const values = rawFilter.slice(splitIndex + 1);
+		splitIndex = values.indexOf('-');
+		if (splitIndex < 0) {
+			const value = processRawNumericFilter(values, name, true);
+			if (typeof value === 'string') return isBpm ? [`${value}`] : [`${name}=${value}`];
 			// @ts-ignore
-			parameter = [Number(parameter) - ranges[name], Number(parameter) + ranges[name]];
-			return processRawNumericFilter(name, parameter[0], 'minimum').concat(processRawNumericFilter(name, parameter[1], 'maximum'));
-		} else if (index === parameter.length - 1) {
-			return processRawNumericFilter(name, parameter, 'exact');
+			return processNumericFilter(name, value - filtersProperties[name].range, 'minimum').concat(
+				// @ts-ignore
+				processNumericFilter(name, value + filtersProperties[name].range, 'maximum')
+			);
+		} else if (splitIndex === values.length - 1) {
+			const value = processRawNumericFilter(values.slice(0, -1), name, true);
+			if (typeof value === 'string') return isBpm ? [`${value}-`] : [`${name}=${value}-`];
+			return processNumericFilter(name, value, 'exact');
 		} else {
-			parameter = parameter.split('-');
-			return processRawNumericFilter(name, parameter[0], 'minimum').concat(processRawNumericFilter(name, parameter[1], 'maximum'));
+			const ranges = values.split('-');
+			const minimum = processRawNumericFilter(ranges[0], name, true);
+			const maximum = processRawNumericFilter(ranges[1], name, true);
+			if (typeof minimum === 'string' || typeof maximum === 'string')
+				return isBpm ? [`${minimum}-${maximum}`] : [`${name}=${minimum}-${maximum}`];
+			return processNumericFilter(name, minimum, 'minimum').concat(processNumericFilter(name, maximum, 'maximum'));
 		}
 	} else if (rawFilter.indexOf('<') > 0) {
-		const index = rawFilter.indexOf('<');
-		const numericFilter = processRawNumericFilter(rawFilter.slice(0, index), rawFilter.slice(index + 1), 'maximum');
-		return numericFilter;
+		const splitIndex = rawFilter.indexOf('<');
+		const name = rawFilter.slice(0, splitIndex);
+		//@ts-ignore
+		if (filtersProperties[name] === undefined) return processNonNumericFilter(rawFilter, isBpm);
+		const value = processRawNumericFilter(rawFilter.slice(splitIndex + 1), name, true);
+		if (typeof value === 'string') return isBpm ? [`<${value}`] : [`${name}<${value}`];
+		return processNumericFilter(name, value, 'maximum');
 	} else if (rawFilter.indexOf('>') > 0) {
-		const index = rawFilter.indexOf('>');
-		const numericFilter = processRawNumericFilter(rawFilter.slice(0, index), rawFilter.slice(index + 1), 'minimum');
-		return numericFilter;
-	} else return processRawNonNumericFilter(rawFilter);
+		const splitIndex = rawFilter.indexOf('>');
+		const name = rawFilter.slice(0, splitIndex);
+		//@ts-ignore
+		if (filtersProperties[name] === undefined) return processNonNumericFilter(rawFilter, isBpm);
+		const value = processRawNumericFilter(rawFilter.slice(splitIndex + 1), name, true);
+		if (typeof value === 'string') return isBpm ? [`>${value}`] : [`${name}>${value}`];
+		return processNumericFilter(name, value, 'minimum');
+	}
+	return processNonNumericFilter(rawFilter, isBpm);
 };
 
 /**
- * Transforms a raw numeric filter into an array of filter objects if the raw filter is well formed. If not, returns an array containing undefined.
+ * Transforms a numeric filter into an array of filter objects if the filter is well formed. If not, returns an array containing undefined.
  *
- * @param name - The name of the raw numeric filter target property.
- * @param value - The value of the raw numeric filter.
- * @param format - The type of the raw numeric filter to generate with the raw filter's value ('exact', 'minimum' or 'maximum').
+ * @param name - The name of the numeric filter target property.
+ * @param value - The value of the numeric filter.
+ * @param format - The type of the numeric filter to generate with the filter's value ('exact', 'minimum' or 'maximum').
  * @returns An array with the generated filter objects or undefined.
  */
-const processRawNumericFilter = (name: string, value: string, format: string): any[] => {
-	if (!ranges.hasOwnProperty(name)) return [undefined];
+const processNumericFilter = (name: string, value: number, format: string): Filter[] => {
 	switch (format) {
 		case 'exact':
-			const exactNumber = Number(value.slice(0, -1));
-			if (isNaN(exactNumber) || exactNumber < 0 || exactNumber > Number.MAX_SAFE_INTEGER) return [undefined];
 			if (name === 'year')
-				return [
-					new Filter('last_updated', 'minimum', `${exactNumber}-01-01`),
-					new Filter('last_updated', 'maximum', `${exactNumber + 1}-01-01`)
-				];
-			return [new Filter(name, 'exact', exactNumber)];
+				return [new Filter('last_updated', 'minimum', `${value}-01-01`), new Filter('last_updated', 'maximum', `${value + 1}-01-01`)];
+			return [new Filter(name, 'exact', value)];
 		case 'minimum':
-			const minimumNumber = Number(value);
-			if (isNaN(minimumNumber) || minimumNumber < 0 || minimumNumber > Number.MAX_SAFE_INTEGER) return [undefined];
-			if (name === 'year') return [new Filter('last_updated', 'minimum', `${minimumNumber}-01-01`)];
-			return [new Filter(name, 'minimum', minimumNumber)];
+			if (name === 'year') return [new Filter('last_updated', 'minimum', `${value}-01-01`)];
+			return [new Filter(name, 'minimum', value)];
 		case 'maximum':
-			const maximumNumber = Number(value);
-			if (isNaN(maximumNumber) || maximumNumber < 0 || maximumNumber > Number.MAX_SAFE_INTEGER) return [undefined];
-			if (name === 'year') return [new Filter('last_updated', 'maximum', `${maximumNumber + 1}-01-01`)];
-			return [new Filter(name, 'maximum', maximumNumber)];
+			if (name === 'year') return [new Filter('last_updated', 'maximum', `${value + 1}-01-01`)];
+			return [new Filter(name, 'maximum', value)];
 		default:
-			return [undefined];
+			return [];
 	}
 };
 
+const processRawNumericFilter = (rawNumber: string | number, propertyName: string, useDefaultRange: boolean = false): number | string => {
+	if (typeof rawNumber === 'number') return rawNumber;
+	// @ts-ignore
+	const filterProperties = filtersProperties[propertyName];
+	let number = Number(rawNumber);
+	let parsingError = false;
+	if (isNaN(number)) {
+		number = parseFloat(rawNumber);
+		if (isNaN(number)) return `${filterProperties.default}`;
+		parsingError = true;
+	}
+	if (number + (useDefaultRange ? filterProperties.range : 0) < filterProperties.minimum) return `${filterProperties.minimum}`;
+	if (filterProperties.maximum !== undefined && number - (useDefaultRange ? filterProperties.range : 0) > filterProperties.maximum)
+		return `${filterProperties.maximum}`;
+	else if (number > Number.MAX_SAFE_INTEGER) return `${Number.MAX_SAFE_INTEGER}`;
+	return parsingError ? `${number}` : number;
+};
+
 /**
- * Transforms a raw non numeric filter into an array of filter objects if the raw filter is well formed. If not, return an array containing undefined.
+ * Transforms a non numeric filter into an array of filter objects if the filter is well formed. If not, return an array containing undefined.
  *
- * @param rawFilter - The raw non numeric filter.
+ * @param filter - The non numeric filter.
  * @returns An array with the generated filter objects or undefined.
  */
-const processRawNonNumericFilter = (rawFilter: string): any[] => {
-	if (!rawFilter) return [undefined];
-	switch (rawFilter[0]) {
+const processNonNumericFilter = (filter: string, isBpm: boolean): any[] => {
+	if (isBpm) return ['180'];
+	if (!filter) return [''];
+	switch (filter[0]) {
 		case 'b':
-			return [new Filter('average', 'maximum', 8)];
+			switch (filter) {
+				case 'b':
+					return [new Filter('average', 'maximum', 8)];
+				case 'bursts':
+					return [new Filter('average', 'maximum', 8)];
+				default:
+					return ['bursts'];
+			}
 		case 's':
-			return [new Filter('average', 'maximum', 24), new Filter('average', 'minimum', 9)];
+			switch (filter) {
+				case 's':
+					return [new Filter('average', 'maximum', 24), new Filter('average', 'minimum', 9)];
+				case 'streams':
+					return [new Filter('average', 'maximum', 24), new Filter('average', 'minimum', 9)];
+				default:
+					return ['streams'];
+			}
 		case 'd':
-			return [new Filter('average', 'minimum', 25)];
+			switch (filter) {
+				case 'd':
+					return [new Filter('average', 'minimum', 25)];
+				case 'dt':
+					return [new Filter('modification', '', true)];
+				case 'deathstreams':
+					return [new Filter('average', 'minimum', 25)];
+				default:
+					return ['deathstreams'];
+			}
 		case 'r':
-			return [new Filter('ranked_status', 'exact', 'ranked')];
+			switch (filter) {
+				case 'r':
+					return [new Filter('ranked_status', 'exact', 'ranked')];
+				case 'ranked':
+					return [new Filter('ranked_status', 'exact', 'ranked')];
+				default:
+					return ['ranked'];
+			}
 		case 'u':
-			return [new Filter('ranked_status', 'exact', 'unranked')];
+			switch (filter) {
+				case 'u':
+					return [new Filter('ranked_status', 'exact', 'unranked')];
+				case 'unranked':
+					return [new Filter('ranked_status', 'exact', 'unranked')];
+				default:
+					return ['unranked'];
+			}
 		case 'l':
-			return [new Filter('ranked_status', 'exact', 'loved')];
+			switch (filter) {
+				case 'l':
+					return [new Filter('ranked_status', 'exact', 'loved')];
+				case 'loved':
+					return [new Filter('ranked_status', 'exact', 'loved')];
+				default:
+					return ['loved'];
+			}
+		case 'n':
+			switch (filter) {
+				case 'nomod':
+					return [new Filter('modification', '', false)];
+				default:
+					return ['nomod'];
+			}
 		default:
-			return [undefined];
+			return [''];
 	}
 };
 

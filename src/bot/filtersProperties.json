@@ -1,0 +1,51 @@
+{
+	"ar": {
+		"default": 9,
+		"minimum": 0,
+		"maximum": 11,
+		"range": 0.5
+	},
+	"average": {
+		"default": 16,
+		"minimum": 3,
+		"range": 2
+	},
+	"bpm": {
+		"default": 180,
+		"minimum": 130,
+		"range": 5
+	},
+	"cs": {
+		"default": 4,
+		"minimum": 0,
+		"maximum": 12,
+		"range": 0.5
+	},
+	"density": {
+		"default": 0.5,
+		"minimum": 0.3,
+		"maximum": 1,
+		"range": 0.1
+	},
+	"length": {
+		"default": 90,
+		"minimum": 1,
+		"range": 5
+	},
+	"od": {
+		"default": 9,
+		"minimum": 0,
+		"maximum": 11.1,
+		"range": 0.5
+	},
+	"stars": {
+		"default": 6,
+		"minimum": 3,
+		"range": 0.5
+	},
+	"year": {
+		"default": 2018,
+		"minimum": 2007,
+		"range": 0
+	}
+}

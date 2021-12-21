@@ -3,10 +3,9 @@ if (process.env.NODE_ENV !== 'production') dotenv.config({ path: './.env.develop
 else dotenv.config();
 import { approveSubmissions, checkSubmissionsLastUpdate } from './server/logic/collection/tasks/submissionsTasks';
 import { updateFavorites } from './server/logic/collection/tasks/beatmapsTaks';
-
 import OsuService from './osuApi/osuApiService';
 import commandProcessing from './bot/commands';
-import dictionary from './bot/dictionary';
+import { internalBotError } from './bot/dictionary';
 import serverSetup from './server/app';
 import cron from 'node-cron';
 import PQueue from 'p-queue';
@@ -36,14 +35,17 @@ const setup = async (): Promise<void> => {
 			'PM',
 			process.env.NODE_ENV !== 'production'
 				? (message: any) => {
-						console.info(message.message);
+						if (message.self) return;
+						commandProcessing(message.message)
+							.then(response => console.info(response))
+							.catch(error => console.error(error));
 				  }
 				: async (message: any) => {
 						if (message.self) return;
 						try {
 							await message.user.sendMessage(await commandProcessing(message.message));
 						} catch (error) {
-							await message.user.sendMessage(dictionary.internalBotError);
+							await message.user.sendMessage(internalBotError);
 						}
 				  }
 		);
