@@ -3,14 +3,15 @@ dotenv.config({ path: './.env.development' });
 import Database from '../../src/server/models/database';
 import commandProcessing from '../../src/bot/commands';
 import request from '../../src/bot/request';
-import { help, submit, noBeatmapsFound, incorrectFilters, commandNotFound, internalBotError } from '../../src/bot/dictionary';
+import { help, submit, noBeatmapsFound, incorrectFilters, commandNotFound, internalBotError,  } from '../../src/bot/dictionary';
 import filtersProperties from '../../src/bot/filtersProperties.json';
 
 afterAll(Database.$pool.end);
 
 test('Recognizes request command', async () => {
 	const possibleErrors = [noBeatmapsFound, incorrectFilters('!request 180'), commandNotFound, internalBotError];
-	expect(possibleErrors.includes(await commandProcessing('!request 180'))).toBe(false);
+	expect(possibleErrors.includes(await commandProcessing('!request 180'))).toBe(false);	
+	expect(await commandProcessing('!request 180a')).toBe(`The provided filters are incorrect or not allowed, try using: "!request 180"`);
 	expect(await commandProcessing('!request 1800 nomod')).toBe(noBeatmapsFound);
 });
 

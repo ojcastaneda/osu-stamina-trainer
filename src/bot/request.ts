@@ -15,7 +15,7 @@ import filtersProperties from './filtersProperties.json';
  */
 const request = async (rawFilters: string[]): Promise<{ beatmap: Beatmap | undefined; isDoubleTime: boolean } | string> => {
 	rawFilters = rawFilters.filter(rawFilters => rawFilters != undefined);
-	if (rawFilters.length < 1) return '!r 180';
+	if (rawFilters.length < 1) return '180';
 	const guessedCommand: string[] = [];
 	const filters: Filter[] = [];
 	let incorrectFilters = false;
