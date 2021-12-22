@@ -3,7 +3,7 @@ import Beatmap from '../server/models/beatmap';
 import Filter from '../server/models/filter';
 
 /**
- * The default ranges and limits of the numeric filters.
+ * The default values, ranges and limits of the numeric filters.
  */
 import filtersProperties from './filtersProperties.json';
 
@@ -68,8 +68,8 @@ const processRawFilter = (rawFilter: string, isBpm: boolean = false): any[] => {
 			const value = processRawNumericFilter(values, name, true);
 			if (!isCorrect || typeof value === 'string') return isBpm ? [`${value}`] : [`${name}=${value}`];
 			// @ts-ignore
-			const defaultRange = filtersProperties[name].range;
-			return processNumericFilter(name, value - defaultRange, 'minimum').concat(processNumericFilter(name, value + defaultRange, 'maximum'));
+			const { range } = filtersProperties[name];
+			return processNumericFilter(name, value - range, 'minimum').concat(processNumericFilter(name, value + range, 'maximum'));
 		} else if (splitIndex === values.length - 1) {
 			const value = processRawNumericFilter(values.slice(0, -1), name, true);
 			if (!isCorrect || typeof value === 'string') return isBpm ? [`${value}-`] : [`${name}=${value}-`];
@@ -103,7 +103,7 @@ const processRawFilter = (rawFilter: string, isBpm: boolean = false): any[] => {
 /**
  * Transforms a numeric filter into an array of filter objects.
  *
- * @param name - The name of the numeric filter target property.
+ * @param name - The name of the numeric filter's target property.
  * @param value - The value of the numeric filter.
  * @param format - The type of the numeric filter to generate with the filter's value ('exact', 'minimum' or 'maximum').
  * @returns An array with the generated filter objects.
@@ -126,10 +126,11 @@ const processNumericFilter = (name: string, value: number, format: string): Filt
 };
 
 /**
- * 
- * 
- * @param name 
- * @returns 
+ * Checks if the name for the numeric filter's target property is correct and guesses the correct name if the name is incorrect.
+ *
+ * @param name - The property name of the numeric filter's target property.
+ * @returns An array with a boolean indicating if the name is correct in the first position
+ * and an string with the guessed correct name in the second position.
  */
 const checkNumericFilterProperty = (name: string): [boolean, string] => {
 	switch (name[0]) {
@@ -154,20 +155,27 @@ const checkNumericFilterProperty = (name: string): [boolean, string] => {
 	}
 };
 
-const processRawNumericFilter = (rawNumber: string | number, propertyName: string, useDefaultRange: boolean = false): number | string => {
+/**
+ * Transforms a number from a numeric filter value into its corresponding number representation or an string of the guessed correct number.
+ *
+ * @param rawNumber - The number from the numeric filter value.
+ * @param name - The property name of the numeric filter's target property.
+ * @param useDefaultRange - The indicator of wether or not to use to take into account the default ranges for the filter.
+ * @returns A number representing the raw number or an string of the guessed correct number.
+ */
+const processRawNumericFilter = (rawNumber: string | number, name: string, useDefaultRange: boolean = false): number | string => {
 	if (typeof rawNumber === 'number') return rawNumber;
 	// @ts-ignore
-	const filterProperties = filtersProperties[propertyName];
+	const { defaultValue, range, minimum, maximum } = filtersProperties[name];
 	let number = Number(rawNumber);
 	let parsingError = false;
 	if (isNaN(number)) {
 		number = parseFloat(rawNumber);
-		if (isNaN(number)) return `${filterProperties.default}`;
+		if (isNaN(number)) return `${defaultValue}`;
 		parsingError = true;
 	}
-	if (number + (useDefaultRange ? filterProperties.range : 0) < filterProperties.minimum) return `${filterProperties.minimum}`;
-	if (filterProperties.maximum !== undefined && number - (useDefaultRange ? filterProperties.range : 0) > filterProperties.maximum)
-		return `${filterProperties.maximum}`;
+	if (number + (useDefaultRange ? range : 0) < minimum) return `${minimum}`;
+	if (maximum !== undefined && number - (useDefaultRange ? range : 0) > maximum) return `${maximum}`;
 	else if (number > Number.MAX_SAFE_INTEGER) return `${Number.MAX_SAFE_INTEGER}`;
 	return parsingError ? `${number}` : number;
 };
