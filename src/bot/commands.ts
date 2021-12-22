@@ -1,5 +1,5 @@
 import Beatmap from '../server/models/beatmap';
-import { submit, help, commandNotFound, noBeatmapsFound, incorrectFilters } from './dictionary';
+import { submit, help, commandNotFound, noBeatmapsFound, incorrectFilters, didYouMean } from './dictionary';
 import request from './request';
 
 /**
@@ -11,15 +11,17 @@ import request from './request';
 const commandProcessing = async (message: string): Promise<string> => {
 	const params = message.toLowerCase().split(' ');
 	const command = params.shift();
-	switch (command) {
-		case '!request':
-			return makeResponse(command, await request(params));
-		case '!r':
-			return makeResponse(command, await request(params));
-		case '!submit':
-			return submit;
-		case '!help':
-			return help;
+	if (command === undefined) return commandNotFound;
+	if (command[0] !== '!') return commandNotFound;
+	switch (command[1]) {
+		case 'r':
+			return command === '!r' || command === '!request'
+				? makeResponse(command, await request(params))
+				: didYouMean(`!request ${params.join(' ')}`);
+		case 's':
+			return command === '!submit' ? submit : didYouMean('!submit');
+		case 'h':
+			return command === '!help' ? help : didYouMean('!help');
 		default:
 			return commandNotFound;
 	}

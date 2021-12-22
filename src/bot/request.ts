@@ -48,7 +48,7 @@ const request = async (rawFilters: string[]): Promise<{ beatmap: Beatmap | undef
 		if (!incorrectFilter) guessedCommand.push(rawFilter);
 		else incorrectFilters = true;
 	}
-	return incorrectFilters ? `${guessedCommand.join(' ')}` : await requestBeatmap(isDoubleTime, filters);
+	return incorrectFilters ? `${guessedCommand.filter(filter => filter != undefined).join(' ')}` : await requestBeatmap(isDoubleTime, filters);
 };
 
 /**
@@ -204,6 +204,18 @@ const processNonNumericFilter = (filter: string, isBpm: boolean): any[] => {
 			return filter === 'l' || filter === 'loved' ? [new Filter('ranked_status', 'exact', 'loved')] : ['loved'];
 		case 'n':
 			return filter === 'nomod' ? [new Filter('modification', '', false)] : ['nomod'];
+		case 't':
+			const typeFilter = filter.split('=');
+			if (typeFilter.length > 1)
+				switch (typeFilter[1][0]) {
+					case 'b':
+						return ['bursts'];
+					case 'd':
+						return ['deathstreams'];
+					default:
+						return ['streams'];
+				}
+			return [''];
 		default:
 			return [''];
 	}

@@ -3,7 +3,7 @@ dotenv.config({ path: './.env.development' });
 import Database from '../../src/server/models/database';
 import commandProcessing from '../../src/bot/commands';
 import request from '../../src/bot/request';
-import { help, submit, noBeatmapsFound, incorrectFilters, commandNotFound, internalBotError } from '../../src/bot/dictionary';
+import { help, submit, noBeatmapsFound, incorrectFilters, commandNotFound, internalBotError, didYouMean } from '../../src/bot/dictionary';
 import filtersProperties from '../../src/bot/filtersProperties.json';
 
 afterAll(Database.$pool.end);
@@ -12,13 +12,20 @@ test('Recognizes request command', async () => {
 	const possibleErrors = [noBeatmapsFound, incorrectFilters('!request 180'), commandNotFound, internalBotError];
 	expect(possibleErrors.includes(await commandProcessing('!request 180'))).toBe(false);
 	expect(await commandProcessing('!request 1800 nomod')).toBe(noBeatmapsFound);
+	expect(await commandProcessing('!recommend 180')).toBe(didYouMean('!request 180'));
 });
 
-test('Recognizes submit command', async () => expect(await commandProcessing('!submit')).toBe(submit));
+test('Recognizes submit command', async () => {
+	expect(await commandProcessing('!submit')).toBe(submit);
+	expect(await commandProcessing('!submita')).toBe(didYouMean('!submit'));
+});
 
-test('Recognizes help command', async () => expect(await commandProcessing('!help')).toBe(help));
+test('Recognizes help command', async () => {
+	expect(await commandProcessing('!help')).toBe(help);
+	expect(await commandProcessing('!helpa')).toBe(didYouMean('!help'));
+});
 
-test('Recognizes lack of commands', async () => expect(await commandProcessing('!random')).toBe(commandNotFound));
+test('Recognizes lack of commands', async () => expect(await commandProcessing('!a')).toBe(commandNotFound));
 
 test('Recognizes lack of prefix', async () => expect(await commandProcessing('hello')).toBe(commandNotFound));
 
@@ -107,6 +114,7 @@ test('Recognizes non numeric commands', async () => {
 		expect(check((await request([bpm, type])).beatmap.average)).toBe(true);
 		expect(await commandProcessing(`!r ${bpm} ${type}a`)).toBe(incorrectFilters(`!r ${bpm} ${type}`));
 		expect(await commandProcessing(`!r ${bpm} ${type}`)).not.toBe(incorrectFilters(`!r ${bpm} ${type}`));
+		expect(await commandProcessing(`!r ${bpm} type=${type}`)).toBe(incorrectFilters(`!r ${bpm} ${type}`));
 	}
 	for (const variation of ['ranked', 'unranked', 'loved']) {
 		//@ts-ignore
