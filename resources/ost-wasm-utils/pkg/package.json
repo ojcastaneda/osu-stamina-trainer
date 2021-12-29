@@ -1,0 +1,11 @@
+{
+  "name": "ost-wasm-utils",
+  "version": "1.6.3",
+  "files": [
+    "ost_wasm_utils_bg.wasm",
+    "ost_wasm_utils.js",
+    "ost_wasm_utils.d.ts"
+  ],
+  "main": "ost_wasm_utils.js",
+  "types": "ost_wasm_utils.d.ts"
+}
