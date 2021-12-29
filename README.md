@@ -13,7 +13,6 @@ This project uses the following dependencies:
 
 - [Nodejs](https://nodejs.org/en/)
 - [Expressjs](https://expressjs.com/)
-
 - [rosu-pp](https://crates.io/crates/rosu-pp)
 
 ## Previously used tools

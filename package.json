@@ -32,7 +32,6 @@
     "morgan": "^1.10.0",
     "node-cron": "^3.0.0",
     "ost-wasm-utils": "file:resources/ost-wasm-utils/pkg",
-    "osucolle": "^1.0.2",
     "p-queue": "^6.6.2",
     "pg": "^8.6.0",
     "pg-promise": "^10.11.0"
