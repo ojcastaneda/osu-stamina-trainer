@@ -1,18 +1,17 @@
-import pgPromise, { IDatabase, QueryFile } from 'pg-promise';
-import { resolve } from 'path';
+import pgPromise, {IDatabase, QueryFile} from 'pg-promise';
+import {Promise} from 'bluebird';
+import {resolve} from 'path';
 
 /**
  * The pg-promise specification for query logs.
  */
-const database = pgPromise({
-	query: query => {
+const client = pgPromise({
+	capSQL: true, promiseLib: Promise, query: query => {
 		const plainQuery = query.query.replace(/\s\s+/g, ' ');
 		switch (plainQuery) {
-			case 'begin isolation level read committed read write':
-				break;
-			case 'begin isolation level read committed read only':
-				break;
-			case 'commit':
+			case 'BEGIN ISOLATION LEVEL READ COMMITTED READ WRITE':
+			case 'BEGIN ISOLATION LEVEL READ COMMITTED READ ONLY':
+			case 'COMMIT':
 				break;
 			default:
 				console.info(plainQuery);
@@ -24,9 +23,8 @@ const database = pgPromise({
 /**
  * The pg-promise connection with the database.
  */
-const client: IDatabase<any> = database({
-	connectionString: process.env.DATABASE_URL!,
-	ssl: process.env.NODE_ENV === 'production' && { rejectUnauthorized: false }
+const database: IDatabase<any> = client({
+	connectionString: process.env.DATABASE_URL!, ssl: process.env.NODE_ENV === 'production' && {rejectUnauthorized: false}
 });
 
 /**
@@ -35,9 +33,17 @@ const client: IDatabase<any> = database({
  * @param reset - The specification for dropping and crating all the SQL entities needed.
  */
 const setupDatabaseConnection = async (reset: boolean = false) => {
-	if (reset) await client.none(new QueryFile(resolve('resources/database/reset.sql'), { minify: true }));
-	await client.none(new QueryFile(resolve('resources/database/setup.sql'), { minify: true }));
+	if (reset) await database.none(new QueryFile(resolve('resources/database/reset.sql'), {minify: true}));
+	await database.none(new QueryFile(resolve('resources/database/setup.sql'), {minify: true}));
 };
 
-export { setupDatabaseConnection };
-export default client;
+interface Entity {
+	id?: number;
+}
+
+enum Tables {
+	users = 'users', submissions = 'submissions', double_time_beatmaps = 'double_time_beatmaps', beatmaps = 'beatmaps'
+}
+
+export {Entity, Tables, setupDatabaseConnection};
+export default database;

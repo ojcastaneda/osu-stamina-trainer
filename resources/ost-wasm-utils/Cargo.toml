@@ -1,0 +1,15 @@
+[package]
+name = "ost-wasm-utils"
+version = "1.6.3"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+rosu-pp = "0.4.0"
+flate2 = "1.0.22"
+wasm-bindgen = { version = "0.2.78", features = ["serde-serialize"] }
+serde = { version = "1.0.132", features = ["derive"] }

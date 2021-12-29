@@ -1,28 +1,29 @@
-import Filter, { generateSelectConditionQuery, generateUpdateQuery } from './filter';
+import Filter, {generateSelectConditionQuery, generateUpdateQuery} from './filter';
 import OsuBeatmapset from '../../osuApi/models/beatmapset';
 import OsuBeatmap from '../../osuApi/models/beatmap';
-import Sort, { generateOrderQuery } from './sort';
-import { ITask, txMode } from 'pg-promise';
-import Database from './database';
+import Sort, {generateOrderQuery} from './sort';
+import {ITask, txMode} from 'pg-promise';
+import Database, {Entity, Tables} from './database';
 
 /**
  * Interface that represents the beatmaps archived in the collection.
  */
-interface Beatmap {
-	/**
-	 * The beatmap's ID.
-	 */
-	id?: number;
+interface Beatmap extends Entity {
 
 	/**
 	 * The beatmap's set's ID.
 	 */
-	set_id?: number;
+	beatmapset_id?: number;
 
 	/**
 	 * The beatmap's number of favorites.
 	 */
-	favorites?: number;
+	favourite_count?: number;
+
+	/**
+	 * The beatmap's number of plays.
+	 */
+	play_count?: number;
 
 	/**
 	 * The beatmap's suggested beats per minute.
@@ -32,12 +33,17 @@ interface Beatmap {
 	/**
 	 * The beatmap's drain time measured in seconds.
 	 */
-	length?: number;
+	hit_length?: number;
 
 	/**
 	 * The beatmap's weighted average streams length.
 	 */
-	average?: number;
+	stream_length?: number;
+
+	/**
+	 * The beatmap's overall difficulty.
+	 */
+	accuracy?: number;
 
 	/**
 	 * The beatmap's approach rate.
@@ -45,47 +51,47 @@ interface Beatmap {
 	ar?: number;
 
 	/**
-	 * The beatmap's overall difficulty.
-	 */
-	od?: number;
-
-	/**
 	 * The beatmap's circle size.
 	 */
 	cs?: number;
 
 	/**
-	 * The beatmap's difficulty.
-	 */
-	stars?: number;
-
-	/**
 	 * The beatmap's stream to hit object ratio.
 	 */
-	density?: number;
+	stream_density?: number;
 
 	/**
-	 * The beatmap's active status for interactions.
+	 * The beatmap's difficulty raiting.
 	 */
-	active_status?: boolean;
+	difficulty_rating?: number;
 
 	/**
-	 * The beatmap's name composed by the song's name and the beatmap version.
+	 * The beatmap's active status.
 	 */
-	name?: string;
+	active?: boolean;
 
 	/**
-	 * The beatmap's hash identifier.
+	 * The beatmap's song title.
 	 */
-	hash?: string;
+	title?: string;
 
 	/**
-	 * The beatmap's ranked status ('ranked', 'loved' and 'ranked').
+	 * The beatmap's md5 checksum.
 	 */
-	ranked_status?: string;
+	checksum?: string;
 
 	/**
-	 * The beatmap's date when it was last requested.
+	 * The beatmap's ranked status.
+	 */
+	ranked?: Ranked;
+
+	/**
+	 * The beatmap's date when it was last verified by .
+	 */
+	last_verified?: Date;
+
+	/**
+	 * The beatmap's date when it was last requested by a user.
 	 */
 	last_requested?: Date;
 
@@ -95,40 +101,30 @@ interface Beatmap {
 	last_updated?: Date;
 }
 
-/**
- * The only string or boolean properties that are allowed as filters for retrieving beatmaps.
- */
-const stringFilters: string[] = ['name', 'ranked_status', 'active_status'];
+enum Ranked {
+	ranked = 'ranked', loved = 'loved', unranked = 'unranked'
+}
 
 /**
- * The only numeric properties that are allowed as filters for retrieving beatmaps.
+ * The only properties that are allowed as filters for retrieving beatmaps.
  */
-const numericFilters: string[] = ['bpm', 'length', 'average', 'ar', 'od', 'cs', 'stars', 'density', 'last_updated'];
+const allowedFilters: (keyof Beatmap)[] = ['bpm', 'hit_length', 'stream_length', 'accuracy', 'ar', 'cs', 'stream_density', 'difficulty_rating',
+	'active', 'title', 'ranked', 'last_verified', 'last_updated'];
 
 /**
  * Creates an instance of a beatmap based on an osu! api response.
  *
- * @param osuBeatmap - The osu! API beatmap corresponding to the beatmap.
- * @param osuBeatmapset - The osu! API beatmapset corresponding to the beatmap.
+ * @param beatmap - The osu! API beatmap corresponding to the beatmap.
+ * @param beatmapset - The osu! API beatmapset corresponding to the beatmap.
  * @returns A beatmap object based on the osu! api response.
  */
-const createBeatmapFromOsuApi = (osuBeatmap: OsuBeatmap, osuBeatmapset: OsuBeatmapset): Beatmap => {
+const createBeatmapFromOsuApi = (beatmap: OsuBeatmap, beatmapset: OsuBeatmapset): Beatmap => {
+	const {id, beatmapset_id, hit_length, accuracy, ar, cs, difficulty_rating, version, checksum, ranked, last_updated} = beatmap;
+	const {favourite_count, play_count, title, ranked_date} = beatmapset;
 	return {
-		id: osuBeatmap.id,
-		set_id: osuBeatmapset.id,
-		name: `${osuBeatmapset.title} [${osuBeatmap.version}]`,
-		ar: osuBeatmap.ar,
-		od: osuBeatmap.od,
-		cs: osuBeatmap.cs,
-		density: 0,
-		length: osuBeatmap.length,
-		bpm: osuBeatmap.bpm,
-		stars: osuBeatmap.stars,
-		ranked_status: osuBeatmap.ranked === 1 || osuBeatmap.ranked === 2 ? 'ranked' : osuBeatmap.ranked === 4 ? 'loved' : 'unranked',
-		average: 0,
-		hash: osuBeatmap.hash,
-		favorites: osuBeatmapset.favourites,
-		last_updated: osuBeatmapset.rankedDate !== undefined ? osuBeatmapset.rankedDate : osuBeatmap.lastUpdated
+		id, beatmapset_id, favourite_count, play_count, hit_length, accuracy, ar, cs, difficulty_rating, title: `${title} [${version}]`, checksum,
+		ranked: ranked === 1 || ranked === 2 ? Ranked.ranked : ranked === 4 ? Ranked.loved : Ranked.unranked,
+		last_updated: ranked_date !== null ? ranked_date : last_updated
 	} as Beatmap;
 };
 
@@ -139,13 +135,10 @@ const createBeatmapFromOsuApi = (osuBeatmap: OsuBeatmap, osuBeatmapset: OsuBeatm
  * @param doubleTimeStatistics - The statistics after being modified by the double time modification.
  * @returns A beatmap object based on the specific statistics modified by the double time modification.
  */
-const createDoubleTimeBeatmap = (bpm: number, length: number, doubleTimeStatistics: { ar: number; od: number; stars: number }): Beatmap => {
+const createDoubleTimeBeatmap = (bpm: number, hit_length: number, accuracy: number, ar: number, difficulty_rating: number): Beatmap => {
 	return {
-		ar: Number(doubleTimeStatistics.ar.toFixed(1)),
-		od: Number(doubleTimeStatistics.od.toFixed(1)),
-		length: Math.round((length * 2) / 3),
-		bpm: Math.round(bpm * 1.5),
-		stars: Number(doubleTimeStatistics.stars.toFixed(2))
+		bpm: Math.round(bpm * 1.5), hit_length: Math.round((hit_length * 2) / 3), ar: Number(ar.toFixed(1)), accuracy: Number(accuracy.toFixed(1)),
+		difficulty_rating: Number(difficulty_rating.toFixed(2))
 	} as Beatmap;
 };
 
@@ -156,25 +149,23 @@ const createDoubleTimeBeatmap = (bpm: number, length: number, doubleTimeStatisti
  * @param doubleTimeBeatmap - The partial beatmap instance with only the properties that are affected by the double time modification.
  * @param isSubmission - The indicator for a beatmap that comes from a submission.
  */
-const createBeatmap = async (beatmap: Beatmap, doubleTimeBeatmap: Beatmap, isSubmission: boolean = false): Promise<void> =>
-	Database.tx(
-		{ mode: new txMode.TransactionMode({ tiLevel: txMode.isolationLevel.readCommitted, readOnly: false }) },
-		async (transaction: ITask<any>) => {
-			let { id, average, cs, density, ranked_status, name, last_updated, set_id, favorites, bpm, length, ar, od, stars, hash } = beatmap;
-			await transaction.none(
-				`INSERT INTO table_beatmaps (id, set_id, favorites, bpm, length, average, ar, od, cs, stars, density, name, hash, ranked_status, last_updated)
-					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15)`,
-				[id, set_id, favorites, bpm, length, average, ar, od, cs, stars, density, name, hash, ranked_status, last_updated]
-			);
-			({ bpm, length, ar, od, stars } = doubleTimeBeatmap);
-			await transaction.none(
-				`INSERT INTO table_double_time_beatmaps (id, bpm, length, average, ar, od, cs, stars, density, name, ranked_status, last_updated)
-					VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
-				[id, bpm, length, average, ar, od, cs, stars, density, name, ranked_status, last_updated]
-			);
-			if (isSubmission) await transaction.none(`UPDATE table_submissions SET approved_status = 'approved' WHERE id = $1`, [id]);
-		}
-	);
+const createBeatmap = async (beatmap: Beatmap, doubleTimeBeatmap: Beatmap, isSubmission: boolean = false): Promise<void> => Database.tx(
+	{mode: new txMode.TransactionMode({tiLevel: txMode.isolationLevel.readCommitted, readOnly: false})}, async (transaction: ITask<any>) => {
+		let {
+			id, beatmapset_id, favourite_count, play_count, bpm, hit_length, stream_length, accuracy, ar, cs, stream_density, difficulty_rating,
+			title, checksum, ranked, last_verified, last_updated
+		} = beatmap;
+		await transaction.none(`INSERT INTO ${Tables.beatmaps} (id, beatmapset_id, favourite_count, play_count, bpm, hit_length, stream_length, 
+			accuracy, ar, cs, stream_density, difficulty_rating, title, checksum, ranked, last_verified, last_updated) 
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17)`,
+			[	id, beatmapset_id, favourite_count, play_count, bpm, hit_length, stream_length, accuracy, ar, cs, stream_density, difficulty_rating,
+				title, checksum, ranked, last_verified, last_updated]);
+		({bpm, hit_length, accuracy, ar, difficulty_rating} = doubleTimeBeatmap);
+		await transaction.none(`INSERT INTO ${Tables.double_time_beatmaps} (id, bpm, hit_length, stream_length, accuracy, ar, cs, stream_density, 
+		difficulty_rating, title, ranked, last_updated) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)`,
+			[id, bpm, hit_length, stream_length, accuracy, ar, cs, stream_density, difficulty_rating, title, ranked, last_updated]);
+		if (isSubmission) await transaction.none(`UPDATE ${Tables.submissions} SET approved = 'approved' WHERE id = $1`, [id]);
+	});
 
 /**
  * Retrieves a beatmap from the database composed by the provided properties that matches the provided ID.
@@ -183,26 +174,26 @@ const createBeatmap = async (beatmap: Beatmap, doubleTimeBeatmap: Beatmap, isSub
  * @param properties - The properties that are expected to be part of the returned beatmap.
  * @returns A promise of the requested beatmap or undefined if not found.
  */
-const retrieveBeatmap = async (id: number, properties: string[] = ['id']): Promise<Beatmap | undefined> => {
-	const beatmap = await Database.oneOrNone<Beatmap>(`SELECT ${properties.join(', ')} FROM table_beatmaps WHERE id = $1 LIMIT 1`, [id]);
+const retrieveBeatmap = async (id: number, properties: (keyof Beatmap)[] | '*' = '*'): Promise<Beatmap | undefined> => {
+	const formattedProperties = properties === '*' ? properties : properties.join(', ');
+	const beatmap = await Database.oneOrNone<Beatmap>(`SELECT ${formattedProperties} FROM ${Tables.beatmaps} WHERE id = $1 LIMIT 1`, [id]);
 	return beatmap !== null ? beatmap : undefined;
 };
 
 /**
  * Retrieves a beatmap from the database composed by the provided properties, filtered by dynamic and raw filters.
  *
- * @param isDoubleTime - The specification to whether or not to retrieve the beatmap with the double time statistics or the no modification statistics.
+ * @param isDoubleTime - The specification to whether or not to retrieve the beatmap with the double time statistics or the no modification
+ *     statistics.
  * @param filters - The dynamic filters with a variable property, value and conditional operator.
  * @returns A promise of the least recently requested beatmap that match the filters or undefined if not found.
  */
-const retrieveBeatmapRequest = async (isDoubleTime: boolean = false, filters: Filter[]): Promise<Beatmap | undefined> => {
-	const [conditionQuery, values] = generateSelectConditionQuery(filters, numericFilters, stringFilters, ['active_status = true']);
-	const tableName: string = isDoubleTime ? 'table_double_time_beatmaps' : 'table_beatmaps';
-	const beatmap = await Database.oneOrNone<Beatmap>(
-		`UPDATE ${tableName} SET last_requested = now() WHERE id = (SELECT id FROM ${tableName} ${conditionQuery} ORDER BY last_requested ASC LIMIT 1) 
-			RETURNING id, bpm, length, average, ar, od, od, cs, stars, density, name, ranked_status, last_updated`,
-		values
-	);
+const retrieveBeatmapRequest = async (isDoubleTime: boolean = false, filters: Filter<Beatmap>[]): Promise<Beatmap | undefined> => {
+	const [conditionQuery, values] = generateSelectConditionQuery(filters, allowedFilters);
+	const tableName: Tables = isDoubleTime ? Tables.double_time_beatmaps : Tables.beatmaps;
+	const beatmap = await Database.oneOrNone<Beatmap>(`UPDATE ${tableName} SET last_requested = now() WHERE id = (SELECT id FROM ${tableName} 
+		${conditionQuery} ORDER BY last_requested ASC LIMIT 1) 
+		RETURNING id, bpm, hit_length, stream_length, accuracy, ar, cs, stream_density, difficulty_rating, title, ranked, last_updated`, values);
 	return beatmap !== null ? beatmap : undefined;
 };
 
@@ -211,12 +202,12 @@ const retrieveBeatmapRequest = async (isDoubleTime: boolean = false, filters: Fi
  *
  * @param properties - The properties that are expected to be part of the returned beatmaps.
  * @param filters - The dynamic filters with a variable property, value and conditional operator.
- * @param rawFilters - The raw filters that are directly provided in the query.
  * @returns A promise of an array of all the beatmaps that match the filters.
  */
-const retrieveBeatmaps = async (properties: string[] = ['id'], filters: Filter[] = [], rawFilters: string[] = []): Promise<Beatmap[]> => {
-	const [conditionQuery, values] = generateSelectConditionQuery(filters, numericFilters, stringFilters, rawFilters);
-	return Database.manyOrNone<Beatmap>(`SELECT ${properties.join(', ')} FROM table_beatmaps ${conditionQuery}`, values);
+const retrieveBeatmaps = async (properties: (keyof Beatmap)[] | '*' = '*', filters: Filter<Beatmap>[] = []): Promise<Beatmap[]> => {
+	const formattedProperties = properties === '*' ? properties : properties.join(', ');
+	const [conditionQuery, values] = generateSelectConditionQuery(filters, allowedFilters);
+	return Database.manyOrNone<Beatmap>(`SELECT ${formattedProperties} FROM ${Tables.beatmaps} ${conditionQuery}`, values);
 };
 
 /**
@@ -226,30 +217,21 @@ const retrieveBeatmaps = async (properties: string[] = ['id'], filters: Filter[]
  * @param page - The page which is then multiplied by 12, the result of this operation indicates the offset.
  * @param sort - The dynamic with a variable property and order.
  * @param filters - The dynamic filters with a variable property, value and conditional operator.
- * @param rawFilters - The raw filters that are directly provided in the query.
  * @returns A promise of an array with the beatmaps that match the filters and the page offset in the provided order in the first position and
  * the total amount of beatmaps that match the filters in the second position.
  */
-const retrieveBeatmapsByPage = async (
-	page: number,
-	sort: Sort,
-	filters: Filter[] = [],
-	rawFilters: string[] = []
-): Promise<[rows: Beatmap[], count: number]> => {
-	const [conditionQuery, values] = generateSelectConditionQuery(filters, numericFilters, stringFilters, rawFilters);
+const retrieveBeatmapsByPage = async (page: number, sort: Sort<Beatmap>,
+	filters: Filter<Beatmap>[] = []): Promise<[rows: Beatmap[], count: number]> => {
+	const [conditionQuery, values] = generateSelectConditionQuery(filters, allowedFilters);
 	values.push((page - 1) * 12);
 	return Database.tx<[rows: Beatmap[], count: number]>(
-		{ mode: new txMode.TransactionMode({ tiLevel: txMode.isolationLevel.readCommitted, readOnly: true }) },
-		async (transaction: ITask<any>) => {
-			const rows = await transaction.manyOrNone<Beatmap>(
-				`SELECT id, set_id, favorites, bpm, average, stars, active_status, name, ranked_status FROM table_beatmaps ${conditionQuery} 
-				${generateOrderQuery(sort.sortProperty, sort.order, ['bpm', 'favorites', 'stars', 'last_updated'])} LIMIT 12 OFFSET $${values.length}`,
-				values
-			);
-			const count = await transaction.result(`SELECT COUNT(id) FROM table_beatmaps ${conditionQuery}`, values);
-			return [rows, count.rowCount];
-		}
-	);
+		{mode: new txMode.TransactionMode({tiLevel: txMode.isolationLevel.readCommitted, readOnly: true})}, async (transaction: ITask<any>) => {
+			const rows = await transaction.manyOrNone<Beatmap>(`SELECT id, beatmapset_id, favourite_count, play_count, bpm, stream_length, 
+				difficulty_rating, active, title, ranked FROM ${Tables.beatmaps} ${conditionQuery} 
+				${generateOrderQuery(sort.property, sort.order, ['bpm', 'favourite_count', 'difficulty_rating', 'last_updated'])} 
+				LIMIT 12 OFFSET $${values.length}`, values);
+			return [rows, (await transaction.one(`SELECT COUNT(id) FROM ${Tables.beatmaps} ${conditionQuery}`, values)).count];
+		});
 };
 
 /**
@@ -259,36 +241,28 @@ const retrieveBeatmapsByPage = async (
  * @param doubleTimeBeatmap - The double time statistics properties that will be updated.
  * @returns A promise of whether or not the beatmap statistics or double time statistics were updated.
  */
-const updateBeatmap = async (beatmap: Beatmap, doubleTimeBeatmap: Beatmap = {}): Promise<boolean> =>
-	Database.tx(
-		{ mode: new txMode.TransactionMode({ tiLevel: txMode.isolationLevel.readCommitted, readOnly: false }) },
-		async (transaction: ITask<any>) => {
-			let updatedRows = 0;
-			let [query, values] = generateUpdateQuery('table_beatmaps', beatmap);
-			if (query) updatedRows += (await transaction.result(query, values)).rowCount;
-			[query, values] = generateUpdateQuery('table_double_time_beatmaps', { ...doubleTimeBeatmap, id: beatmap.id });
-			if (query) updatedRows += (await transaction.result(query, values)).rowCount;
-			return updatedRows > 0;
-		}
-	);
+const updateBeatmap = async (beatmap: Beatmap, doubleTimeBeatmap: Beatmap = {}): Promise<boolean> => Database.tx(
+	{mode: new txMode.TransactionMode({tiLevel: txMode.isolationLevel.readCommitted, readOnly: false})}, async (transaction: ITask<any>) => {
+		let updatedRows = 0;
+		let [query, values] = generateUpdateQuery(Tables.beatmaps, beatmap);
+		if (query) updatedRows += (await transaction.result(query, values)).rowCount;
+		doubleTimeBeatmap.id = beatmap.id;
+		[query, values] = generateUpdateQuery(Tables.double_time_beatmaps, doubleTimeBeatmap);
+		if (query) updatedRows += (await transaction.result(query, values)).rowCount;
+		return updatedRows > 0;
+	});
 
 /**
  * Deletes a beatmap and its double time statistics from the database with a provided ID.
  *
- * @param id - The ID of the beatmap that will be removed.
- * @returns A promise of whether or not the beatmap was deleted.
+ * @param id - The ID of the beatmap that will be deleted.
+ * @returns A promise of whether the beatmap was deleted.
  */
-const deleteBeatmap = async (id: number): Promise<boolean> => (await Database.result(`DELETE FROM table_beatmaps WHERE id = $1`, [id])).rowCount > 0;
+const deleteBeatmap = async (id: number): Promise<boolean> => (await Database.result(`DELETE FROM ${Tables.beatmaps} WHERE id = $1`, [id])).rowCount >
+	0;
 
 export default Beatmap;
 export {
-	createBeatmapFromOsuApi,
-	createDoubleTimeBeatmap,
-	createBeatmap,
-	retrieveBeatmap,
-	retrieveBeatmapRequest,
-	retrieveBeatmaps,
-	retrieveBeatmapsByPage,
-	updateBeatmap,
-	deleteBeatmap
+	Ranked, createBeatmapFromOsuApi, createDoubleTimeBeatmap, createBeatmap, retrieveBeatmap, retrieveBeatmapRequest, retrieveBeatmaps,
+	retrieveBeatmapsByPage, updateBeatmap, deleteBeatmap
 };

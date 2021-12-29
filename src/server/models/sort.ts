@@ -1,11 +1,13 @@
+import {Entity} from './database';
+
 /**
  * Interface that represents the sorting order used in the prepared statements queries.
  */
-interface Sort {
+interface Sort<Type extends Entity> {
 	/**
 	 * The sort's dynamic property to sort by in the prepared statements.
 	 */
-	sortProperty: string;
+	property: (keyof Type);
 
 	/**
 	 * The sort's dynamic order to sort by in the prepared statements.
@@ -21,11 +23,11 @@ interface Sort {
  * @param allowedProperties - The array of allowed properties to sort by.
  * @returns A string in prepared statement order format if the property matches the allowed properties.
  */
-const generateOrderQuery = (property: string, order: string, allowedProperties: string[]): string => {
+const generateOrderQuery = <Type>(property: (keyof Type), order: string, allowedProperties: (keyof Type)[]): string => {
 	const upperCaseOrder = order.toUpperCase();
 	if (!(upperCaseOrder === 'DESC' || upperCaseOrder === 'ASC') || !allowedProperties.includes(property)) return '';
-	return `ORDER BY ${property} ${order.toUpperCase()}`;
+	return `ORDER BY ${property} ${upperCaseOrder}`;
 };
 
 export default Sort;
-export { generateOrderQuery };
+export {generateOrderQuery};

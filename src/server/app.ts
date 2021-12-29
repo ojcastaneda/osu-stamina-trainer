@@ -1,9 +1,9 @@
-import { createUser, retrieveUser, updateUser } from './models/user';
-import express, { NextFunction, Request, Response } from 'express';
-import { setupDatabaseConnection } from './models/database';
-import { generatePassword } from './logic/authentication';
-import { setupCloudStorage } from './logic/fileManager';
-import apiRouter from './routes/api.routes';
+import {checkUser, createUser, Role, updateUser} from './models/user';
+import express, {NextFunction, Request, Response} from 'express';
+import {setupDatabaseConnection} from './models/database';
+import {generatePassword} from './logic/authentication';
+import {setupCloudStorage} from './logic/fileManager';
+import apiRouter from './routes/api';
 import helmet from 'helmet';
 import morgan from 'morgan';
 import cors from 'cors';
@@ -15,9 +15,11 @@ const serverSetup = async (): Promise<void> => {
 	await setupDatabaseConnection();
 	await setupCloudStorage();
 	const password = await generatePassword(process.env.DEFAULT_PASSWORD!);
-	if ((await retrieveUser(1)) !== undefined)
-		await updateUser({ id: 1, username: process.env.DEFAULT_USERNAME, password: password, role: 'super_admin' });
-	else await createUser({ username: process.env.DEFAULT_USERNAME, password: password, role: 'super_admin' });
+	if (await checkUser(1)) {
+		await updateUser({id: 1, username: process.env.DEFAULT_USERNAME, password: password, role: Role.super_admin});
+	} else {
+		await createUser({username: process.env.DEFAULT_USERNAME, password: password, role: Role.super_admin});
+	}
 	console.info('DB connected');
 	const app = express();
 	app.use(helmet());

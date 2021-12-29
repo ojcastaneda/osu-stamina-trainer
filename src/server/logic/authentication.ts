@@ -1,7 +1,7 @@
-import User, { retrieveUserByUsername } from '../models/user';
-import { NextFunction, Request, Response } from 'express';
-import { hash, genSalt, compare } from 'bcrypt';
-import { sign } from 'jsonwebtoken';
+import User, {retrieveUserByUsername} from '../models/user';
+import {NextFunction, Request, Response} from 'express';
+import {hash, genSalt, compare} from 'bcrypt';
+import {sign} from 'jsonwebtoken';
 
 /**
  * Generates the encrypted password to store in the database.
@@ -20,19 +20,19 @@ const generatePassword = async (password: string): Promise<string | undefined> =
 const generateToken = (user: User): { role: string; token: string; expiration: Date } => {
 	const expiration = new Date();
 	expiration.setTime(expiration.getTime() + 90000000);
-	return { role: user.role!, token: sign({ role: user.role }, process.env.SECRET_KEY!, { expiresIn: '26h' }), expiration: expiration };
+	return {role: user.role!, token: sign({role: user.role}, process.env.SECRET_KEY!, {expiresIn: '26h'}), expiration: expiration};
 };
 
 /**
- * Attaches a token to the express response if the user with the provided credentials exists in the database. 
- * 
+ * Attaches a token to the express response if the user with the provided credentials exists in the database.
+ *
  * @param request - The express request.
  * @param response - The express response.
  * @param next - The express next function.
  */
 const requestToken = async (request: Request, response: Response, next: NextFunction) => {
 	try {
-		const { username, password }: { username: string; password: string } = request.body;
+		const {username, password}: { username: string; password: string } = request.body;
 		const user = await retrieveUserByUsername(username, ['password', 'role']);
 		if (user === undefined) return response.status(404).send('Incorrect credentials');
 		const result = await compare(password, user.password!);
@@ -43,4 +43,4 @@ const requestToken = async (request: Request, response: Response, next: NextFunc
 	}
 };
 
-export { generatePassword, requestToken };
+export {generatePassword, requestToken};

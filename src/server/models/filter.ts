@@ -1,21 +1,23 @@
+import {Entity, Tables} from './database';
+
 /**
  * Class that represents the filters used in the prepared statements queries.
  */
-class Filter {
+class Filter<Type extends Entity> {
 	/**
 	 * The filter's property to filter by in the prepared statements.
 	 */
-	public filterProperty: string;
+	public property: (keyof Type);
+
+	/**
+	 * The filter's conditional operators to filter by in the prepared statements.
+	 */
+	public operator: Operator;
 
 	/**
 	 * The filter's value to filter by in the prepared statements.
 	 */
 	public value: any;
-
-	/**
-	 * The filter's conditional operators to filter by in the prepared statements.
-	 */
-	public operator: string;
 
 	/**
 	 * Creates an instance of a filter.
@@ -24,11 +26,15 @@ class Filter {
 	 * @param operator - The operator for filtering.
 	 * @param value - The value for filtering using the operator.
 	 */
-	constructor(filterProperty: string, operator: string, value: any) {
-		this.filterProperty = filterProperty;
+	constructor(property: (keyof Type), operator: Operator, value: any) {
+		this.property = property;
 		this.operator = operator;
 		this.value = value;
 	}
+}
+
+enum Operator {
+	minimum = 'minimum', maximum = 'maximum', exact = 'exact', like = 'like', different = 'different'
 }
 
 /**
@@ -37,22 +43,16 @@ class Filter {
  * @param filters - The dynamic filters with a variable property, value and conditional operator
  * @param numericFilters - The array of the allowed properties to filter by using numeric conditional operators
  * @param stringFilters - The array of the allowed properties to filter by using string and boolean conditional operators
- * @param rawFilters - The raw filters that are directly provided in the query
  * @returns An array with the where clause of the prepared statement in the first position and the values in the second position
  */
-const generateSelectConditionQuery = (
-	filters: Filter[],
-	numericFilters: string[],
-	stringFilters: string[],
-	rawFilters: string[]
-): [conditionQuery: string, values: any[]] => {
+const generateSelectConditionQuery = <Type extends Entity>(filters: Filter<Type>[],
+	allowedFilters: (keyof Type)[]): [conditionQuery: string, values: any[]] => {
 	const values: any[] = [];
-	let filterQueries: string[] = rawFilters;
+	let filterQueries: string[] = [];
 	filters.forEach((filter, index) => {
-		const { filterProperty, value, operator } = filter;
-		let filterQuery: string | undefined;
-		if (numericFilters.includes(filterProperty)) filterQuery = generateNumericFilterQuery(filterProperty, operator, index + 1);
-		else if (stringFilters.includes(filterProperty)) filterQuery = generateStringFilterQuery(filterProperty, operator, index + 1);
+		const {property, value, operator} = filter;
+		if (!allowedFilters.includes(property)) return;
+		const filterQuery = generateFilterQuery(property, operator, index + 1);
 		if (filterQuery === undefined) throw 'Incorrect filters';
 		values.push(value);
 		filterQueries.push(filterQuery);
@@ -68,7 +68,7 @@ const generateSelectConditionQuery = (
  * @param instance - The instance of a persistence class containing the properties and the id of the row to update
  * @returns An array with the prepared statement query in the first position and the values in the second position
  */
-const generateUpdateQuery = (table: string, instance: any): [query: string | undefined, values: any[]] => {
+const generateUpdateQuery = <Type extends Entity>(table: Tables, instance: Type): [query: string | undefined, values: any[]] => {
 	const properties: string[] = [];
 	const values: any[] = [];
 	let index = 1;
@@ -85,43 +85,29 @@ const generateUpdateQuery = (table: string, instance: any): [query: string | und
 
 /**
  * Generates a prepared statement condition based on a property, an operator and the index of the condition in the prepared statement query
- * for numeric filters
+ * for filters.
  *
- * @param property - The property to filter by in the prepared statement query
- * @param operator - The conditional operator to filter by in the prepared statement query
- * @param index - The index for the prepared statement condition in the prepared statement query
- * @returns A string in prepared statement conditional format if the property matches the allowed operators
+ * @param property - The property to filter by in the prepared statement query.
+ * @param operator - The conditional operator to filter by in the prepared statement query.
+ * @param index - The index for the prepared statement condition in the prepared statement query.
+ * @returns A string in prepared statement conditional format if the property matches the allowed operators.
  */
-const generateNumericFilterQuery = (property: string, operator: string, index: number): string | undefined => {
+const generateFilterQuery = <Type extends Entity>(property: (keyof Type), operator: Operator, index: number): string | undefined => {
 	switch (operator) {
-		case 'minimum':
+		case Operator.minimum:
 			return `${property} >= $${index}`;
-		case 'maximum':
+		case Operator.maximum:
 			return `${property} <= $${index}`;
-		case 'exact':
+		case Operator.exact:
 			return `${property} = $${index}`;
-	}
-};
-
-/**
- * Generates a prepared statement condition based on a property, an operator and the index of the condition in the prepared statement query
- * for string and boolean filters
- *
- * @param property - The property to filter by in the prepared statement query
- * @param operator - The conditional operator to filter by in the prepared statement query
- * @param index - The index for the prepared statement condition in the prepared statement query
- * @returns A string in prepared statement conditional format if the property matches the allowed operators
- */
-const generateStringFilterQuery = (property: string, operator: string, index: number): string | undefined => {
-	switch (operator) {
-		case 'like':
+		case Operator.like:
 			return `${property} ILIKE CONCAT('%', $${index}, '%')`;
-		case 'exact':
-			return `${property} = $${index}`;
-		case 'different':
+		case Operator.different:
 			return `${property} != $${index}`;
+		default:
+			return;
 	}
 };
 
 export default Filter;
-export { generateUpdateQuery, generateSelectConditionQuery };
+export {Operator, generateUpdateQuery, generateSelectConditionQuery};

@@ -1,9 +1,9 @@
-import { NextFunction, Request, Response } from 'express';
-import { verify } from 'jsonwebtoken';
+import {NextFunction, Request, Response} from 'express';
+import {verify} from 'jsonwebtoken';
 
 /**
  * Middleware for access restriction to non super administrator users.
- * 
+ *
  * @param request - The express request.
  * @param response - The express response.
  * @param next - The express next function.
@@ -19,7 +19,7 @@ const superAdminMiddleware = async (request: Request, response: Response, next: 
 
 /**
  * Middleware for access restriction to non administrator users.
- * 
+ *
  * @param request - The express request.
  * @param response - The express response.
  * @param next - The express next function.
@@ -35,14 +35,14 @@ const adminMiddleware = async (request: Request, response: Response, next: NextF
 
 /**
  * Middleware for indicating whether or not an user is an administrator.
- * 
+ *
  * @param request - The express request.
  * @param response - The express response.
  * @param next - The express next function.
  */
 const optionalAdminMiddleware = async (request: Request, response: Response, next: NextFunction) => {
 	try {
-		if (extractTokenRole(request) !== undefined) request.body.is_admin = true;
+		if (extractTokenRole(request) !== undefined) request.body.isAdmin = true;
 		next();
 	} catch (error) {
 		next();
@@ -51,7 +51,7 @@ const optionalAdminMiddleware = async (request: Request, response: Response, nex
 
 /**
  * Extracts the role of the user that sent the request.
- * 
+ *
  * @param request - The express request.
  * @returns A role associated with the request or undefined if not found.
  */
@@ -66,4 +66,4 @@ const extractTokenRole = (request: Request): string | undefined => {
 	} catch (error) {}
 };
 
-export { superAdminMiddleware, adminMiddleware, optionalAdminMiddleware };
+export {superAdminMiddleware, adminMiddleware, optionalAdminMiddleware};

@@ -1,9 +1,9 @@
-DROP TABLE IF EXISTS table_users,
-    table_submissions,
-    table_double_time_beatmaps,
-    table_beatmaps
+DROP TABLE IF EXISTS users,
+    submissions,
+    double_time_beatmaps,
+    beatmaps
     CASCADE;
 
-DROP TYPE IF EXISTS enum_ranked_status,
-    enum_user_roles,
-    enum_approved_status;
+DROP TYPE IF EXISTS enum_ranked,
+    enum_roles,
+    enum_approved;

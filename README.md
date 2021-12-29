@@ -13,10 +13,14 @@ This project uses the following dependencies:
 
 - [Nodejs](https://nodejs.org/en/)
 - [Expressjs](https://expressjs.com/)
-- [osuColle](https://www.npmjs.com/package/osucolle)
+
 - [rosu-pp](https://crates.io/crates/rosu-pp)
+
+## Previously used tools
+
+- [osuColle](https://www.npmjs.com/package/osucolle)
+- [oppai-ng](https://github.com/Francesco149/oppai-ng)
 
 ## Other related projects
 
 - [osu! Stamina Trainer Website](https://github.com/ojcastaneda/osu-stamina-trainer-web)
-- [osu! Stream Detector](https://github.com/ojcastaneda/osu-stream-detector)
