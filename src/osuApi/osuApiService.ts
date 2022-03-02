@@ -57,25 +57,26 @@ class OsuService {
 		lastBeatmapset: number): Promise<[beatmaps: Beatmap[], lastDate: number, lastBeatmapset: number, beatmapsLeft: boolean]> => {
 		try {
 			const beatmaps: Beatmap[] = [];
-			const params = [`m=0`, 'sort=ranked_asc', 'nsfw=true', `cursor[_id]=${lastBeatmapset}`, `cursor[approved_date]=${lastDate}`];
-			const response = await fetch(`${apiUrl}beatmapsets/search?${params.join('&')}`, {
-				method: 'GET', headers: this.authorizationHeaders
-			});
+			const params = Buffer.from(`{\"approved_date\":\"${lastDate}\",\"id\":\"${lastBeatmapset}\"}`);
+			const response = await fetch(
+				`${apiUrl}beatmapsets/search?m=0&sort=ranked_asc&s=ranked&cursor_string=${params.toString('base64')}`,
+				{method: 'GET', headers: this.authorizationHeaders}
+			);
 			if (response.ok) {
 				const {beatmapsets, cursor} = (await response.json()) as { beatmapsets: OsuBeatmapset[], cursor: Cursor };
 				if (cursor.approved_date < this.lastMonth) {
 					beatmapsets.forEach(beatmapset => this.includeBeatmaps(beatmaps, beatmapset));
-					return [beatmaps, cursor.approved_date, cursor._id, true];
+					return [beatmaps, cursor.approved_date, cursor.id, true];
 				} else {
 					beatmapsets.forEach(beatmapset => {
 						const rankedDate = new Date(beatmapset.ranked_date!).getTime();
 						if (beatmapset.ranked_date !== null && rankedDate < this.lastMonth) {
-							cursor._id = beatmapset.id;
+							cursor.id = beatmapset.id;
 							cursor.approved_date = rankedDate;
 							this.includeBeatmaps(beatmaps, beatmapset);
 						}
 					});
-					return [beatmaps, cursor.approved_date, cursor._id, false];
+					return [beatmaps, cursor.approved_date, cursor.id, false];
 				}
 			}
 		} catch (error) {
@@ -125,7 +126,7 @@ interface Cursor {
 	/**
 	 * The identifier of the last beatmapset.
 	 */
-	_id: number;
+	id: number;
 }
 
 /**
