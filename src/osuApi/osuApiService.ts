@@ -59,12 +59,13 @@ class OsuService {
 			const beatmaps: Beatmap[] = [];
 			const params = Buffer.from(`{\"approved_date\":\"${lastDate}\",\"id\":\"${lastBeatmapset}\"}`);
 			const response = await fetch(
-				`${apiUrl}beatmapsets/search?m=0&sort=ranked_asc&s=ranked&cursor_string=${params.toString('base64')}`,
+				`${apiUrl}beatmapsets/search?m=0&nsfw=true&sort=ranked_asc&s=ranked&cursor_string=${params.toString('base64')}`,
 				{method: 'GET', headers: this.authorizationHeaders}
 			);
 			if (response.ok) {
-				const {beatmapsets, cursor} = (await response.json()) as { beatmapsets: OsuBeatmapset[], cursor: Cursor };
-				if (cursor.approved_date < this.lastMonth) {
+				let {beatmapsets, cursor} = (await response.json()) as { beatmapsets: OsuBeatmapset[], cursor: Cursor };
+				if (cursor == null) cursor = {approved_date: lastDate, id: lastBeatmapset} as Cursor;
+				if (cursor.approved_date !== lastDate && cursor.id !== lastBeatmapset && cursor.approved_date! < this.lastMonth) {
 					beatmapsets.forEach(beatmapset => this.includeBeatmaps(beatmaps, beatmapset));
 					return [beatmaps, cursor.approved_date, cursor.id, true];
 				} else {
