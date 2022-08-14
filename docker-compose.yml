@@ -100,4 +100,4 @@ services:
         - "80:80"
         - "443:443"
         volumes:
-        - ./caddy/Caddyfile.production:/etc/caddy/Caddyfile
+        - ./caddy/Caddyfile:/etc/caddy/Caddyfile
