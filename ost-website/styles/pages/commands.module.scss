@@ -1,0 +1,142 @@
+@import 'styles/variables';
+
+#bot-commands > section {
+	margin-bottom: $lg-spacing;
+
+	&:last-child {
+		margin-bottom: 0;
+	}
+
+	& > div {
+		padding: $md-spacing $lg-spacing;
+
+		&:first-child {
+			background-color: var(--secondary-theme-color);
+			border: $xxs-spacing solid var(--tertiary-theme-color);
+			border-radius: $xs-spacing $xs-spacing 0 0;
+			color: var(--secondary-font-color);
+		}
+
+		&:last-child {
+			border-bottom: $xxs-spacing solid var(--tertiary-theme-color);
+			border-left: $xxs-spacing solid var(--tertiary-theme-color);
+			border-radius: 0 0 $xs-spacing $xs-spacing;
+			border-right: $xxs-spacing solid var(--tertiary-theme-color);
+		}
+	}
+}
+
+.copy-input {
+	display: flex;
+	width: 100%;
+
+	& > input {
+		border-radius: $xs-spacing 0 0 $xs-spacing;
+		cursor: text;
+		text-align: center;
+		width: 100%;
+	}
+
+	& > button {
+		border-radius: 0 $xs-spacing $xs-spacing 0;
+	}
+}
+
+#language {
+	display: flex;
+	margin-top: $lg-spacing;
+
+	@media (max-width: $medium-responsive) {
+		display: grid;
+		gap: $lg-spacing;
+		grid-template-columns: 1fr 1fr;
+		grid-template-areas:
+			'a a'
+			'b c';
+	}
+
+	@media (max-width: $small-responsive) {
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			'a'
+			'b'
+			'c';
+	}
+
+	& > div {
+		@media (max-width: $small-responsive) {
+			margin-right: 0;
+		}
+
+		&:first-of-type {
+			margin-right: $lg-spacing;
+
+			@media (max-width: $medium-responsive) {
+				grid-area: a;
+				margin-right: 0;
+			}
+		}
+
+		&:last-of-type {
+			align-items: center;
+			display: flex;
+			position: relative;
+
+			@media (max-width: $medium-responsive) {
+				grid-area: c;
+			}
+		}
+
+		& > select {
+			padding: 0.5rem 0.75rem 0.5rem calc(0.75rem + 20px + $xs-spacing);
+
+			@media (max-width: $medium-responsive) {
+				width: 100%;
+			}
+		}
+
+		& > span {
+			left: 0.75rem;
+			display: flex;
+			pointer-events: none;
+			position: absolute;
+		}
+	}
+
+	& > input {
+		margin-right: $lg-spacing;
+
+		@media (max-width: $medium-responsive) {
+			box-sizing: border-box;
+			grid-area: b;
+			margin-right: 0;
+			width: 100%;
+		}
+	}
+}
+
+#request {
+	display: flex;
+	margin: $lg-spacing 0;
+
+	@media (max-width: $small-responsive) {
+		display: block;
+	}
+
+	& > div {
+		&:first-of-type {
+			@media (max-width: $small-responsive) {
+				margin: $lg-spacing 0;
+			}
+		}
+
+		&:last-of-type > button {
+			margin-left: $lg-spacing;
+			white-space: nowrap;
+
+			@media (max-width: $small-responsive) {
+				margin: 0 auto;
+			}
+		}
+	}
+}

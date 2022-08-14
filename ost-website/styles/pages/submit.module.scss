@@ -1,0 +1,59 @@
+@import 'styles/variables';
+
+#submit {
+	display: grid;
+	gap: $lg-spacing;
+	grid-template-columns: 2fr 1fr;
+
+	@media (max-width: $medium-responsive) {
+		grid-template-columns: 3fr 2fr;
+	}
+
+	@media (max-width: $small-responsive) {
+		grid-template-columns: 1fr;
+	}
+
+	& > form {
+		@media (max-width: $small-responsive) {
+			display: contents;
+		}
+	}
+}
+
+#submit-buttons {
+	display: grid;
+	gap: $lg-spacing;
+	grid-template-columns: 1fr 1fr;
+	margin-bottom: $lg-spacing;
+
+	@media (max-width: $small-responsive) {
+		margin-bottom: 0;
+	}
+
+	& > button {
+		justify-content: center;
+	}
+}
+
+#submit-input {
+	margin-bottom: $lg-spacing;
+
+	@media (max-width: $small-responsive) {
+		margin-bottom: 0;
+	}
+
+	& > input {
+		box-sizing: border-box;
+		width: 100%;
+	}
+
+	& > span {
+		display: block;
+		margin-top: $sm-spacing;
+	}
+}
+
+#submit-rules {
+	padding-left: 1.5rem;
+	margin: 0;
+}

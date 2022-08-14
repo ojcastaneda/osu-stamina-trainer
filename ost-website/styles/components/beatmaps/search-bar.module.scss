@@ -1,0 +1,85 @@
+@import 'styles/variables';
+
+#search-bar {
+	display: flex;
+	margin-bottom: $sm-spacing;
+
+	@media (max-width: $medium-responsive) {
+		display: grid;
+		gap: $lg-spacing;
+		grid-template-columns: 1fr 1fr;
+		grid-template-areas:
+			'a a'
+			'b c';
+	}
+
+	@media (max-width: $small-responsive) {
+		grid-template-columns: 1fr;
+		grid-template-areas:
+			'a'
+			'b'
+			'c';
+	}
+
+	& > div > button > div {
+		display: flex;
+	}
+}
+
+#search-order {
+	display: flex;
+	filter: var(--shadow);
+	margin-right: $lg-spacing;
+
+	@media (max-width: $medium-responsive) {
+		grid-area: b;
+		margin-right: 0;
+	}
+
+	& > button {
+		border-radius: 0 $xs-spacing $xs-spacing 0;
+		filter: none;
+	}
+
+	& > select {
+		border-radius: $xs-spacing 0 0 $xs-spacing;
+		filter: none;
+
+		@media (max-width: $medium-responsive) {
+			width: 100%;
+		}
+	}
+}
+
+#search-download {
+	@media (max-width: $medium-responsive) {
+		grid-area: c;
+	}
+
+	& > select {
+		@media (max-width: $medium-responsive) {
+			width: 100%;
+		}
+	}
+}
+
+#search-title {
+	border-radius: $xs-spacing 0 0 $xs-spacing;
+	display: flex;
+	margin-right: $lg-spacing;
+	width: 100%;
+
+	@media (max-width: $medium-responsive) {
+		grid-area: a;
+		margin-right: 0;
+	}
+
+	& > button {
+		border-radius: 0 $xs-spacing $xs-spacing 0;
+	}
+
+	& > input {
+		border-radius: $xs-spacing 0 0 $xs-spacing;
+		width: 100%;
+	}
+}

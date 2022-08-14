@@ -1,0 +1,88 @@
+@import 'styles/variables';
+
+.bpm-icon {
+	& > path,
+	circle {
+		fill: var(--primary-font-color);
+	}
+}
+
+.card {
+	border: $xs-spacing solid var(--tertiary-theme-color);
+	border-radius: $sm-spacing;
+	height: fit-content;
+	overflow-x: hidden;
+	position: relative;
+}
+
+.card-bar {
+	padding: 0 $md-spacing;
+	width: 100%;
+
+	& > div {
+		background-color: var(--tertiary-theme-color);
+		height: $xs-spacing;
+
+		& > div {
+			background-color: var(--primary-font-color);
+			height: 100%;
+		}
+	}
+}
+
+.card-content {
+	display: grid;
+	gap: 0 $md-spacing;
+	grid-template-columns: 1fr 1fr 1fr;
+	padding: 0 $md-spacing;
+
+	& > div {
+		align-items: center;
+		display: flex;
+		margin-top: $sm-spacing;
+
+		& > div {
+			margin-left: $xs-spacing;
+		}
+	}
+}
+
+.card-details {
+	padding: $sm-spacing $md-spacing 0 $md-spacing;
+}
+
+.card-expand-button {
+	display: block;
+	margin-top: $sm-spacing;
+	width: 100%;
+}
+
+.card-icon {
+	background-color: var(--primary-theme-color);
+	border-radius: 50%;
+	display: flex;
+	padding: $xs-spacing;
+	position: absolute;
+	right: $sm-spacing;
+	top: $sm-spacing;
+	z-index: 1;
+}
+
+.card-performance {
+	display: flex;
+	justify-content: space-evenly;
+}
+
+.card-title {
+	display: block;
+	margin-top: $sm-spacing;
+	overflow: hidden;
+	padding: 0 $md-spacing;
+	text-align: center;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	&.expanded {
+		white-space: normal;
+	}
+}

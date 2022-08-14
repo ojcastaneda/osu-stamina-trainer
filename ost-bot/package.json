@@ -1,0 +1,35 @@
+{
+	"name": "ost-bot",
+	"version": "2.0.0",
+	"private": true,
+	"scripts": {
+		"build": "tsc",
+		"dev": "ts-node-dev src/app.ts",
+		"format": "prettier --ignore-path .gitignore --write --plugin-search-dir=. .",
+		"lint": "prettier --ignore-path .gitignore --check --plugin-search-dir=. . && eslint --ignore-path .gitignore .",
+		"start": "node build/app.js",
+		"test": "jest tests/"
+	},
+	"dependencies": {
+		"bancho.js": "^0.9.7",
+		"dotenv": "^16.0.1",
+		"levenary": "^1.1.1"
+	},
+	"devDependencies": {
+		"@types/jest": "^28.1.4",
+		"@types/node": "^18.0.3",
+		"@typescript-eslint/eslint-plugin": "^5.10.1",
+		"@typescript-eslint/parser": "^5.10.1",
+		"eslint": "^8.12.0",
+		"eslint-config-prettier": "^8.3.0",
+		"jest": "^28.1.2",
+		"prettier": "^2.5.1",
+		"ts-jest": "^28.0.5",
+		"ts-node-dev": "^2.0.0",
+		"tslib": "^2.3.1",
+		"typescript": "^4.7.4"
+	},
+	"jest": {
+		"preset": "ts-jest"
+	}
+}

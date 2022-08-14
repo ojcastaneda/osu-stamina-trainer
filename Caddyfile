@@ -1,0 +1,15 @@
+http://ost.sombrax79.org {
+	redir https://{host}{uri}
+}
+
+https://ost.sombrax79.org {
+	route /api/bot/* {
+		respond "Access denied" 403
+	}
+
+	route /api/* {
+		reverse_proxy ost-server:8080
+	}
+
+	reverse_proxy ost-website:3000
+}

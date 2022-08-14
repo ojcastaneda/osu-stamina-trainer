@@ -1,0 +1,8 @@
+{
+	"administrator_only": "Solo administradores",
+	"error_0": "Las credenciales proporcionadas son incorrectas",
+	"error_1": "Un error ocurrió al momento de iniciar sesión",
+	"login": "Iniciar sesión",
+	"password": "Contraseña",
+	"username": "Nombre de usuario"
+}

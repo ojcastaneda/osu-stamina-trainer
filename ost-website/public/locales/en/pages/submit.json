@@ -1,0 +1,13 @@
+{
+	"beatmap_submitted": "Beatmap sucessfully submitted",
+	"beatmapset_submitted": "Beatmapset sucessfully submitted",
+	"error_0": "The submitted beatmap is already part of the collection",
+	"error_1": "An error ocurred while performing the submission",
+	"submission_rule_1": "No incomplete beatmaps",
+	"submission_rule_2": "No meme/troll beatmaps",
+	"submission_rule_3": "No beatmaps dedicated exclusively to streams",
+	"submission_rule_4": "No beatmaps under 100 BPM",
+	"submission_rules": "Submission rules",
+	"submit_beatmap": "Submit as beatmap",
+	"submit_beatmapset": "Submit as beatmapset"
+}

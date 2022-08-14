@@ -1,0 +1,24 @@
+FROM rust:latest AS build
+
+WORKDIR /
+COPY ost-utils ./ost-utils
+RUN USER=root cargo new --bin ost-server
+
+WORKDIR /ost-server
+COPY ost-server/Cargo.toml ost-server/Cargo.lock ./
+RUN cargo build --release
+
+RUN rm ./target/release/deps/ost_server*
+COPY ost-server ./
+RUN cargo build --release
+
+FROM debian:bullseye-slim
+
+COPY --from=build /ost-server/migrations /migrations
+COPY --from=build /ost-server/target/release/ost-server /ost-server
+
+RUN apt-get update -y
+RUN apt-get install -y ca-certificates
+RUN update-ca-certificates
+
+CMD ["/ost-server"]

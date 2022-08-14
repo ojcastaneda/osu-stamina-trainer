@@ -1,0 +1,39 @@
+@import 'styles/variables';
+
+#current-page {
+	border: $xxs-spacing solid;
+	border-color: var(--secondary-font-color);
+}
+
+#pagination {
+	display: flex;
+	justify-content: center;
+	margin-top: $xxl-spacing;
+
+	& * {
+		color: var(--secondary-font-color);
+	}
+
+	& > * {
+		align-items: center;
+		background-color: var(--secondary-theme-color);
+		display: flex;
+		padding: $sm-spacing $md-spacing;
+	}
+
+	& > a {
+		cursor: pointer;
+
+		&:last-child {
+			border-radius: 0 $xs-spacing $xs-spacing 0;
+		}
+
+		&:first-child {
+			border-radius: $xs-spacing 0 0 $xs-spacing;
+		}
+
+		&:hover {
+			background-color: var(--tertiary-theme-color);
+		}
+	}
+}

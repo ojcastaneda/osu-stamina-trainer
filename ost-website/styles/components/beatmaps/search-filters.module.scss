@@ -1,0 +1,107 @@
+@import 'styles/variables';
+
+.filter {
+	text-align: left;
+
+	@media (max-width: $small-responsive) {
+		display: block;
+		margin-bottom: $md-spacing;
+		position: relative;
+
+		& > td {
+			display: block;
+			padding-bottom: $sm-spacing;
+
+			&:last-of-type,
+			&:nth-last-child(2) {
+				padding-bottom: 0;
+			}
+
+			& > button {
+				padding: 0;
+				position: absolute;
+				top: $xxs-spacing;
+				right: $xxs-spacing;
+			}
+
+			& > input,
+			select {
+				box-sizing: border-box;
+				width: 100%;
+			}
+		}
+	}
+
+	& > td {
+		& > button {
+			border-radius: 50%;
+			padding: $xs-spacing;
+		}
+		& > input {
+			box-sizing: border-box;
+			min-width: 100%;
+		}
+
+		& > select {
+			min-width: 100%;
+		}
+	}
+}
+
+.filter-property {
+	position: relative;
+	width: 100%;
+
+	& > div {
+		align-items: center;
+		display: flex;
+
+		& > span {
+			background-color: var(--secondary-theme-color);
+			border-radius: 50%;
+			color: var(--secondary-font-color);
+			cursor: pointer;
+			display: flex;
+			height: fit-content;
+			margin-right: $sm-spacing;
+			padding: $xs-spacing;
+			text-align: center;
+
+			& * {
+				color: var(--secondary-font-color);
+			}
+		}
+	}
+
+	& > span {
+		background-color: var(--secondary-theme-color);
+		border-radius: $sm-spacing;
+		color: var(--secondary-font-color);
+		padding: $md-spacing;
+		position: absolute;
+		z-index: 2;
+	}
+}
+
+.filters {
+	position: relative;
+	text-align: center;
+
+	& > table {
+		border-spacing: $sm-spacing;
+		margin-bottom: $sm-spacing;
+
+		@media (max-width: $small-responsive) {
+			border-spacing: 0;
+			width: 100%;
+		}
+	}
+}
+
+#settings {
+	cursor: pointer;
+	display: block;
+	margin: $lg-spacing 0;
+	text-align: center;
+	text-decoration: underline;
+}

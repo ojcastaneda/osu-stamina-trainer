@@ -1,0 +1,8 @@
+{
+	"administrator_only": "Administrator only",
+	"error_0": "The provided credentials are incorrect",
+	"error_1": "An error ocurred while logging in",
+	"login": "Login",
+	"password": "Password",
+	"username": "Username"
+}

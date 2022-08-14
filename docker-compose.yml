@@ -1,0 +1,103 @@
+version: "3.8"
+
+services:
+    cache:
+        image: redis:alpine
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
+        restart: on-failure
+        ports:
+            - 6379
+
+    ost-server:
+        image: ojcastaneda/ost-server:latest
+        restart: on-failure
+        depends_on:
+            - cache
+        environment:
+            - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            - AWS_BUCKET=${AWS_BUCKET}
+            - AWS_REGION=${AWS_REGION}
+            - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            - BASE_USERNAME=${BASE_USERNAME}
+            - BASE_PASSWORD=${BASE_PASSWORD}
+            - DATABASE_URL=${DATABASE_URL}
+            - OSU_API_CLIENT_ID=${OSU_API_CLIENT_ID}
+            - OSU_API_CLIENT_SECRET=${OSU_API_CLIENT_SECRET}
+            - REDIS_URL=redis://cache:6379
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
+        ports:
+            - 8080
+
+    ost-bot:
+        image: ojcastaneda/ost-bot:latest
+        restart: on-failure
+        depends_on:
+            - ost-server
+        environment:
+            - API_URL=http://ost-server:8080
+            - BOT_PASSWORD=${BOT_PASSWORD}
+            - BOT_USERNAME=${BOT_USERNAME}
+            - DISCORD_URL=https://discord.com/invite/eNU3BE6bca
+            - NODE_ENV=${NODE_ENV}
+            - WEBSITE_URL=https://ost.sombrax79.org/
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
+
+    ost-tasks:
+        image: ojcastaneda/ost-tasks:latest
+        restart: on-failure:3
+        environment:
+            - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
+            - AWS_BUCKET=${AWS_BUCKET}
+            - AWS_REGION=${AWS_REGION}
+            - AWS_SECRET_ACCESS_KEY=${AWS_SECRET_ACCESS_KEY}
+            - DATABASE_URL=${DATABASE_URL}
+            - OSU_API_CLIENT_ID=${OSU_API_CLIENT_ID}
+            - OSU_API_CLIENT_SECRET=${OSU_API_CLIENT_SECRET}
+            - PERIODIC=true
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
+
+    ost-website:
+        image: ojcastaneda/ost-website:latest
+        restart: on-failure
+        depends_on:
+            - ost-server
+        environment:
+            - API_URL=http://ost-server:8080
+            - DISCORD_URL=https://discord.com/invite/eNU3BE6bca
+            - GITHUB_URL=https://github.com/ojcastaneda/osu-stamina-trainer
+            - PATREON_URL=https://www.patreon.com/osuStaminaTrainer
+        container_name: ost-website
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
+        ports:
+            - 3000
+
+    ost-routing:
+        image: caddy:alpine
+        restart: on-failure
+        depends_on:
+            - ost-server
+            - ost-website
+        logging:
+            driver: "json-file"
+            options:
+                max-size: "50m"
+        ports:
+        - "80:80"
+        - "443:443"
+        volumes:
+        - ./caddy/Caddyfile.production:/etc/caddy/Caddyfile

@@ -1,0 +1,23 @@
+FROM rust:latest AS build
+
+WORKDIR /
+COPY ost-utils ./ost-utils
+RUN USER=root cargo new --bin ost-tasks
+
+WORKDIR /ost-tasks
+COPY ost-tasks/Cargo.toml ost-tasks/Cargo.lock ./
+RUN cargo build --release
+
+RUN rm ./target/release/deps/ost_tasks*
+COPY ost-tasks ./
+RUN cargo build --release
+
+FROM debian:bullseye-slim
+
+COPY --from=build /ost-tasks/target/release/ost-tasks /ost-tasks
+
+RUN apt-get update -y
+RUN apt-get install -y ca-certificates
+RUN update-ca-certificates
+
+CMD ["/ost-tasks"]

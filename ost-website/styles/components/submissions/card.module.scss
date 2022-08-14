@@ -1,0 +1,48 @@
+@import 'styles/variables';
+
+.card {
+	border: $xs-spacing solid var(--tertiary-theme-color);
+	border-radius: $sm-spacing;
+	height: fit-content;
+	overflow-x: hidden;
+	position: relative;
+}
+
+.card-content {
+	padding: $lg-spacing;
+	display: flex;
+	& > button {
+		justify-content: center;
+		width: 100%;
+
+		&:last-of-type {
+			background-color: var(--error-color);
+			margin-left: $lg-spacing;
+		}
+	}
+}
+
+.card-icon {
+	background-color: var(--primary-theme-color);
+	border-radius: 50%;
+	display: flex;
+	padding: $xs-spacing;
+	position: absolute;
+	right: $sm-spacing;
+	top: $sm-spacing;
+	z-index: 1;
+}
+
+.card-title {
+	display: block;
+	margin-top: $sm-spacing;
+	overflow: hidden;
+	padding: 0 $md-spacing;
+	text-align: center;
+	text-overflow: ellipsis;
+	white-space: nowrap;
+
+	&.expanded {
+		white-space: normal;
+	}
+}

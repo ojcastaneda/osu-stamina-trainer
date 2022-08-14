@@ -1,0 +1,14 @@
+{
+	"beatmap_submitted": "Mapa propuesto exitosamente",
+	"beatmapset_submitted": "Colección de mapas propuestos exitosamente",
+	"error_0": "El mapa propuesto ya es parte de la colección",
+	"error_1": "Un error ha ocurrido al intentar hacer proponer",
+	"submission_rule_1": "No mapas incompletos",
+	"submission_rule_2": "No mapas meme/troll",
+	"submission_rule_3": "No mapas dedicados exclusivamente a streams",
+	"submission_rule_4": "No mapas por debajo de 100BPM",
+	"submission_rules": "Reglas de propuestas",
+	"submit_a_beatmap": "Proponer un mapa o colección de mapas",
+	"submit_beatmap": "Proponer como mapa",
+	"submit_beatmapset": "Proponer como colección de mapas"
+}

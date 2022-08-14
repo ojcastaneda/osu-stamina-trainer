@@ -1,0 +1,53 @@
+@import 'styles/variables';
+
+#search-bar {
+	display: flex;
+	margin-bottom: $lg-spacing;
+
+	@media (max-width: $smallest-responsive) {
+		display: block;
+	}
+
+	& > div > button > div {
+		display: flex;
+	}
+}
+
+#search-order {
+	display: flex;
+	filter: var(--shadow);
+
+	& > button {
+		border-radius: 0 $xs-spacing $xs-spacing 0;
+		filter: none;
+	}
+
+	& > select {
+		border-radius: $xs-spacing 0 0 $xs-spacing;
+		filter: none;
+
+		@media (max-width: $smallest-responsive) {
+			width: 100%;
+		}
+	}
+}
+
+#search-title {
+	border-radius: $xs-spacing 0 0 $xs-spacing;
+	display: flex;
+	margin-right: $lg-spacing;
+	width: 100%;
+
+	@media (max-width: $smallest-responsive) {
+		margin-bottom: $lg-spacing;
+	}
+
+	& > button {
+		border-radius: 0 $xs-spacing $xs-spacing 0;
+	}
+
+	& > input {
+		border-radius: $xs-spacing 0 0 $xs-spacing;
+		width: 100%;
+	}
+}

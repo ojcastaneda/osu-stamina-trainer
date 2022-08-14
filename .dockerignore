@@ -1,0 +1,11 @@
+**/.svelte-kit/
+**/build/
+**/node_modules/
+**/target/
+**/tets/
+**/test_files/
+**/.env
+**/.env.example
+**/.gitignore
+**/README.md
+ost-utils/Cargo.lock

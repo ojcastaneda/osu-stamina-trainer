@@ -1,0 +1,33 @@
+@import 'styles/variables';
+
+#log-in {
+	background-color: var(--primary-theme-color);
+	margin: 0 auto;
+	padding: 2.5% 5%;
+	text-align: center;
+	width: fit-content;
+
+	& > div {
+		display: block;
+		margin-bottom: $md-spacing;
+
+		&:last-of-type {
+			margin-bottom: 0;
+		}
+
+		& > button {
+			justify-content: center;
+			width: 100%;
+		}
+
+		& > input {
+			box-sizing: border-box;
+			min-width: 100%;
+		}
+
+		& > span {
+			display: block;
+			margin-top: $sm-spacing;
+		}
+	}
+}

@@ -1,0 +1,15 @@
+@import 'styles/variables';
+
+#beatmaps {
+	display: grid;
+	gap: $lg-spacing;
+	grid-template-columns: 1fr 1fr 1fr;
+
+	@media (max-width: $medium-responsive) {
+		grid-template-columns: 1fr 1fr;
+	}
+
+	@media (max-width: $small-responsive) {
+		grid-template-columns: 1fr;
+	}
+}

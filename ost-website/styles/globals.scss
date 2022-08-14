@@ -1,0 +1,140 @@
+@import 'styles/variables';
+
+@font-face {
+	font-family: 'Noto Sans';
+	src: url('/fonts/NotoSans-Regular.ttf');
+}
+
+@font-face {
+	font-family: 'Noto Serif';
+	src: url('/fonts/NotoSerif-Regular.ttf');
+}
+
+* {
+	color: var(--primary-font-color);
+	font: var(--font-size) 'Noto Sans';
+}
+
+a {
+	text-decoration: none;
+}
+
+body {
+	--primary-font-color: rgb(255, 255, 255);
+	--secondary-font-color: rgb(255, 255, 255);
+
+	--primary-theme-color: rgb(49, 53, 57);
+	--secondary-theme-color: rgb(35, 39, 41);
+	--tertiary-theme-color: rgb(90, 95, 100);
+
+	--background-color: var(--secondary-theme-color);
+
+	--error-color: rgb(255, 80, 80);
+
+	--shadow: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.5));
+
+	--font-size: 15px;
+
+	background-color: var(--background-color);
+	margin: 0;
+
+	&.light-theme {
+		--primary-font-color: rgb(0, 0, 0);
+		--secondary-font-color: rgb(255, 255, 255);
+
+		--primary-theme-color: rgb(255, 255, 255);
+		--secondary-theme-color: rgb(35, 39, 41);
+		--tertiary-theme-color: rgb(210, 210, 210);
+
+		--background-color: var(--tertiary-theme-color);
+	}
+}
+
+.osu-image {
+	aspect-ratio: 900 / 250;
+	display: block;
+	cursor: pointer;
+	display: block;
+	position: relative;
+}
+
+button {
+	align-items: center;
+	background-color: var(--secondary-theme-color);
+	border: 0;
+	border-radius: $xs-spacing;
+	color: var(--secondary-font-color);
+	cursor: pointer;
+	display: flex;
+	filter: var(--shadow);
+	padding: 0.5rem 0.75rem;
+
+	&:disabled {
+		cursor: auto;
+		opacity: 0.7;
+	}
+
+	& * {
+		color: var(--secondary-font-color);
+	}
+}
+
+h1 {
+	font-size: 2rem;
+	margin: 0 0 $lg-spacing 0;
+	text-align: center;
+}
+
+h2 {
+	font-size: 1.5rem;
+	margin: 0 0 $md-spacing 0;
+	text-align: center;
+}
+
+html,
+body,
+body > div {
+	font-size: var(--font-size);
+	width: 100%;
+}
+
+span.error {
+	color: var(--error-color);
+}
+
+input {
+	background-color: var(--tertiary-theme-color);
+	border: 0;
+	border-radius: $xs-spacing;
+	filter: var(--shadow);
+	padding: 0.5rem 0.75rem;
+
+	&:disabled {
+		opacity: 0.6;
+	}
+
+	&::placeholder {
+		color: var(--primary-font-color);
+		opacity: 50%;
+	}
+
+	&.error {
+		border: $xxs-spacing solid var(--error-color);
+	}
+}
+
+option {
+	color: var(--secondary-font-color);
+}
+
+select {
+	appearance: none;
+	background-color: var(--secondary-theme-color);
+	border: 0;
+	border-radius: $xs-spacing;
+	color: var(--secondary-font-color);
+	cursor: pointer;
+	filter: var(--shadow);
+	line-height: 1.5rem;
+	padding: 0.5rem 0.75rem;
+}
