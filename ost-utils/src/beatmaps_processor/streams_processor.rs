@@ -89,8 +89,16 @@ pub fn process_beatmap(parsed_beatmap: &rosu_pp::Beatmap) -> Beatmap {
         process_intervals(&mut beatmap, parsed_beatmap, &timing_points);
     }
     calculate_streams_statistics(&mut beatmap);
-    beatmap.longest_stream += 1;
-    beatmap.streams_length += 1;
+    if beatmap.longest_stream > 1 {
+        beatmap.longest_stream += 1;
+        beatmap.streams_length += 1;
+    } else {
+        beatmap.predominant_bpm = PredominantBpm::new(parsed_beatmap.bpm().round() as i16, 0);
+        beatmap.streams_spacing = 0.0;
+    }
+    beatmap.total_length =
+        (parsed_beatmap.hit_objects[parsed_beatmap.hit_objects.len() - 1].start_time / 1000.0)
+            .round() as i16;
     beatmap
 }
 

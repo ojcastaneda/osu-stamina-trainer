@@ -19,6 +19,7 @@ pub struct Beatmap {
     pub streams_density: f32,
     pub streams_spacing: f32,
     pub streams_length: i16,
+    pub total_length: i16,
 }
 
 #[derive(Debug)]
@@ -82,6 +83,7 @@ pub async fn process_beatmap(file: &[u8]) -> Result<Beatmap, Error> {
         streams_density: round_decimal(2, beatmap.streams_density),
         streams_length: beatmap.streams_length,
         streams_spacing: round_decimal(2, beatmap.streams_spacing),
+        total_length: beatmap.total_length,
     })
 }
 
@@ -93,31 +95,10 @@ fn round_decimal(decimals: i32, number: f64) -> f32 {
 #[cfg(test)]
 mod tests {
     use super::{Beatmap, ModDecimal, ModInteger};
-    use crate::beatmaps_processor::{process_beatmap};
+    use crate::beatmaps_processor::process_beatmap;
     use tokio::fs;
 
-    fn setup_test() -> Beatmap {
-        Beatmap {
-            accuracy: ModDecimal::new(1, 11.1, 10.0),
-            approach_rate: ModDecimal::new(1, 11.0, 10.0),
-            bpm: ModInteger::new(444.0, 296.0),
-            circle_size: 5.0,
-            difficulty_rating: ModDecimal::new(1, 0.0, 0.0),
-            longest_stream: 81,
-            performance_100: ModInteger::new(0.0, 0.0),
-            performance_95: ModInteger::new(0.0, 0.0),
-            streams_density: 0.1,
-            streams_spacing: 0.41,
-            streams_length: 71,
-        }
-    }
-
-    #[tokio::test]
-    async fn test_process_beatmap() {
-        let beatmap = process_beatmap(&fs::read("./test_files/test.osu").await.unwrap())
-            .await
-            .unwrap();
-        let test_beatmap = setup_test();
+    fn compare_beatmaps(beatmap: Beatmap, test_beatmap: Beatmap) {
         assert_eq!(
             beatmap.accuracy.double_time,
             test_beatmap.accuracy.double_time
@@ -149,5 +130,49 @@ mod tests {
         assert_eq!(beatmap.streams_density, test_beatmap.streams_density);
         assert_eq!(beatmap.streams_length, test_beatmap.streams_length);
         assert_eq!(beatmap.streams_spacing, test_beatmap.streams_spacing);
+        assert_eq!(beatmap.total_length, test_beatmap.total_length);
+    }
+
+    #[tokio::test]
+    async fn test_process_beatmap() {
+        let beatmap = process_beatmap(&fs::read("./test_files/test.osu").await.unwrap())
+            .await
+            .unwrap();
+        let test_beatmap = Beatmap {
+            accuracy: ModDecimal::new(1, 11.1, 10.0),
+            approach_rate: ModDecimal::new(1, 11.0, 10.0),
+            bpm: ModInteger::new(444.0, 296.0),
+            circle_size: 5.0,
+            difficulty_rating: ModDecimal::new(1, 0.0, 0.0),
+            longest_stream: 81,
+            performance_100: ModInteger::new(0.0, 0.0),
+            performance_95: ModInteger::new(0.0, 0.0),
+            streams_density: 0.1,
+            streams_spacing: 0.41,
+            streams_length: 71,
+            total_length: 211,
+        };
+        compare_beatmaps(beatmap, test_beatmap);
+    }
+    #[tokio::test]
+    async fn test_no_streams() {
+        let beatmap = process_beatmap(&fs::read("./test_files/test_no_streams.osu").await.unwrap())
+            .await
+            .unwrap();
+        let test_beatmap = Beatmap {
+            accuracy: ModDecimal::new(1, 7.1, 4.0),
+            approach_rate: ModDecimal::new(1, 7.7, 5.0),
+            bpm: ModInteger::new(270.0, 180.0),
+            circle_size: 3.5,
+            difficulty_rating: ModDecimal::new(1, 0.0, 0.0),
+            longest_stream: 0,
+            performance_100: ModInteger::new(0.0, 0.0),
+            performance_95: ModInteger::new(0.0, 0.0),
+            streams_density: 0.0,
+            streams_spacing: 0.0,
+            streams_length: 0,
+            total_length: 258,
+        };
+        compare_beatmaps(beatmap, test_beatmap);
     }
 }

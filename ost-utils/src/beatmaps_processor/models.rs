@@ -13,6 +13,7 @@ pub struct Beatmap {
     pub streams_density: f64,
     pub streams_length: i16,
     pub streams_spacing: f64,
+    pub total_length: i16,
 }
 
 impl Beatmap {
@@ -28,6 +29,7 @@ impl Beatmap {
             streams_density: 0.0,
             streams_length: 0,
             streams_spacing: 0.0,
+            total_length: 0,
         }
     }
 

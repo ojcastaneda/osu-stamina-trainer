@@ -83,7 +83,7 @@ async fn retrieve_beatmap(
             difficulty_rating: beatmap.difficulty_rating.no_modification,
             id,
             last_updated: Utc::now(),
-            length: beatmap.bpm.no_modification,
+            length: beatmap.total_length,
             longest_stream: beatmap.longest_stream,
             performance_100: beatmap.performance_100.no_modification,
             performance_95: beatmap.performance_95.no_modification,
@@ -98,7 +98,7 @@ async fn retrieve_beatmap(
             ),
         })
         .into_response())
-    } else {    
+    } else {
         Ok(StatusCode::NOT_FOUND.into_response())
     }
 }
