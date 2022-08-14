@@ -44,6 +44,7 @@ services:
             - BOT_PASSWORD=${BOT_PASSWORD}
             - BOT_USERNAME=${BOT_USERNAME}
             - DISCORD_URL=https://discord.com/invite/eNU3BE6bca
+            - GITHUB_URL=https://github.com/ojcastaneda/osu-stamina-trainer
             - NODE_ENV=${NODE_ENV}
             - WEBSITE_URL=https://ost.sombrax79.org
         logging:
@@ -53,7 +54,7 @@ services:
 
     ost-tasks:
         image: ojcastaneda/ost-tasks:latest
-        restart: on-failure:3
+        restart: on-failure
         environment:
             - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
             - AWS_BUCKET=${AWS_BUCKET}
