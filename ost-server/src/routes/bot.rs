@@ -117,7 +117,7 @@ async fn retrieve_language(
             .await?;
         Ok(user.language)
     } else {
-        let language = if let Some(user) = osu_api.retrieve_user(username.clone()).await? {
+        let language = if let Some(user) = osu_api.retrieve_user(username.clone(), true).await? {
             parse_country_code(user.country_code)
         } else {
             String::from("en")
@@ -142,7 +142,7 @@ async fn update_language(
     Json(payload): Json<UserLanguage>,
     Path(username): Path<String>,
 ) -> ServerResult<impl IntoResponse> {
-    if let Some(user) = osu_api.retrieve_user(payload.id).await? {
+    if let Some(user) = osu_api.retrieve_user(payload.id, false).await? {
         let new_username = user.username.replace(' ', "_");
         if new_username != username {
             return Ok(StatusCode::FORBIDDEN);

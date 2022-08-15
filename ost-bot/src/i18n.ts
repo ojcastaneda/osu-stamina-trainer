@@ -45,7 +45,8 @@ export const english: Readonly<Response> = {
 		`Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
 		`Streams density: ${beatmap.streams_density} | Streams spacing: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
-		`CS: ${beatmap.circle_size} | Length: ${formatLength(beatmap.length)}`,
+		`CS: ${beatmap.circle_size} | Length: ${formatLength(beatmap.length)} | ` +
+		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	requestNotFound:
 		'No beatmaps found that match provided filters, reduce the number of filters or change their values',
 	simpleRequest: (beatmap: Beatmap) =>
@@ -53,7 +54,8 @@ export const english: Readonly<Response> = {
 		`BPM: ${beatmap.bpm} | Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
 		`Streams density: ${beatmap.streams_density} | Streams spacing: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
-		`CS: ${beatmap.circle_size} | Duration: ${formatLength(beatmap.length)}`,
+		`CS: ${beatmap.circle_size} | Duration: ${formatLength(beatmap.length)} | ` +
+		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	simpleRequestNotFound:
 		'Beatmap analysis is only available for ranked beatmaps or beatmaps that are part of the collection',
 	unexpectedError: `The bot failed unexpectedly, please report this error via [${process.env.DISCORD_URL} Discord]`,
@@ -75,7 +77,8 @@ export const spanish: Readonly<Response> = {
 		`Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
 		`Densidad de streams: ${beatmap.streams_density} | Espaciado de streams: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
-		`CS: ${beatmap.circle_size} | Duración: ${formatLength(beatmap.length)}`,
+		`CS: ${beatmap.circle_size} | Duración: ${formatLength(beatmap.length)} | ` +
+		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	requestNotFound:
 		'No se encontraron mapas que coinciden con los filtros suministrados, reduzca el número de filtros o cambie sus valores',
 	simpleRequest: (beatmap: Beatmap) =>
@@ -83,7 +86,8 @@ export const spanish: Readonly<Response> = {
 		`BPM: ${beatmap.bpm} | Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
 		`Densidad de streams: ${beatmap.streams_density} | Espaciado de streams: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
-		`CS: ${beatmap.circle_size} | Duración: ${formatLength(beatmap.length)}`,
+		`CS: ${beatmap.circle_size} | Duración: ${formatLength(beatmap.length)} | ` +
+		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	simpleRequestNotFound:
 		'El análisis de mapas solo está disponible para mapas clasificados o mapas que sean parte de la colección',
 	unexpectedError: `El bot falló inesperadamente, por favor reporte este error vía [${process.env.DISCORD_URL} Discord]`,
