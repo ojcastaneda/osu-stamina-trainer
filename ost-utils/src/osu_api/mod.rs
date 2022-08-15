@@ -200,12 +200,19 @@ impl Client {
         Ok((beatmaps, new_approved_date, new_id))
     }
 
-    pub async fn retrieve_user(&mut self, id: impl Display) -> Result<Option<User>, Error> {
+    pub async fn retrieve_user(
+        &mut self,
+        user: impl Display,
+        is_username: bool,
+    ) -> Result<Option<User>, Error> {
         self.request_permit().await?;
         let token = self.headers.lock().await.token.clone();
         let response = self
             .client
-            .get(format!("https://osu.ppy.sh/api/v2/users/{id}/osu"))
+            .get(format!(
+                "https://osu.ppy.sh/api/v2/users/{user}?key={}",
+                if is_username { "username" } else { "id" }
+            ))
             .header("Authorization", token)
             .send()
             .await;
@@ -240,24 +247,24 @@ mod tests {
     use super::Client;
     use chrono::{DateTime, Utc};
     use dotenv::dotenv;
-    use std::{str::FromStr, time::Instant};
+    use std::{error::Error, str::FromStr, time::Instant};
     use tokio::spawn;
 
-    fn setup_test(requests_per_minute: usize) -> Client {
+    fn setup_test(requests_per_minute: usize) -> Result<Client, Box<dyn Error>> {
         dotenv().ok();
-        Client::from_environment(requests_per_minute).unwrap()
+        Ok(Client::from_environment(requests_per_minute)?)
     }
 
     #[tokio::test]
-    async fn test_retrieve_beatmap() {
-        let mut client = setup_test(2);
-        let beatmap = client.retrieve_beatmap(555797).await.unwrap().unwrap();
+    async fn test_retrieve_beatmap() -> Result<(), Box<dyn Error>> {
+        let mut client = setup_test(2)?;
+        let beatmap = client.retrieve_beatmap(555797).await?.unwrap();
         assert_eq!(beatmap.beatmapset_id, 158023);
         assert_eq!(beatmap.checksum, "a84050da9b68ca1bd8e2d1700b9c6ca5");
         assert_eq!(beatmap.id, 555797);
         assert_eq!(
             beatmap.last_updated,
-            DateTime::<Utc>::from_str("2015-03-17T22:31:07+00:00").unwrap()
+            DateTime::<Utc>::from_str("2015-03-17T22:31:07+00:00")?
         );
         assert_eq!(beatmap.mode, "osu");
         assert_eq!(beatmap.ranked, 1);
@@ -270,22 +277,23 @@ mod tests {
         assert!(beatmapset.play_count > 47000000);
         assert_eq!(
             beatmapset.ranked_date.unwrap(),
-            DateTime::<Utc>::from_str("2015-03-24T22:40:14+00:00").unwrap()
+            DateTime::<Utc>::from_str("2015-03-24T22:40:14+00:00")?
         );
         assert_eq!(beatmapset.title, "Everything will freeze");
-        assert!(client.retrieve_beatmap(1).await.unwrap().is_none());
+        assert!(client.retrieve_beatmap(1).await?.is_none());
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_retrieve_beatmapset() {
-        let mut client = setup_test(2);
-        let beatmapset = client.retrieve_beatmapset(158023).await.unwrap().unwrap();
+    async fn test_retrieve_beatmapset() -> Result<(), Box<dyn Error>> {
+        let mut client = setup_test(2)?;
+        let beatmapset = client.retrieve_beatmapset(158023).await?.unwrap();
         assert!(beatmapset.favourite_count > 21000);
         assert_eq!(beatmapset.id, 158023);
         assert!(beatmapset.play_count > 47000000);
         assert_eq!(
             beatmapset.ranked_date.unwrap(),
-            DateTime::<Utc>::from_str("2015-03-24T22:40:14+00:00").unwrap()
+            DateTime::<Utc>::from_str("2015-03-24T22:40:14+00:00")?
         );
         assert_eq!(beatmapset.title, "Everything will freeze");
         let beatmaps = beatmapset.beatmaps.unwrap();
@@ -298,21 +306,20 @@ mod tests {
         assert_eq!(beatmap.id, 555797);
         assert_eq!(
             beatmap.last_updated,
-            DateTime::<Utc>::from_str("2015-03-17T22:31:07+00:00").unwrap()
+            DateTime::<Utc>::from_str("2015-03-17T22:31:07+00:00")?
         );
         assert_eq!(beatmap.mode, "osu");
         assert_eq!(beatmap.ranked, 1);
         assert_eq!(beatmap.version, "Time Freeze");
-        assert!(client.retrieve_beatmapset(121252).await.unwrap().is_none());
+        assert!(client.retrieve_beatmapset(121252).await?.is_none());
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_retrieve_leaderboard_beatmaps() {
-        let mut client = setup_test(2);
-        let (beatmaps, approved_date, id) = client
-            .retrieve_leaderboard_beatmaps(0, 0, i64::MAX)
-            .await
-            .unwrap();
+    async fn test_retrieve_leaderboard_beatmaps() -> Result<(), Box<dyn Error>> {
+        let mut client = setup_test(2)?;
+        let (beatmaps, approved_date, id) =
+            client.retrieve_leaderboard_beatmaps(0, 0, i64::MAX).await?;
         assert_eq!(beatmaps.len(), 70);
         let beatmap = &beatmaps[0];
         assert_eq!(beatmap.beatmapset_id, 1);
@@ -321,7 +328,7 @@ mod tests {
         assert_eq!(beatmap.id, 75);
         assert_eq!(
             beatmap.last_updated,
-            DateTime::<Utc>::from_str("2014-05-18T17:16:42+00:00").unwrap()
+            DateTime::<Utc>::from_str("2014-05-18T17:16:42+00:00")?
         );
         assert_eq!(beatmap.mode, "osu");
         assert_eq!(beatmap.ranked, 1);
@@ -333,50 +340,60 @@ mod tests {
         assert!(beatmapset.play_count > 580000);
         assert_eq!(
             beatmapset.ranked_date.unwrap(),
-            DateTime::<Utc>::from_str("2007-10-06T17:46:31+00:00").unwrap()
+            DateTime::<Utc>::from_str("2007-10-06T17:46:31+00:00")?
         );
         assert_eq!(beatmapset.title, "DISCO PRINCE");
         assert_eq!(approved_date, 1192064884000);
         assert_eq!(id, 74);
         let (empty_beatmaps, empty_approved_date, empty_id) = client
             .retrieve_leaderboard_beatmaps(i64::MAX, i32::MAX, i64::MAX)
-            .await
-            .unwrap();
+            .await?;
         assert_eq!(empty_beatmaps.len(), 0);
         assert_eq!(empty_approved_date, i64::MAX);
         assert_eq!(empty_id, i32::MAX);
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_requests_per_minute() {
-        let client = setup_test(2);
+    async fn test_requests_per_minute() -> Result<(), Box<dyn Error>> {
+        let client = setup_test(2)?;
         let mut tasks = Vec::new();
         let start = Instant::now();
         for _ in 0..3 {
             let mut clone = client.clone();
             tasks.push(spawn(async move {
-                clone.retrieve_user(6484647).await.unwrap_or(None)
+                clone.retrieve_user(6484647, false).await.unwrap_or(None)
             }));
         }
 
         for task in tasks {
-            assert!(task.await.unwrap().is_some());
+            assert!(task.await?.is_some());
         }
         assert!(start.elapsed().as_secs_f64() >= 60.0);
+        Ok(())
     }
 
     #[tokio::test]
-    async fn test_retrieve_user() {
-        let mut client = setup_test(2);
+    async fn test_retrieve_user() -> Result<(), Box<dyn Error>> {
+        let mut client = setup_test(2)?;
         assert_eq!(
             client
-                .retrieve_user(6484647)
-                .await
-                .unwrap()
+                .retrieve_user(6484647, false)
+                .await?
                 .unwrap()
                 .username,
             "Sombrax79"
         );
-        assert!(client.retrieve_user(1).await.unwrap().is_none());
+        assert_eq!(
+            client
+                .retrieve_user("Sombrax79", true)
+                .await?
+                .unwrap()
+                .username,
+            "Sombrax79"
+        );
+        assert!(client.retrieve_user(6484647, true).await?.is_none());
+        assert!(client.retrieve_user("Sombrax79", false).await?.is_none());
+        Ok(())
     }
 }

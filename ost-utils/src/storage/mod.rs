@@ -63,18 +63,19 @@ impl Client {
 mod tests {
     use crate::storage::Client;
     use dotenv::dotenv;
-    use std::fs;
+    use std::{error::Error, fs};
 
     const TEST_FILE: &str = "test.osu";
 
     #[tokio::test]
-    async fn test_storage() {
+    async fn test_storage() -> Result<(), Box<dyn Error>> {
         dotenv().ok();
-        let client = Client::from_environment().await.unwrap();
-        let file_content = fs::read("./test_files/test.osu").unwrap();
+        let client = Client::from_environment().await?;
+        let file_content = fs::read("./test_files/test.osu")?;
         assert!(client.upload(&file_content, TEST_FILE).await.is_ok());
-        assert_eq!(client.retrieve(TEST_FILE).await.unwrap(), file_content);
+        assert_eq!(client.retrieve(TEST_FILE).await?, file_content);
         assert!(client.delete(TEST_FILE).await.is_ok());
         assert!(client.retrieve(TEST_FILE).await.is_err());
+        Ok(())
     }
 }

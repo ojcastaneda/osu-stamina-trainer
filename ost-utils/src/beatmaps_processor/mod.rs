@@ -96,6 +96,7 @@ fn round_decimal(decimals: i32, number: f64) -> f32 {
 mod tests {
     use super::{Beatmap, ModDecimal, ModInteger};
     use crate::beatmaps_processor::process_beatmap;
+    use std::error::Error;
     use tokio::fs;
 
     fn compare_beatmaps(beatmap: Beatmap, test_beatmap: Beatmap) {
@@ -134,10 +135,8 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn test_process_beatmap() {
-        let beatmap = process_beatmap(&fs::read("./test_files/test.osu").await.unwrap())
-            .await
-            .unwrap();
+    async fn test_process_beatmap() -> Result<(), Box<dyn Error>> {
+        let beatmap = process_beatmap(&fs::read("./test_files/test.osu").await?).await?;
         let test_beatmap = Beatmap {
             accuracy: ModDecimal::new(1, 11.1, 10.0),
             approach_rate: ModDecimal::new(1, 11.0, 10.0),
@@ -153,12 +152,11 @@ mod tests {
             total_length: 211,
         };
         compare_beatmaps(beatmap, test_beatmap);
+        Ok(())
     }
     #[tokio::test]
-    async fn test_no_streams() {
-        let beatmap = process_beatmap(&fs::read("./test_files/test_no_streams.osu").await.unwrap())
-            .await
-            .unwrap();
+    async fn test_no_streams() -> Result<(), Box<dyn Error>> {
+        let beatmap = process_beatmap(&fs::read("./test_files/test_no_streams.osu").await?).await?;
         let test_beatmap = Beatmap {
             accuracy: ModDecimal::new(1, 7.1, 4.0),
             approach_rate: ModDecimal::new(1, 7.7, 5.0),
@@ -174,5 +172,6 @@ mod tests {
             total_length: 258,
         };
         compare_beatmaps(beatmap, test_beatmap);
+        Ok(())
     }
 }
