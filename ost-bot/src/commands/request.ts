@@ -241,7 +241,7 @@ export async function request(
 ): Promise<I18nProps> {
 	const parsedRequest = parseRequest(parameters, guessCommand);
 	if (typeof parsedRequest === 'string') return ['didYouMean', `${command} ${parsedRequest}`];
-	console.info(`${command} ${parameters} | DT: ${parsedRequest[0]} | Filters: ${parsedRequest[1]}`);
+	console.info(`${command} ${parameters} | DT: ${parsedRequest[1]} | Filters: ${JSON.stringify(parsedRequest[0])}`);
 	if (parsedRequest[1] !== undefined) {
 		const beatmap = await fetchRequest(parsedRequest[0], parsedRequest[1]);
 		return beatmap === undefined
