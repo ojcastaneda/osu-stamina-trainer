@@ -43,7 +43,8 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
                 .compact()
                 .with_target(false)
                 .with_filter(filter_fn(|metadata| {
-                    metadata.target().starts_with("tower_http") || metadata.target().starts_with("ost_server")
+                    metadata.target().starts_with("tower_http")
+                        || metadata.target().starts_with("ost_server")
                 })),
         )
         .init();

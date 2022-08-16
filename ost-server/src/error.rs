@@ -9,11 +9,14 @@ use redis::RedisError;
 use std::{error, fmt};
 use tokio::io;
 
+use crate::models::filter::Property;
+
 #[derive(Debug)]
 pub enum Error {
     Authorization,
     BeatmapProcessor(beatmaps_processor::Error),
     Database(sqlx::Error),
+    DynamicFilter(Property),
     Extension(ExtensionRejection),
     FileStorage(storage::Error),
     HeaderValue(InvalidHeaderValue),
@@ -32,6 +35,11 @@ impl fmt::Display for Error {
             Self::Authorization => write!(formatter, "User not authorized."),
             Self::BeatmapProcessor(beatmaps_processor) => beatmaps_processor.fmt(formatter),
             Self::Database(database) => database.fmt(formatter),
+            Self::DynamicFilter(filter) => write!(
+                formatter,
+                "Incorrect data type for filter with property {:?}",
+                filter
+            ),
             Self::Extension(extension) => extension.fmt(formatter),
             Self::FileStorage(storage) => storage.fmt(formatter),
             Self::HeaderValue(header_value) => header_value.fmt(formatter),
@@ -118,6 +126,7 @@ impl IntoResponse for Error {
                 Self::Authorization => "User not authorized.",
                 Self::BeatmapProcessor(_) => "An error ocurred while processing a beatmap.",
                 Self::Database(_) => "An error ocurred while performing a database transaction.",
+                Self::DynamicFilter(_) => "An error ocurred while binding dynamic filter.",
                 Self::Extension(_) => {
                     "An error ocurred during the initial configuration of services."
                 }

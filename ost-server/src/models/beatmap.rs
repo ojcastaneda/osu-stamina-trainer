@@ -1,8 +1,4 @@
-use super::{
-    filter::{Filter, Value},
-    order::Order,
-    Limit,
-};
+use super::{filter::Filter, order::Order, Limit};
 use crate::{collection_generator::CollectionBeatmap, ServerResult};
 use serde::{Deserialize, Serialize};
 use sqlx::{
@@ -93,12 +89,7 @@ pub async fn retrieve_filtered_collection(
     );
     let mut beatmaps = query_as::<_, CollectionBeatmap>(&beatmaps_sql);
     for filter in filters {
-        beatmaps = match filter.value {
-            Value::Date(date) => beatmaps.bind(date),
-            Value::Decimal(decimal) => beatmaps.bind(decimal),
-            Value::Integer(integer) => beatmaps.bind(integer),
-            Value::RankedStatus(ranked_status) => beatmaps.bind(ranked_status),
-        };
+        beatmaps = filter.bind(beatmaps)?;
     }
     if let Some(title) = title {
         beatmaps = beatmaps.bind(title);
@@ -128,14 +119,8 @@ pub async fn retrieve_by_page(
     let limit_sql = format!(r#"SELECT COUNT(id) as limit FROM beatmaps {parsed_filters}"#);
     let mut limit = query_as::<_, Limit>(&limit_sql);
     for filter in filters {
-        (beatmaps, limit) = match filter.value {
-            Value::Date(date) => (beatmaps.bind(date), limit.bind(date)),
-            Value::Decimal(decimal) => (beatmaps.bind(decimal), limit.bind(decimal)),
-            Value::Integer(integer) => (beatmaps.bind(integer), limit.bind(integer)),
-            Value::RankedStatus(ranked_status) => {
-                (beatmaps.bind(ranked_status), limit.bind(ranked_status))
-            }
-        };
+        beatmaps = filter.bind(beatmaps)?;
+        limit = filter.bind(limit)?;
     }
     let mut transaction = database.begin().await?;
     if let Some(title) = title {
@@ -182,12 +167,7 @@ pub async fn retrieve_request(
     );
     let mut beatmap = query_as::<_, Beatmap>(&beatmap_sql);
     for filter in filters {
-        beatmap = match filter.value {
-            Value::Date(date) => beatmap.bind(date),
-            Value::Integer(integer) => beatmap.bind(integer),
-            Value::Decimal(decimal) => beatmap.bind(decimal),
-            Value::RankedStatus(ranked_status) => beatmap.bind(ranked_status),
-        };
+        beatmap = filter.bind(beatmap)?;
     }
     Ok(beatmap.fetch_optional(database).await?)
 }

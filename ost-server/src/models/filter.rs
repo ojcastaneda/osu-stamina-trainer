@@ -1,19 +1,72 @@
+use crate::{error::Error, ServerResult};
+
 use super::beatmap::RankedStatus;
 use serde::Deserialize;
-use sqlx::types::chrono::{DateTime, Utc};
+use sqlx::{
+    postgres::PgArguments,
+    query::QueryAs,
+    types::chrono::{DateTime, Utc},
+    Postgres,
+};
 
 #[derive(Deserialize)]
 pub struct Filter {
     pub operator: Operator,
     pub property: Property,
-    pub value: Value,
+    value: Value,
 }
 
 impl Filter {
+    pub fn bind<'q, T>(
+        &self,
+        query: QueryAs<'q, Postgres, T, PgArguments>,
+    ) -> ServerResult<QueryAs<'q, Postgres, T, PgArguments>> {
+        Ok(match self.value {
+            Value::Date(date) => {
+                if !matches!(self.property, Property::LastUpdated) {
+                    return Err(Error::DynamicFilter(self.property));
+                } else {
+                    query.bind(date)
+                }
+            }
+            Value::Integer(integer) => match self.property {
+                Property::Accuracy
+                | Property::ApproachRate
+                | Property::CircleSize
+                | Property::DifficultyRating
+                | Property::StreamsDensity
+                | Property::StreamsSpacing => query.bind(integer as f32),
+                Property::RankedStatus | Property::LastUpdated => {
+                    return Err(Error::DynamicFilter(self.property))
+                }
+                _ => query.bind(integer),
+            },
+            Value::Decimal(decimal) => match self.property {
+                Property::Accuracy
+                | Property::ApproachRate
+                | Property::CircleSize
+                | Property::DifficultyRating
+                | Property::StreamsDensity
+                | Property::StreamsSpacing => query.bind(decimal),
+                Property::RankedStatus | Property::LastUpdated => {
+                    return Err(Error::DynamicFilter(self.property))
+                }
+                _ => query.bind(decimal.round() as i16),
+            },
+            Value::RankedStatus(ranked_status) => {
+                if !matches!(self.property, Property::RankedStatus) {
+                    return Err(Error::DynamicFilter(self.property));
+                } else {
+                    query.bind(ranked_status)
+                }
+            }
+        })
+    }
+
     pub fn parse_multiple(filters: &[Filter], include_title: bool) -> String {
         let mut parsed_filters = Vec::<String>::new();
         for (index, filter) in filters.iter().enumerate() {
-            parsed_filters.push(Self::parse(filter, index + 1));
+            parsed_filters.push(filter.parse(index + 1));
         }
         if include_title {
             parsed_filters.push(format!(
@@ -28,8 +81,8 @@ impl Filter {
         }
     }
 
-    fn parse(filter: &Filter, index: usize) -> String {
-        let property = match filter.property {
+    fn parse(&self, index: usize) -> String {
+        let property = match self.property {
             Property::Accuracy => "accuracy",
             Property::ApproachRate => "approach_rate",
             Property::CircleSize => "circle_size",
@@ -47,7 +100,7 @@ impl Filter {
             Property::StreamsLength => "streams_length",
             Property::StreamsSpacing => "streams_spacing",
         };
-        let operator = match filter.operator {
+        let operator = match self.operator {
             Operator::Exact => "=",
             Operator::Maximum => "<=",
             Operator::Minimum => ">=",
@@ -64,7 +117,7 @@ pub enum Operator {
     Minimum,
 }
 
-#[derive(Deserialize)]
+#[derive(Clone, Copy, Debug, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Property {
     Accuracy,
