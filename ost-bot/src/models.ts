@@ -122,7 +122,7 @@ export class NumericFilter {
 }
 
 export const alphanumericFilters: Record<AlphanumericParameter, AlphanumericFilter | boolean> = {
-	[AlphanumericParameter.alternate]: new AlphanumericFilter('streams_density', [1.66, undefined]),
+	[AlphanumericParameter.alternate]: new AlphanumericFilter('streams_spacing', [1.66, undefined]),
 	[AlphanumericParameter.bursts]: new AlphanumericFilter('streams_length', [undefined, 8]),
 	[AlphanumericParameter.deathstreams]: new AlphanumericFilter('streams_length', [25, undefined]),
 	[AlphanumericParameter.doubletime]: true,
@@ -146,7 +146,7 @@ export const numericFilters: Record<NumericProperty, NumericFilter> = {
 	od: new NumericFilter('accuracy', 0.5, 9),
 	pp: new NumericFilter('performance_100', 30, 300),
 	pp95: new NumericFilter('performance_95', 25, 250),
-	spacing: new NumericFilter('streams_spacing', 0.25, 1.5),
+	spacing: new NumericFilter('streams_spacing', 0.25, 1.0),
 	stars: new NumericFilter('difficulty_rating', 0.25, 4),
 	year: new NumericFilter('last_updated', 0, 2018)
 };

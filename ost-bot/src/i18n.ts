@@ -2,19 +2,21 @@ import { Beatmap } from './models';
 
 export type ConstantResponses = keyof Omit<
 	Response,
-	'didYouMean' | 'languageUpdate' | 'request' | 'simpleRequest'
+	'didYouMean' | 'languageUpdate' | 'request' | 'analysis'
 >;
 
 export type I18nProps =
 	| ['didYouMean', string]
 	| ['languageUpdate', Languages]
 	| ['request', Beatmap, string]
-	| ['simpleRequest', Beatmap]
+	| ['analysis', Beatmap]
 	| ConstantResponses;
 
 export type Languages = keyof typeof languages;
 
 export interface Response {
+	analysis: (beatmap: Beatmap) => string;
+	analysisNotFound: string;
 	commandNotFount: string;
 	didYouMean: (suggestion: string) => string;
 	help: string;
@@ -24,13 +26,20 @@ export interface Response {
 	ranked: string;
 	request: (beatmap: Beatmap, modification: string) => string;
 	requestNotFound: string;
-	simpleRequest: (beatmap: Beatmap) => string;
-	simpleRequestNotFound: string;
 	unexpectedError: string;
 	unranked: string;
 }
 
 export const english: Readonly<Response> = {
+	analysis: (beatmap: Beatmap) =>
+		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}] ${english[beatmap.ranked_status]} | ` +
+		`BPM: ${beatmap.bpm} | Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
+		`Streams density: ${beatmap.streams_density} | Streams spacing: ${beatmap.streams_spacing} | ` +
+		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
+		`CS: ${beatmap.circle_size} | Duration: ${formatLength(beatmap.length)} | ` +
+		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
+	analysisNotFound:
+		'Beatmap analysis is only available for ranked beatmaps or beatmaps that are part of the collection',
 	commandNotFount: `No command was detected, type [${process.env.WEBSITE_URL}/commands !help en] to see the available commands`,
 	didYouMean: (suggestion: string) =>
 		`The detected command is incorrect, did you mean "${suggestion}"?`,
@@ -49,20 +58,21 @@ export const english: Readonly<Response> = {
 		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	requestNotFound:
 		'No beatmaps found that match provided filters, reduce the number of filters or change their values',
-	simpleRequest: (beatmap: Beatmap) =>
-		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}] ${english[beatmap.ranked_status]} | ` +
-		`BPM: ${beatmap.bpm} | Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
-		`Streams density: ${beatmap.streams_density} | Streams spacing: ${beatmap.streams_spacing} | ` +
-		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
-		`CS: ${beatmap.circle_size} | Duration: ${formatLength(beatmap.length)} | ` +
-		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
-	simpleRequestNotFound:
-		'Beatmap analysis is only available for ranked beatmaps or beatmaps that are part of the collection',
 	unexpectedError: `The bot failed unexpectedly, please report this error via [${process.env.DISCORD_URL} Discord]`,
 	unranked: 'Unranked'
 };
 
 export const spanish: Readonly<Response> = {
+	analysis: (beatmap: Beatmap) =>
+		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}] ${english[beatmap.ranked_status]} | ` +
+		`BPM: ${beatmap.bpm} | Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
+		`Densidad de streams: ${beatmap.streams_density} | Espaciado de streams: ${beatmap.streams_spacing} | ` +
+		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
+		`CS: ${beatmap.circle_size} | Duración: ${formatLength(beatmap.length)} | ` +
+		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
+	analysisNotFound:
+		'El análisis de mapas solo está disponible para mapas clasificados o mapas que sean parte de la colección',
+	unexpectedError: `El bot falló inesperadamente, por favor reporte este error vía [${process.env.DISCORD_URL} Discord]`,
 	commandNotFount: `No se detectó ningún comando, escriba [${process.env.WEBSITE_URL}/es/commands !help es] para ver los comandos disponibles`,
 	didYouMean: (suggestion: string) =>
 		`El comando detectado es incorrecto, quiso decir "${suggestion}"?`,
@@ -81,16 +91,6 @@ export const spanish: Readonly<Response> = {
 		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	requestNotFound:
 		'No se encontraron mapas que coinciden con los filtros suministrados, reduzca el número de filtros o cambie sus valores',
-	simpleRequest: (beatmap: Beatmap) =>
-		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}] ${english[beatmap.ranked_status]} | ` +
-		`BPM: ${beatmap.bpm} | Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
-		`Densidad de streams: ${beatmap.streams_density} | Espaciado de streams: ${beatmap.streams_spacing} | ` +
-		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
-		`CS: ${beatmap.circle_size} | Duración: ${formatLength(beatmap.length)} | ` +
-		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
-	simpleRequestNotFound:
-		'El análisis de mapas solo está disponible para mapas clasificados o mapas que sean parte de la colección',
-	unexpectedError: `El bot falló inesperadamente, por favor reporte este error vía [${process.env.DISCORD_URL} Discord]`,
 	unranked: 'No clasificado'
 };
 
@@ -121,7 +121,7 @@ export function i18n(language: Languages, props: I18nProps): string {
 			return languages[props[1]][props[0]];
 		case 'request':
 			return response[props[0]](props[1], props[2]);
-		case 'simpleRequest':
+		case 'analysis':
 			return response[props[0]](props[1]);
 	}
 }
