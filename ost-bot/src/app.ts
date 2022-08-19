@@ -1,16 +1,26 @@
 import 'dotenv/config';
 import { BanchoClient, PrivateMessage } from 'bancho.js';
-import { i18n, I18nProps, Languages, languages } from './i18n';
+import { i18n, I18nProperties, Languages, languages } from './i18n';
 import { request } from './commands/request';
 import { analyze } from './commands/analyze';
 import { updateLanguage } from './commands/updateLanguage';
 
+/**
+ * Default help message for all users.
+ */
 const help = 'Type "!help en" for more details / Escriba "!help es" para más detalles';
 
+/**
+ * Returns the i18n properties for all the supported responses of the bot.
+ *
+ * @param message - The message from the user.
+ * @param username - The irc username of the user.
+ * @returns The i18n properties for the response.
+ */
 async function processMessage(
 	message: string,
 	username: string
-): Promise<I18nProps | 'genericHelp'> {
+): Promise<I18nProperties | 'genericHelp'> {
 	const parameters = message
 		.toLowerCase()
 		.split(' ')
@@ -33,6 +43,13 @@ async function processMessage(
 	}
 }
 
+/**
+ * Returns the language code for the specified user if no exception ocurred.
+ * Otherwise, returns the language code for english.
+ *
+ * @param username - The irc username of the user.
+ * @returns The language code for the user.
+ */
 async function retrieveLanguage(username: string): Promise<Languages> {
 	try {
 		const response = await fetch(`${process.env.API_URL}/api/bot/user/${username}`);
@@ -43,6 +60,13 @@ async function retrieveLanguage(username: string): Promise<Languages> {
 	}
 }
 
+/**
+ * Handles the incoming messages for the bot.
+ * Sends a reply with the expected response if no exception ocurred during the message processing.
+ * Otherwise, sends a generic error reply.
+ *
+ * @param privateMessage - The incoming message from an irc user.
+ */
 async function handlePM({ message, self, user }: PrivateMessage) {
 	if (self) return;
 	try {
@@ -61,6 +85,9 @@ async function handlePM({ message, self, user }: PrivateMessage) {
 	}
 }
 
+/**
+ * Starts the bot if the required credentials were provided.
+ */
 async function startBot() {
 	if (
 		process.env.BOT_USERNAME === undefined ||

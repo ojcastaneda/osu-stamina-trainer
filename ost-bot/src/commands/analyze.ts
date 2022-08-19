@@ -1,11 +1,11 @@
-import { ConstantResponses, I18nProps } from '../i18n';
+import { ConstantResponses, I18nProperties } from '../i18n';
 
 /**
  * Returns the beatmap id  if the message from the user is formatted according to the now playing command.
- * Otherwise returns the the i18n prop for `command not found`.
+ * Otherwise, returns the i18n property for `command not found`.
  *
  * @param nowPlaying - The message from the user.
- * @returns The corresponding i18n prop.
+ * @returns The i18n property for `command not found` or the beatmap id.
  */
 export function parseNowPlaying(nowPlaying: string): ConstantResponses | number {
 	const idStart = nowPlaying.indexOf('#/');
@@ -16,17 +16,16 @@ export function parseNowPlaying(nowPlaying: string): ConstantResponses | number 
 }
 
 /**
- * Checks the message from the user and returns the beatmap statistics from the now playing command if available.
- * If the beatmap is not available returns the i18n prop for `Analysis`.
- * Otherwise returns the the i18n prop for `command not found`.
+ * Returns the i18n properties for `analysis` if the command is correct.
+ * If the beatmap is not available returns the i18n properties for `Analysis not found`.
+ * Otherwise, returns the the i18n property for `command not found`.
  *
  * @param nowPlaying - The message from the user.
- * @returns The corresponding i18n prop.
+ * @returns The corresponding i18n properties.
  */
-export async function analyze(nowPlaying: string): Promise<I18nProps> {
+export async function analyze(nowPlaying: string): Promise<I18nProperties> {
 	const id = parseNowPlaying(nowPlaying);
 	if (typeof id === 'string') return id;
 	const response = await fetch(`${process.env.API_URL}/api/bot/beatmap/${id}`);
-	if (response.status === 404) return 'analysisNotFound';
-	return ['analysis', await response.json()];
+	return response.status === 404 ? 'analysisNotFound' : ['analysis', await response.json()];
 }

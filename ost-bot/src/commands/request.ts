@@ -1,5 +1,5 @@
 import levenary from 'levenary';
-import { I18nProps } from '../i18n';
+import { I18nProperties } from '../i18n';
 import {
 	alphanumericFilters,
 	AlphanumericParameter,
@@ -11,6 +11,9 @@ import {
 	Operator
 } from '../models';
 
+/**
+ * Guesses for properties of numeric filters.
+ */
 export const numericGuesses: NumericProperty[] = [
 	'ar',
 	'average',
@@ -26,10 +29,16 @@ export const numericGuesses: NumericProperty[] = [
 	'year'
 ];
 
+/**
+ * Guesses for parameters of alphanumeric filters.
+ */
 export const alphanumericGuesses = Object.values(AlphanumericParameter).filter(
 	(key) => typeof key === 'string'
 ) as string[];
 
+/**
+ * Guesses for legacy parameters.
+ */
 export const typeGuesses = Object.values(AlphanumericParameter).filter((key) => {
 	if (typeof key === 'number') return false;
 	switch (AlphanumericParameter[key as keyof typeof AlphanumericParameter]) {
@@ -42,6 +51,15 @@ export const typeGuesses = Object.values(AlphanumericParameter).filter((key) => 
 	}
 }) as string[];
 
+/**
+ * Fetches the request from the server.
+ * Returns a beatmap if a beatmap from the collection meets the filters.
+ * Otherwise, returns undefined.
+ *
+ * @param filters - The filters used for the request.
+ * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.
+ * @returns A beatmaps that meets the request if available.
+ */
 async function fetchRequest(
 	filters: Filter[],
 	useDoubleTime: boolean
@@ -56,10 +74,18 @@ async function fetchRequest(
 			body: JSON.stringify(filters)
 		}
 	);
-	if (response.status === 404) return undefined;
-	return response.json();
+	return response.status === 404 ? undefined : response.json();
 }
 
+/**
+ * If the command is correct and the guess command parameter is set to true,
+ * returns the provided command from the user into an array of filters and an indicator for which modification to use.
+ * Otherwise, returns a guess for the provided command.
+ *
+ * @param parameters - The filters provided by the user.
+ * @param guessCommand - Whether or not to guess the command even if it is correct.
+ * @returns The parsed or guessed command.
+ */
 export function parseRequest(
 	parameters: string[],
 	guessCommand = false
@@ -96,6 +122,13 @@ export function parseRequest(
 	return incorrectFilters || guessCommand ? guessedCommand.join(' ') : [filters, useDoubleTime];
 }
 
+/**
+ * If the parameter is correct, returns an array of filters or a boolean based on the parameter.
+ * Otherwise, returns a guess for the parameter.
+ *
+ * @param parameter - The parameter to parse.
+ * @returns The parsed or guessed parameter.
+ */
 function parseParameter(parameter: string): Filter[] | string | boolean {
 	let splitIndex = parameter.indexOf('=');
 	if (splitIndex > 0) {
@@ -160,6 +193,14 @@ function parseParameter(parameter: string): Filter[] | string | boolean {
 	return parseAlphanumericParameter(parameter);
 }
 
+/**
+ * Returns a numeric property from a parameter into an array of the guessed property,
+ * the filter representation of the property,
+ * and whether or not the property was incorrect and had to be guessed.
+ *
+ * @param property - The numeric property from the parameter.
+ * @returns The array containing the parsing result.
+ */
 function parseNumericProperty(property: string): [string, NumericFilter, boolean] {
 	const numericFilter = numericFilters[property as NumericProperty];
 	if (numericFilter === undefined) {
@@ -169,6 +210,16 @@ function parseNumericProperty(property: string): [string, NumericFilter, boolean
 	return [property, numericFilter, true];
 }
 
+/**
+ * If the numeric parameter is correct, returns an array of filters based on the parameter.
+ * Otherwise, returns a guess for the parameter.
+ *
+ * @param numericFilter - The numeric filter of the parameter.
+ * @param format - The operator to use for the parsed filters.
+ * @param value - The value of the numeric parameter.
+ * @param applyRange - Whether or not to use the default range of the parameter.
+ * @returns The parsed or guessed numeric parameter.
+ */
 function parseNumericParameter(
 	numericFilter: NumericFilter,
 	format: Operator,
@@ -200,12 +251,26 @@ function parseNumericParameter(
 	];
 }
 
+/**
+ * Returns the filter based on the year of the date when a beatmap was last updated.
+ *
+ * @param operator - The operator to use for the parsed filters.
+ * @param value - The year to filter.
+ * @returns The parsed date.
+ */
 function parseYear(operator: 'maximum' | 'minimum', value: number): Filter {
 	return operator === 'maximum'
 		? new Filter(operator, 'last_updated', new Date(`${value}-12-31T23:59:59.999+00:00`))
 		: new Filter(operator, 'last_updated', new Date(`${value}-01-01T00:00:00+00:00`));
 }
 
+/**
+ * If the alphanumeric parameter is correct, returns an array of filters based on the parameter.
+ * Otherwise, returns a guess for the parameter.
+ *
+ * @param parameter - The alphanumeric parameter to parse.
+ * @returns The parsed or guessed alphanumeric parameter.
+ */
 function parseAlphanumericParameter(parameter: string): Filter[] | string | boolean {
 	const alphanumericFilter =
 		alphanumericFilters[AlphanumericParameter[parameter as keyof typeof AlphanumericParameter]];
@@ -234,14 +299,23 @@ function parseAlphanumericParameter(parameter: string): Filter[] | string | bool
 	}
 }
 
+/**
+ * Returns the i18n properties for `request` if a beatmap that meets the provided filters and the command is correct.
+ * If the command is incorrect guesses the correct command, and returns the i18n properties for `did you mean`.
+ * Otherwise, returns the i18n property for `request not found`.
+ *
+ * @param command - The command used `!r` or `!request`.
+ * @param parameters - The parameters to filter the request.
+ * @param guessCommand - Whether or not to guess the command even if it is correct.
+ * @returns The corresponding i18n properties.
+ */
 export async function request(
 	command: string,
 	parameters: string[],
 	guessCommand = false
-): Promise<I18nProps> {
+): Promise<I18nProperties> {
 	const parsedRequest = parseRequest(parameters, guessCommand);
 	if (typeof parsedRequest === 'string') return ['didYouMean', `${command} ${parsedRequest}`];
-	console.info(`${command} ${parameters} | DT: ${parsedRequest[1]} | Filters: ${JSON.stringify(parsedRequest[0])}`);
 	if (parsedRequest[1] !== undefined) {
 		const beatmap = await fetchRequest(parsedRequest[0], parsedRequest[1]);
 		return beatmap === undefined

@@ -1,3 +1,6 @@
+/**
+ * Allowed values for alphanumeric parameters.
+ */
 export enum AlphanumericParameter {
 	alt = 0,
 	alternate = 0,
@@ -21,6 +24,9 @@ export enum AlphanumericParameter {
 	unranked = 10
 }
 
+/**
+ * Allowed values for properties of numeric parameters.
+ */
 export type NumericProperty =
 	| 'ar'
 	| 'average'
@@ -36,12 +42,18 @@ export type NumericProperty =
 	| 'stars'
 	| 'year';
 
+/**
+ * Allowed values for properties of alphanumeric filters.
+ */
 type AlphanumericFilterProperty =
 	| 'ranked_status'
 	| 'streams_density'
 	| 'streams_length'
 	| 'streams_spacing';
 
+/**
+ * Allowed values for properties of numeric filters.
+ */
 type NumericFilterProperty =
 	| 'accuracy'
 	| 'approach_rate'
@@ -57,10 +69,19 @@ type NumericFilterProperty =
 	| 'streams_length'
 	| 'streams_spacing';
 
+/**
+ * Allowed values for operators of filters.
+ */
 export type Operator = 'exact' | 'maximum' | 'minimum';
 
+/**
+ * Values for ranked status.
+ */
 export type RankedStatus = 'loved' | 'ranked' | 'unranked';
 
+/**
+ * Response from the server for beatmap request or beatmaps analysis.
+ */
 export interface Beatmap {
 	accuracy: number;
 	approach_rate: number;
@@ -80,6 +101,9 @@ export interface Beatmap {
 	title: string;
 }
 
+/**
+ * Values for parsing or guessing alphanumeric parameters.
+ */
 export class AlphanumericFilter {
 	property: AlphanumericFilterProperty;
 	value: RankedStatus | [number | undefined, number | undefined];
@@ -93,6 +117,9 @@ export class AlphanumericFilter {
 	}
 }
 
+/**
+ * Filters for beatmap requests to the server.
+ */
 export class Filter {
 	operator: Operator;
 	property: keyof Beatmap;
@@ -109,6 +136,9 @@ export class Filter {
 	}
 }
 
+/**
+ * Values for parsing or guessing numeric parameters.
+ */
 export class NumericFilter {
 	property: NumericFilterProperty;
 	range: number;
@@ -121,6 +151,9 @@ export class NumericFilter {
 	}
 }
 
+/**
+ * Record of alphanumeric parameters for parsing or guessing commands.
+ */
 export const alphanumericFilters: Record<AlphanumericParameter, AlphanumericFilter | boolean> = {
 	[AlphanumericParameter.alternate]: new AlphanumericFilter('streams_spacing', [1.66, undefined]),
 	[AlphanumericParameter.bursts]: new AlphanumericFilter('streams_length', [undefined, 8]),
@@ -135,6 +168,9 @@ export const alphanumericFilters: Record<AlphanumericParameter, AlphanumericFilt
 	[AlphanumericParameter.unranked]: new AlphanumericFilter('ranked_status', 'unranked')
 };
 
+/**
+ * Record of numeric parameters for parsing or guessing commands.
+ */
 export const numericFilters: Record<NumericProperty, NumericFilter> = {
 	ar: new NumericFilter('approach_rate', 0.5, 9),
 	average: new NumericFilter('streams_length', 2, 9),
