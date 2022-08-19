@@ -33,12 +33,8 @@
 	}
 }
 
-.card-detail {
-	border-bottom: $xxs-spacing solid var(--tertiary-theme-color);
-
-	&:first-of-type {
-		border-top: $xxs-spacing solid var(--tertiary-theme-color);
-	}
+.card-detail > td:last-of-type {
+	text-align: center;
 }
 
 .card-detail-bar {
@@ -57,7 +53,6 @@
 }
 
 .card-details {
-	border-collapse: collapse;
 	margin-bottom: $sm-spacing;
 	padding: $sm-spacing $md-spacing 0 $md-spacing;
 }
