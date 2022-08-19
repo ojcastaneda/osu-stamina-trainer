@@ -1,8 +1,11 @@
 {
+	"copy_command": "Copy command",
 	"help": "Shows a list of all the bot commands as a hyperlink to the website",
 	"language": "Changes the language in which the bot is going to reply",
+	"language_command": "Language update command",
 	"now_playing": "Requests the streams related statistics of the currently playing beatmap",
 	"request": "Requests a stream intensive beatmap with a specified BPM, which may include additional filters",
+	"request_command": "Request beatmap command",
 	"use_complete": "Use complete version",
 	"use_shortcut": "Use shortcut version",
 	"user_id": "User ID"

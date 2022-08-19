@@ -1,8 +1,14 @@
 {
 	"bot_commands": "Bot commands",
+	"bot_commands_description": "Commands for the osu! Stamina Trainer bot",
 	"collection": "Collection",
+	"collection_description": "Collection of stamina / streams intensive beatmaps for osu! standard",
+	"expand_navigation": "Expand navigation bar",
 	"language": "Language",
 	"login": "Log in",
+	"login_description": "Administrator log in",
 	"submissions": "Submissions",
-	"submit_beatmaps": "Submit beatmaps"
+	"submissions_description": "Submissions of the osu! Stamina Trainer collection",
+	"submit_beatmaps": "Submit beatmaps",
+	"submit_beatmaps_description": "Submit beatmaps for the osu! Stamina Trainer collection"
 }

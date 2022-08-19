@@ -31,7 +31,17 @@ export default function SearchFilters({ allowCollapse = false, properties }: Sea
 		const property = parseInt(target.value);
 		if (isNaN(property)) return;
 		target.value = '';
-		setFilters({ ...filters, [property]: new BotFilter(Operator.exact, [0, 0]) });
+		setFilters({
+			...filters,
+			[property]: new BotFilter(
+				property === Property.ranked_status ||
+				property === Property.streams_length_type ||
+				property === Property.streams_spacing_type
+					? Operator.exact
+					: Operator.default,
+				[0, 0]
+			)
+		});
 	}
 
 	const setFilter = useCallback(
@@ -155,7 +165,13 @@ function Filter({ filter, property, setFilter }: FilterProps) {
 					/>
 				);
 				newInputs.push(
-					<input disabled maxLength={7} size={6} value={`+/- ${parseProperty(property)[1]}`} />
+					<input
+						aria-label={t('default_range')}
+						disabled
+						maxLength={7}
+						size={6}
+						value={`+/- ${parseProperty(property)[1]}`}
+					/>
 				);
 				return setInputs(newInputs);
 			case Operator.maximum:
@@ -268,7 +284,7 @@ function Filter({ filter, property, setFilter }: FilterProps) {
 				);
 			})}
 			<td>
-				<button onClick={() => setFilter(undefined)}>
+				<button aria-label={t('remove_filter')} onClick={() => setFilter(undefined)}>
 					<FaMinus size={15} />
 				</button>
 			</td>

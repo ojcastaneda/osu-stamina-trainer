@@ -47,7 +47,11 @@ export default function SearchBar({ filter, queryOrder, queryTitle }: SearchBarP
 					placeholder={t('search_title', { ns: 'components/common' })}
 					value={title}
 				/>
-				<button id={styles['search-button']} onClick={() => submit()}>
+				<button
+					aria-label={t('update_search', { ns: 'components/common' })}
+					id={styles['search-button']}
+					onClick={() => submit()}
+				>
 					<div>
 						<FaSearch size={20} />
 					</div>
@@ -67,7 +71,7 @@ export default function SearchBar({ filter, queryOrder, queryTitle }: SearchBarP
 						)
 					)}
 				</select>
-				<button onClick={changeOrder}>
+				<button aria-label={t('change_order', { ns: 'components/common' })} onClick={changeOrder}>
 					<div>
 						{OrderOperator[queryOrder] === OrderOperator.ascending ? (
 							<FaSortAmountDownAlt size={20} />

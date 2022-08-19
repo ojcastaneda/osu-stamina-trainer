@@ -1,3 +1,7 @@
 {
-	"search_title": "Buscar título"
+	"change_order": "Cambiar orden",
+	"first_page": "Primera página",
+	"last_page": "Última página",
+	"search_title": "Buscar título",
+	"update_search": "Actualizar búsqueda"
 }

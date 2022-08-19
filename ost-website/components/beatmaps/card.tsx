@@ -14,12 +14,14 @@ import {
 } from 'react-icons/fa';
 import { MdEditCalendar } from 'react-icons/md';
 import Link from 'next/link';
+import { useTranslation } from 'next-i18next';
 
 interface CardProps {
 	beatmap: Beatmap;
 }
 
 export default function Card({ beatmap }: CardProps) {
+	const { t } = useTranslation('components/beatmaps');
 	const [background, setBackgound] = useState(
 		`https://assets.ppy.sh/beatmaps/${beatmap.beatmapset_id}/covers/cover.jpg`
 	);
@@ -96,12 +98,16 @@ export default function Card({ beatmap }: CardProps) {
 				<>
 					<table className={styles['card-details']}>
 						<tbody>
-							<Detail maximum={10} name="OD" value={beatmap.accuracy} />
-							<Detail maximum={10} name="AR" value={beatmap.approach_rate} />
-							<Detail maximum={10} name="CS" value={beatmap.circle_size} />
-							<Detail maximum={10} name="Stars" value={beatmap.difficulty_rating} />
-							<Detail maximum={1} name="Density" value={beatmap.streams_density} />
-							<Detail maximum={4} name="Spacing" value={beatmap.streams_spacing} />
+							<Detail maximum={10} name={t('accuracy')} value={beatmap.accuracy} />
+							<Detail maximum={10} name={t('approach_rate')} value={beatmap.approach_rate} />
+							<Detail maximum={10} name={t('circle_size')} value={beatmap.circle_size} />
+							<Detail
+								maximum={10}
+								name={t('difficulty_rating')}
+								value={beatmap.difficulty_rating}
+							/>
+							<Detail maximum={1} name={t('streams_density')} value={beatmap.streams_density} />
+							<Detail maximum={4} name={t('streams_spacing')} value={beatmap.streams_spacing} />
 						</tbody>
 					</table>
 					<div className={styles['card-performance']}>
@@ -112,6 +118,7 @@ export default function Card({ beatmap }: CardProps) {
 			)}
 			<div>
 				<button
+					aria-label={t('expand_beatmap')}
 					className={styles['card-expand-button']}
 					onClick={() => setExpanded((previousState) => !previousState)}
 				>
@@ -130,9 +137,9 @@ interface DetailProps {
 
 function Detail({ maximum, name, value }: DetailProps) {
 	return (
-		<tr>
+		<tr className={styles['card-detail']}>
 			<td>{name}</td>
-			<td className={styles['card-bar']}>
+			<td className={styles['card-detail-bar']}>
 				<div>
 					<div style={{ width: `${Math.min((value * 100) / maximum, 100)}%` }} />
 				</div>

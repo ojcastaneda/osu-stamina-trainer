@@ -30,7 +30,7 @@
 #logo {
 	align-items: center;
 	display: flex;
-	font-family: 'Noto Serif';
+	font-family: 'Noto Serif', serif;
 	font-size: 1.5rem;
 	padding: $lg-spacing $md-spacing;
 	margin-right: auto;
@@ -83,7 +83,7 @@
 	& > div {
 		display: flex;
 		margin: 0 auto;
-		max-width: max(70%, $medium-responsive - 40px);
+		max-width: max(75%, $medium-responsive - 40px);
 		text-align: center;
 
 		@media (max-width: $medium-responsive) {

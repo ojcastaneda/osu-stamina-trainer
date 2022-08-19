@@ -1,18 +1,8 @@
 @import 'styles/variables';
 
-@font-face {
-	font-family: 'Noto Sans';
-	src: url('/fonts/NotoSans-Regular.ttf');
-}
-
-@font-face {
-	font-family: 'Noto Serif';
-	src: url('/fonts/NotoSerif-Regular.ttf');
-}
-
 * {
 	color: var(--primary-font-color);
-	font: var(--font-size) 'Noto Sans';
+	font: var(--font-size) 'Noto Sans', sans-serif;
 }
 
 a {
@@ -29,7 +19,7 @@ body {
 
 	--background-color: var(--secondary-theme-color);
 
-	--error-color: rgb(255, 80, 80);
+	--error-color: rgb(215, 60, 60);
 
 	--shadow: drop-shadow(0 4px 4px rgba(0, 0, 0, 0.5));
 

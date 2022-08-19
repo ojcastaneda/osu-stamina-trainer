@@ -90,7 +90,10 @@ export default function BeatmapsSearchBar({
 					placeholder={t('search_title', { ns: 'components/common' })}
 					value={title}
 				/>
-				<button onClick={() => submit()}>
+				<button
+					aria-label={t('update_search', { ns: 'components/common' })}
+					onClick={() => submit()}
+				>
 					<div>
 						<FaSearch size={20} />
 					</div>
@@ -116,7 +119,10 @@ export default function BeatmapsSearchBar({
 						</option>
 					))}
 				</select>
-				<button onClick={changeOrderOperator}>
+				<button
+					aria-label={t('change_order', { ns: 'components/common' })}
+					onClick={changeOrderOperator}
+				>
 					<div>
 						{OrderOperator[queryOrder.operator] === OrderOperator.ascending ? (
 							<FaSortAmountDownAlt size={20} />

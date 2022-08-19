@@ -1,8 +1,14 @@
 {
 	"bot_commands": "Comandos del bot",
+	"bot_commands_description": "Comandos del bot de osu! Stamina Trainer",
 	"collection": "Colección",
+	"collection_description": "Colección de mapas intensivos de estamina / streams para osu! estándar",
+	"expand_navigation": "Expandir barra de navegación",
 	"language": "Lenguaje",
 	"login": "Iniciar sesión",
+	"login_description": "Inicio de sesión de administrador",
 	"submissions": "Propuestas",
-	"submit_beatmaps": "Proponer mapas"
+	"submissions_description": "Propuestas de la colección de osu! Stamina Trainer",
+	"submit_beatmaps": "Proponer mapas",
+	"submit_beatmaps_description": "Proponer mapas para la colección de osu! Stamina Trainer"
 }
