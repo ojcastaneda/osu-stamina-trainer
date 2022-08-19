@@ -1,19 +1,31 @@
 import { Beatmap } from './models';
 
+/**
+ * i18n properties for string responses.
+ */
 export type ConstantResponses = keyof Omit<
 	Response,
 	'didYouMean' | 'languageUpdate' | 'request' | 'analysis'
 >;
 
-export type I18nProps =
+/**
+ * i18n properties for responses.
+ */
+export type I18nProperties =
 	| ['didYouMean', string]
 	| ['languageUpdate', Languages]
 	| ['request', Beatmap, string]
 	| ['analysis', Beatmap]
 	| ConstantResponses;
 
+/**
+ * Available languages for responses.
+ */
 export type Languages = keyof typeof languages;
 
+/**
+ * i18n responses.
+ */
 export interface Response {
 	analysis: (beatmap: Beatmap) => string;
 	analysisNotFound: string;
@@ -30,6 +42,9 @@ export interface Response {
 	unranked: string;
 }
 
+/**
+ * English i18n responses.
+ */
 export const english: Readonly<Response> = {
 	analysis: (beatmap: Beatmap) =>
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}] ${english[beatmap.ranked_status]} | ` +
@@ -54,7 +69,7 @@ export const english: Readonly<Response> = {
 		`Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
 		`Streams density: ${beatmap.streams_density} | Streams spacing: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
-		`CS: ${beatmap.circle_size} | Length: ${formatLength(beatmap.length)} | ` +
+		`CS: ${beatmap.circle_size} | Duration: ${formatLength(beatmap.length)} | ` +
 		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	requestNotFound:
 		'No beatmaps found that match provided filters, reduce the number of filters or change their values',
@@ -62,6 +77,9 @@ export const english: Readonly<Response> = {
 	unranked: 'Unranked'
 };
 
+/**
+ * Spanish i18n responses.
+ */
 export const spanish: Readonly<Response> = {
 	analysis: (beatmap: Beatmap) =>
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}] ${english[beatmap.ranked_status]} | ` +
@@ -101,27 +119,43 @@ function checkTitle(title: string): string {
 		: title;
 }
 
+/**
+ * Formats the duration of the beatmap into a `minutes:seconds` format.
+ *
+ * @param length - The length of the beatmap in seconds.
+ * @returns The formatted duration.
+ */
 function formatLength(length: number): string {
 	const seconds = length % 60;
 	return `${Math.floor(length / 60)}:${seconds < 10 ? '0' : ''}${seconds}`;
 }
 
+/**
+ * Record of languages for sending a response.
+ */
 export const languages: Record<string, Response> = {
 	en: english,
 	es: spanish
 };
 
-export function i18n(language: Languages, props: I18nProps): string {
+/**
+ * Returns a formatted and internationalized response of a bot interaction.
+ *
+ * @param language - The language to use for the response.
+ * @param properties - The properties to use to format the response.
+ * @returns The formatted message to send to the user.
+ */
+export function i18n(language: Languages, properties: I18nProperties): string {
 	const response = languages[language];
-	if (typeof props === 'string') return response[props];
-	switch (props[0]) {
+	if (typeof properties === 'string') return response[properties];
+	switch (properties[0]) {
 		case 'didYouMean':
-			return response[props[0]](props[1]);
+			return response[properties[0]](properties[1]);
 		case 'languageUpdate':
-			return languages[props[1]][props[0]];
+			return languages[properties[1]][properties[0]];
 		case 'request':
-			return response[props[0]](props[1], props[2]);
+			return response[properties[0]](properties[1], properties[2]);
 		case 'analysis':
-			return response[props[0]](props[1]);
+			return response[properties[0]](properties[1]);
 	}
 }
