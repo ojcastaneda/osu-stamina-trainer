@@ -3,12 +3,14 @@ import { ReactElement, useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import { FaAngleDoubleLeft, FaAngleDoubleRight } from 'react-icons/fa';
+import { useTranslation } from 'next-i18next';
 
 interface PaginationProps {
 	limit: number;
 }
 
 export default function Pagination({ limit }: PaginationProps) {
+	const { t } = useTranslation('components/common');
 	const [pages, setPages] = useState<ReactElement[]>([]);
 	const router = useRouter();
 
@@ -46,12 +48,14 @@ export default function Pagination({ limit }: PaginationProps) {
 					href={{ query: { ...router.query, page: `${index === 0 ? 1 : limit}` } }}
 					key={`page=${index === 0 ? 'first' : 'last'}`}
 				>
-					<a>{index === 0 ? <FaAngleDoubleLeft size={20} /> : <FaAngleDoubleRight size={20} />}</a>
+					<a aria-label={t(`${index === 0 ? 'first' : 'last'}_page`)}>
+						{index === 0 ? <FaAngleDoubleLeft size={20} /> : <FaAngleDoubleRight size={20} />}
+					</a>
 				</Link>
 			);
 		}
 		setPages(newPages);
-	}, [limit, router.query]);
+	}, [limit, router.query, t]);
 
 	return <div id={styles['pagination']}>{pages}</div>;
 }

@@ -16,18 +16,21 @@ type MyAppProps = AppProps & {
 function MyApp({ Component, pageProps }: MyAppProps) {
 	const { t } = useTranslation('common');
 
+	const head = (
+		<Head>
+			<title>{`${t(Component.head)} - osu! Stamina Trainer`}</title>
+			<meta content={t(`${Component.head}_description`)} name="description" />
+		</Head>
+	);
+
 	return !Component.useCustomLayout ? (
 		<Layout activeSession={pageProps.activeSession}>
-			<Head>
-				<title>{`${t(Component.head)} - osu! Stamina Trainer`}</title>
-			</Head>
+			{head}
 			<Component {...pageProps} />
 		</Layout>
 	) : (
 		<>
-			<Head>
-				<title>{`${t(Component.head)} - osu! Stamina Trainer`}</title>
-			</Head>
+			{head}
 			<NavigationBar activeSession={pageProps.activeSession} />
 			<Component {...pageProps} />
 		</>

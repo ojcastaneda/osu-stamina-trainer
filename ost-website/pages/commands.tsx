@@ -59,8 +59,11 @@ function BotCommands() {
 						<div>{t('request')}.</div>
 						<div id={styles['request']}>
 							<div className={styles['copy-input']}>
-								<input disabled value={request} />
-								<button onClick={() => navigator.clipboard.writeText(request)}>
+								<input aria-label={t('request_command')} disabled value={request} />
+								<button
+									aria-label={t('copy_command')}
+									onClick={() => navigator.clipboard.writeText(request)}
+								>
 									<FaCopy />
 								</button>
 							</div>
@@ -102,8 +105,13 @@ function BotCommands() {
 						<div>{t('language')}.</div>
 						<div id={styles['language']}>
 							<div className={styles['copy-input']}>
-								<input disabled value={`!language ${id} ${language}`} />
+								<input
+									aria-label={t('language_command')}
+									disabled
+									value={`!language ${id} ${language}`}
+								/>
 								<button
+									aria-label={t('copy_command')}
 									onClick={() => navigator.clipboard.writeText(`!language ${id} ${language}`)}
 								>
 									<FaCopy />

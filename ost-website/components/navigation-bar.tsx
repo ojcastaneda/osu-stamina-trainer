@@ -65,7 +65,7 @@ export default function NavigationBar({ activeSession }: NavigationBarProps) {
 							<a id={styles['logo']}>osu! Stamina Trainer</a>
 						</Link>
 						<div id={styles['mobile-menu']}>
-							<button onClick={() => setExpanded(!expanded)}>
+							<button aria-label={t('expand_navigation')} onClick={() => setExpanded(!expanded)}>
 								<FaBars size={25} />
 							</button>
 						</div>

@@ -3,7 +3,7 @@
 #page-content {
 	background-color: var(--primary-theme-color);
 	margin: 0 auto;
-	width: max(70%, $medium-responsive - 40px);
+	width: max(75%, $medium-responsive - 40px);
 
 	@media (max-width: $medium-responsive) {
 		width: 100%;

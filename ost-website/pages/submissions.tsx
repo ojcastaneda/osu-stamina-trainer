@@ -86,14 +86,14 @@ export interface Search {
 function parseParameters(parameters: ParsedUrlQuery): Search {
 	const filter =
 		typeof parameters['filter'] === 'string' ? parseInt(parameters['filter']) : undefined;
-	const order = parseInt(typeof parameters['order'] === 'string' ? parameters['order'] : '0');
+	const order = parseInt(typeof parameters['order'] === 'string' ? parameters['order'] : '1');
 	const page = parseInt(typeof parameters['page'] === 'string' ? parameters['page'] : '1');
 	return {
 		filter:
 			filter === undefined || isNaN(filter)
 				? undefined
 				: (ApprovalStatus[filter] as keyof typeof ApprovalStatus),
-		order: OrderOperator[isNaN(order) ? 0 : order] as keyof typeof OrderOperator,
+		order: isNaN(order) ? 'descending' : (OrderOperator[order] as keyof typeof OrderOperator),
 		page: isNaN(page) ? 1 : page,
 		title: typeof parameters['title'] === 'string' ? parameters['title'] : undefined
 	};
