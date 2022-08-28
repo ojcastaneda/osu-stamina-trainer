@@ -142,7 +142,7 @@ async function handleDiscordMessage(message: Message) {
 			)}`
 		);
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') await message.reply(i18n('en', 'unexpectedError'));
+		if (process.env.NODE_ENV === 'production') message.reply(i18n('en', 'unexpectedError')).catch();
 		console.error(`Discord | ${message.author.username}: ${message.content} | ${error}`);
 	}
 }
