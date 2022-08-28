@@ -1,12 +1,19 @@
 {
+	"beatmap_id": "Beatmap's ID",
+	"check": "Requests the streams related statistics of the beatmap with the provided ID",
 	"copy_command": "Copy command",
-	"help": "Shows a list of all the bot commands as a hyperlink to the website",
+	"discord_only": "Only available in Discord",
+	"help": "Displays a list of all the bot commands as a hyperlink to the website",
+	"invite": "Displays a button to invite the bot to a Discord server",
+	"invite_discord": "Invite the Discord bot to a server",
 	"language": "Changes the language in which the bot is going to reply",
 	"language_command": "Language update command",
 	"now_playing": "Requests the streams related statistics of the currently playing beatmap",
+	"osu_only": "Only available in osu!",
+	"osu_profile": "osu! bot Profile",
 	"request": "Requests a stream intensive beatmap with a specified BPM, which may include additional filters",
 	"request_command": "Request beatmap command",
 	"use_complete": "Use complete version",
 	"use_shortcut": "Use shortcut version",
-	"user_id": "User ID"
+	"user_id": "User's ID"
 }

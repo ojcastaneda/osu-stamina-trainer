@@ -22,8 +22,6 @@
 	}
 
 	& > a {
-		cursor: pointer;
-
 		&:last-child {
 			border-radius: 0 $xs-spacing $xs-spacing 0;
 		}

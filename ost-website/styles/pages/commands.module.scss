@@ -26,6 +26,72 @@
 	}
 }
 
+#bot-links {
+	display: grid;
+	gap: $lg-spacing;
+	grid-template-columns: 1fr 1fr;
+	margin-bottom: $lg-spacing;
+
+	@media (max-width: $small-responsive) {
+		grid-template-columns: 1fr;
+	}
+
+	& > div {
+		border: $xxs-spacing solid var(--tertiary-theme-color);
+		display: flex;
+		flex-direction: column;
+		padding: $md-spacing $lg-spacing;
+
+		& > a {
+			align-items: center;
+			background-color: var(--secondary-theme-color);
+			border-radius: $xs-spacing;
+			display: flex;
+			flex: 1;
+			justify-content: center;
+			padding: $sm-spacing;
+			text-align: center;
+		}
+
+		& > h2 {
+			align-items: center;
+			justify-content: center;
+			margin-bottom: $md-spacing;
+
+			& > div {
+				font-size: 1.3rem;
+				margin-left: $sm-spacing;
+			}
+		}
+	}
+}
+
+#check {
+	display: flex;
+	margin-top: $lg-spacing;
+
+	@media (max-width: $small-responsive) {
+		display: grid;
+		gap: $lg-spacing;
+		grid-template-columns: 1fr;
+	}
+
+	& > div {
+		margin-right: $lg-spacing;
+
+		@media (max-width: $small-responsive) {
+			margin-right: 0;
+		}
+	}
+
+	& > input {
+		@media (max-width: $small-responsive) {
+			box-sizing: border-box;
+			width: 100%;
+		}
+	}
+}
+
 .copy-input {
 	display: flex;
 	width: 100%;
@@ -112,6 +178,13 @@
 			margin-right: 0;
 			width: 100%;
 		}
+	}
+}
+
+#osu-icon {
+	& > path,
+	circle {
+		fill: var(--primary-font-color);
 	}
 }
 

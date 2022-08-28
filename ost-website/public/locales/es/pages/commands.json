@@ -1,12 +1,19 @@
 {
+	"beatmap_id": "ID del mapa",
+	"check": "Solicita estadísticas relacionadas a streams del mapa con el ID proporcionado",
 	"copy_command": "Copiar comando",
+	"discord_only": "Solo disponible en Discord",
 	"help": "Muestra una lista de todos los comandos en forma de un hipervínculo a la página web",
+	"invite": "Muestra un botón para invitar el bot a un servidor de Discord",
+	"invite_discord": "Invitar el bot a un servidor de Discord",
 	"language": "Cambia el lenguaje con el cual el bot va a responder",
 	"language_command": "Comando de actualizar lenguaje",
 	"now_playing": "Solicita estadísticas relacionadas a streams del mapa que se está reproduciendo actualmente",
+	"osu_only": "Solo disponible en osu!",
+	"osu_profile": "Perfil de osu!",
 	"request": "Solicita un mapa de determinado BPM con un enfoque intensivo en estamina, el cual puede incluir filtros adicionales",
 	"request_command": "Comando de solicitar mapa",
 	"use_complete": "Usar versión completa",
 	"use_shortcut": "Usar versión corta",
-	"user_id": "ID de usuario"
+	"user_id": "ID del usuario"
 }

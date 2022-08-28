@@ -75,11 +75,8 @@ export default function Card({ beatmap }: CardProps) {
 				</div>
 				<div>
 					<svg className={styles['bpm-icon']} height={15} viewBox="0 0 512 512">
-						<path
-							d="M512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256ZM256 48C141.1 48 48 141.1 48 256C48 370.9 141.1 464 256 464C370.9 464 464 370.9 464 256C464 141.1 370.9 48 256 48Z"
-							fill="white"
-						/>
-						<circle cx="256" cy="256" r="160" fill="white" />
+						<path d="M512 256C512 397.4 397.4 512 256 512C114.6 512 0 397.4 0 256C0 114.6 114.6 0 256 0C397.4 0 512 114.6 512 256ZM256 48C141.1 48 48 141.1 48 256C48 370.9 141.1 464 256 464C370.9 464 464 370.9 464 256C464 141.1 370.9 48 256 48Z" />
+						<circle cx="256" cy="256" r="160" />
 					</svg>
 					<div>
 						{beatmap.streams_length} ({beatmap.longest_stream})

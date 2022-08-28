@@ -41,11 +41,13 @@ services:
             - ost-server
         environment:
             - API_URL=http://ost-server:8080
-            - BOT_PASSWORD=${BOT_PASSWORD}
-            - BOT_USERNAME=${BOT_USERNAME}
+            - DISCORD_ID=1012092310776971344
+            - DISCORD_TOKEN=${DISCORD_TOKEN}
             - DISCORD_URL=https://discord.com/invite/eNU3BE6bca
             - GITHUB_URL=https://github.com/ojcastaneda/osu-stamina-trainer
             - NODE_ENV=${NODE_ENV}
+            - OSU_PASSWORD=${OSU_PASSWORD}
+            - OSU_USERNAME=${OSU_USERNAME}
             - WEBSITE_URL=https://ost.sombrax79.org
         logging:
             driver: "json-file"
@@ -75,10 +77,12 @@ services:
         depends_on:
             - ost-server
         environment:
-            - API_URL=http://ost-server:8080
-            - DISCORD_URL=https://discord.com/invite/eNU3BE6bca
-            - GITHUB_URL=https://github.com/ojcastaneda/osu-stamina-trainer
-            - PATREON_URL=https://www.patreon.com/osuStaminaTrainer
+            - NEXT_PUBLIC_API_URL=http://ost-server:8080
+            - NEXT_PUBLIC_DISCORD_ID=1012092310776971344
+            - NEXT_PUBLIC_DISCORD_URL=https://discord.com/invite/eNU3BE6bca
+            - NEXT_PUBLIC_GITHUB_URL=https://github.com/ojcastaneda/osu-stamina-trainer
+            - NEXT_PUBLIC_OSU_ID=6484647
+            - NEXT_PUBLIC_PATREON_URL=https://www.patreon.com/osuStaminaTrainer
         container_name: ost-website
         logging:
             driver: "json-file"

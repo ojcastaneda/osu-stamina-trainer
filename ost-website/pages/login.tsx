@@ -19,7 +19,9 @@ function Login() {
 
 	async function login() {
 		const request = await fetch(
-			`${typeof window !== 'undefined' ? '' : process.env.API_URL}/api/authentication/login`,
+			`${
+				typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_API_URL
+			}/api/authentication/login`,
 			{
 				method: 'POST',
 				headers: {

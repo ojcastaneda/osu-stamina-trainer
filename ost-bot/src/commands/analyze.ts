@@ -23,9 +23,20 @@ export function parseNowPlaying(nowPlaying: string): ConstantResponses | number 
  * @param nowPlaying - The message from the user.
  * @returns The corresponding i18n properties.
  */
-export async function analyze(nowPlaying: string): Promise<I18nProperties> {
+export async function analyzeNowPlaying(nowPlaying: string): Promise<I18nProperties> {
 	const id = parseNowPlaying(nowPlaying);
 	if (typeof id === 'string') return id;
 	const response = await fetch(`${process.env.API_URL}/api/bot/beatmap/${id}`);
-	return response.status === 404 ? 'analysisNotFound' : ['analysis', await response.json()];
+	return response.status === 404
+		? 'analysisNotFound'
+		: ['beatmapInformation', await response.json(), ''];
+}
+
+export async function analyzeId(command: string, id: string): Promise<I18nProperties> {
+	const parsedId = parseInt(id);
+	if (isNaN(parsedId)) return ['didYouMean', `${command} 2766688`];
+	const response = await fetch(`${process.env.API_URL}/api/bot/beatmap/${parsedId}`);
+	return response.status === 404
+		? 'analysisNotFound'
+		: ['beatmapInformation', await response.json(), ''];
 }
