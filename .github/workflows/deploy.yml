@@ -150,10 +150,11 @@ jobs:
             export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
             export BASE_USERNAME=${{ secrets.BASE_USERNAME }}
             export BASE_PASSWORD=${{ secrets.BASE_PASSWORD }}
-            export BOT_USERNAME=${{ secrets.BOT_USERNAME }}
-            export BOT_PASSWORD=${{ secrets.BOT_PASSWORD }}
             export DATABASE_URL=${{ secrets.DATABASE_URL }}
+            export DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
             export OSU_API_CLIENT_ID=${{ secrets.OSU_API_CLIENT_ID }}
             export OSU_API_CLIENT_SECRET=${{ secrets.OSU_API_CLIENT_SECRET }}
+            export OSU_PASSWORD=${{ secrets.OSU_PASSWORD }}
+            export OSU_USERNAME=${{ secrets.OSU_USERNAME }}
             docker-compose up -d --remove-orphans
             yes | docker image prune
