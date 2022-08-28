@@ -12,6 +12,7 @@
 	},
 	"dependencies": {
 		"bancho.js": "^0.9.7",
+		"discord.js": "^14.3.0",
 		"dotenv": "^16.0.1",
 		"levenary": "^1.1.1"
 	},

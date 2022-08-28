@@ -320,7 +320,7 @@ export async function request(
 		const beatmap = await fetchRequest(parsedRequest[0], parsedRequest[1]);
 		return beatmap === undefined
 			? 'requestNotFound'
-			: ['request', beatmap, parsedRequest[1] ? ' +DT |' : ''];
+			: ['beatmapInformation', beatmap, parsedRequest[1] ? ' +DT |' : ''];
 	}
 	const useDoubleTime = parsedRequest[1] === undefined ? Math.random() >= 0.5 : parsedRequest[1];
 	let beatmap = await fetchRequest(parsedRequest[0], useDoubleTime);
@@ -328,7 +328,7 @@ export async function request(
 		beatmap = await fetchRequest(parsedRequest[0], !useDoubleTime);
 		return beatmap === undefined
 			? 'requestNotFound'
-			: ['request', beatmap, !useDoubleTime ? ' +DT |' : ''];
+			: ['beatmapInformation', beatmap, !useDoubleTime ? ' +DT |' : ''];
 	}
-	return ['request', beatmap, useDoubleTime ? ' +DT |' : ''];
+	return ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : ''];
 }

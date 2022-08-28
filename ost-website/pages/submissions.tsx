@@ -42,7 +42,9 @@ export async function getServerSideProps(
 			}
 		};
 	const request = await fetch(
-		`${typeof window !== 'undefined' ? '' : process.env.API_URL}/api/submission/page/${page}`,
+		`${
+			typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_API_URL
+		}/api/submission/page/${page}`,
 		{
 			method: 'POST',
 			headers: {

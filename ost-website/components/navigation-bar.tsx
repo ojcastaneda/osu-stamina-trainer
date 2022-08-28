@@ -77,18 +77,18 @@ export default function NavigationBar({ activeSession }: NavigationBarProps) {
 						{activeSession && <Link href="/submissions">{t('submissions')}</Link>}
 					</div>
 					<div id={styles['navigation-bar-right']} className={expanded ? '' : styles['hidden']}>
-						<Link href={process.env.DISCORD_URL ?? '/'}>
-							<a target="_blank">
+						<Link href={process.env.NEXT_PUBLIC_DISCORD_URL ?? '/'}>
+							<a aria-label="Discord" target="_blank">
 								<FaDiscord size={25} />
 							</a>
 						</Link>
-						<Link href={process.env.GITHUB_URL ?? '/'}>
-							<a target="_blank">
+						<Link href={process.env.NEXT_PUBLIC_GITHUB_URL ?? '/'}>
+							<a aria-label="Github" target="_blank">
 								<FaGithub size={25} />
 							</a>
 						</Link>
-						<Link href={process.env.PATREON_URL ?? '/'}>
-							<a target="_blank">
+						<Link href={process.env.NEXT_PUBLIC_PATREON_URL ?? '/'}>
+							<a aria-label="Patreon" target="_blank">
 								<FaPatreon size={25} />
 							</a>
 						</Link>

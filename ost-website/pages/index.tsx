@@ -72,7 +72,9 @@ export async function getServerSideProps(
 ): Promise<GetServerSidePropsResult<IndexProps>> {
 	const { botFilters, filters, order, page, title } = parseParameters(context.query);
 	const request = await fetch(
-		`${typeof window !== 'undefined' ? '' : process.env.API_URL}/api/beatmap/page/${page}`,
+		`${
+			typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_API_URL
+		}/api/beatmap/page/${page}`,
 		{
 			method: 'POST',
 			headers: {
