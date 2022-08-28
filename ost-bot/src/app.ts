@@ -142,7 +142,7 @@ async function handleDiscordMessage(message: Message) {
 			)}`
 		);
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') message.reply(i18n('en', 'unexpectedError')).catch();
+		if (process.env.NODE_ENV === 'production') message.reply(i18n('en', 'unexpectedError')).catch(console.error);
 		console.error(`Discord | ${message.author.username}: ${message.content} | ${error}`);
 	}
 }
@@ -176,6 +176,7 @@ async function startBot() {
 		partials: [Partials.Channel]
 	});
 	discord.on('messageCreate', handleDiscordMessage);
+	discord.on("error", () => { discord.login(process.env.DISCORD_TOKEN) });
 	await discord.login(process.env.DISCORD_TOKEN);
 	console.info('Discord bot connected');
 }
