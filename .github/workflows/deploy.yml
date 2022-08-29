@@ -1,4 +1,4 @@
-name: Deploy to Digital Ocean
+name: Continuous Deployment
 
 on:
   push:
