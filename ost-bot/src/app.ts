@@ -13,6 +13,26 @@ import { formatDiscordResponse } from './discord';
 const help = 'Type "!help en" for more details / Escriba "!help es" para más detalles';
 
 /**
+ * Logs result of the interaction of a message sent by an user to any bot.
+ *
+ * @param level - The Logging level of the interaction.
+ * @param message - The original message from the user.
+ * @param origin - The bot source of the interaction.
+ * @param result - The result of the interaction.
+ * @param user - The user that started the interaction.
+ */
+function logInteraction(
+	level: 'ERROR' | 'INFO',
+	message: string,
+	origin: 'Discord' | 'osu!',
+	result: string,
+	user: string
+) {
+	const log = `${new Date().toISOString()} ${level} ${origin} | ${user}: ${message} | ${result}`;
+	level === 'INFO' ? console.info(log) : console.error(log);
+}
+
+/**
  * Returns the properties for all the supported responses of the Discord bot.
  *
  * @param message - The message from the user.
@@ -114,11 +134,17 @@ async function handleOsuPM({ message, self, user }: PrivateMessage) {
 		]);
 		const responseMessage = response === 'genericHelp' ? help : i18n(language, response);
 		if (process.env.NODE_ENV === 'production') await user.sendMessage(responseMessage);
-		console.info(`osu! | ${user.ircUsername}: ${message} | ${responseMessage}`);
+		logInteraction('INFO', message, 'osu!', responseMessage, user.ircUsername);
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production')
-			await user.sendMessage(i18n('en', 'unexpectedError'));
-		console.error(`osu! | ${user.ircUsername}: ${message} | ${error}`);
+			user.sendMessage(i18n('en', 'unexpectedError')).catch(() => ({}));
+		logInteraction(
+			'ERROR',
+			message,
+			'osu!',
+			error instanceof Error ? error.message : JSON.stringify(error),
+			user.ircUsername
+		);
 	}
 }
 
@@ -136,14 +162,23 @@ async function handleDiscordMessage(message: Message) {
 		if (response === undefined) return;
 		const responseMessage = formatDiscordResponse(response);
 		if (process.env.NODE_ENV === 'production') await message.reply(responseMessage);
-		console.info(
-			`Discord | ${message.author.username}: ${message.content} | ${JSON.stringify(
-				responseMessage
-			)}`
+		logInteraction(
+			'INFO',
+			message.content,
+			'Discord',
+			JSON.stringify(responseMessage),
+			message.author.username
 		);
 	} catch (error) {
-		if (process.env.NODE_ENV === 'production') message.reply(i18n('en', 'unexpectedError')).catch(console.error);
-		console.error(`Discord | ${message.author.username}: ${message.content} | ${error}`);
+		if (process.env.NODE_ENV === 'production')
+			message.reply(formatDiscordResponse('unexpectedError')).catch(() => ({}));
+		logInteraction(
+			'ERROR',
+			message.content,
+			'Discord',
+			error instanceof Error ? error.message : JSON.stringify(error),
+			message.author.username
+		);
 	}
 }
 
@@ -176,7 +211,6 @@ async function startBot() {
 		partials: [Partials.Channel]
 	});
 	discord.on('messageCreate', handleDiscordMessage);
-	discord.on("error", () => { discord.login(process.env.DISCORD_TOKEN) });
 	await discord.login(process.env.DISCORD_TOKEN);
 	console.info('Discord bot connected');
 }

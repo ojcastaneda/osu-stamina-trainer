@@ -38,7 +38,14 @@ export function formatDiscordResponse(properties: I18nProperties | 'invite'): Me
 				return { embeds: [discordResponse.beatmapInformation(properties[1], properties[2])] };
 		}
 	}
-	return { embeds: [response ?? new EmbedBuilder({ title: english.unexpectedError })] };
+	return {
+		embeds: [
+			response ??
+				new EmbedBuilder({
+					description: `The bot failed unexpectedly, please report this error via [Discord](${process.env.DISCORD_URL})`
+				})
+		]
+	};
 }
 
 /**
