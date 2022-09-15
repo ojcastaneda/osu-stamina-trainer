@@ -8,5 +8,9 @@ dotenv = "0.15.0"
 ost-utils = { path = "../ost-utils" }
 reqwest = "0.11.11"
 rosu-pp = { version = "0.8.0", features = ["async_tokio"] }
-sqlx = { version = "0.6.1", features = ["chrono", "postgres", "runtime-tokio-rustls"] }
-tokio = { version = "1.20.1", features = ["full"] }
+sqlx = { version = "0.6.1", features = [
+    "chrono",
+    "postgres",
+    "runtime-tokio-rustls",
+] }
+tokio = { version = "1.21.1", features = ["full"] }

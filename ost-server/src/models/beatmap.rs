@@ -1,11 +1,7 @@
 use super::{filter::Filter, order::Order, Limit};
 use crate::{collection_generator::CollectionBeatmap, ServerResult};
 use serde::{Deserialize, Serialize};
-use sqlx::{
-    query_as,
-    types::chrono::{DateTime, Utc},
-    FromRow, Pool, Postgres, Type,
-};
+use sqlx::{query_as, FromRow, Pool, Postgres, Type};
 
 #[derive(FromRow, Serialize)]
 pub struct Beatmap {
@@ -15,7 +11,6 @@ pub struct Beatmap {
     pub circle_size: f32,
     pub difficulty_rating: f32,
     pub id: i32,
-    pub last_updated: DateTime<Utc>,
     pub length: i16,
     pub longest_stream: i16,
     pub performance_100: i16,
@@ -37,7 +32,6 @@ pub struct BeatmapByPage {
     pub difficulty_rating: f32,
     pub favorite_count: i32,
     pub id: i32,
-    pub last_updated: DateTime<Utc>,
     pub length: i16,
     pub longest_stream: i16,
     pub performance_100: i16,
@@ -154,15 +148,11 @@ pub async fn retrieve_request(
         "beatmaps"
     };
     let beatmap_sql = format!(
-        r#"UPDATE {table} SET last_requested = now()
-            WHERE id = (
-                SELECT id FROM {table} {}
-                ORDER BY last_requested ASC NULLS FIRST LIMIT 1
-            )
-            RETURNING accuracy, approach_rate, bpm, circle_size, difficulty_rating,
+        r#"SELECT accuracy, approach_rate, bpm, circle_size, difficulty_rating,
                 id, last_updated, length, longest_stream, performance_100,
                 performance_95, ranked_status, streams_density, streams_length,
-                streams_spacing, title"#,
+                streams_spacing, title
+            FROM {table} {} limit 1"#,
         Filter::parse_multiple(filters, false)
     );
     let mut beatmap = query_as::<_, Beatmap>(&beatmap_sql);

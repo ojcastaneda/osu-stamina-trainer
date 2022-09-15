@@ -121,14 +121,14 @@ export class AlphanumericFilter {
  * Filters for beatmap requests to the server.
  */
 export class Filter {
-	operator: Operator;
+	operator: Operator | 'different';
 	property: keyof Beatmap;
-	value: Date | number | RankedStatus;
+	value: Date | number | RankedStatus | number[];
 
 	constructor(
-		operator: Operator,
-		property: AlphanumericFilterProperty | NumericFilterProperty,
-		value: Date | number | RankedStatus
+		operator: Operator | 'different',
+		property: Exclude<keyof Beatmap, 'title'>,
+		value: Date | number | RankedStatus | number[]
 	) {
 		this.operator = operator;
 		this.property = property;

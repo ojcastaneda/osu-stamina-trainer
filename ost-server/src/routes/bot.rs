@@ -18,7 +18,7 @@ use axum::{
 use ost_utils::{beatmaps_processor::process_beatmap, osu_api, storage};
 use redis::{aio::ConnectionManager, AsyncCommands};
 use serde::{Deserialize, Serialize};
-use sqlx::{types::chrono::Utc, Pool, Postgres};
+use sqlx::{Pool, Postgres};
 
 const LANGUAGE_CACHE_EXPIRATION: usize = 86_400;
 
@@ -82,7 +82,6 @@ async fn retrieve_beatmap(
             circle_size: beatmap.circle_size,
             difficulty_rating: beatmap.difficulty_rating.no_modification,
             id,
-            last_updated: Utc::now(),
             length: beatmap.total_length,
             longest_stream: beatmap.longest_stream,
             performance_100: beatmap.performance_100.no_modification,

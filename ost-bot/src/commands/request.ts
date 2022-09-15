@@ -152,8 +152,8 @@ function parseParameter(parameter: string): Filter[] | string | boolean {
 			const minimumValue = value.slice(0, splitIndex);
 			const minimum = parseNumericParameter(numericFilter, 'minimum', minimumValue);
 			if (!isCorrect || typeof maximum === 'number' || typeof minimum === 'number') {
-				return `${property}=${typeof minimum === 'number' ? minimum : maximumValue}-${
-					typeof maximum === 'number' ? maximum : minimumValue
+				return `${property}=${typeof minimum === 'number' ? minimum : minimumValue}-${
+					typeof maximum === 'number' ? maximum : maximumValue
 				}`;
 			}
 			if (maximum[0].value !== minimum[0].value) {
@@ -312,20 +312,34 @@ function parseAlphanumericParameter(parameter: string): Filter[] | string | bool
 export async function request(
 	command: string,
 	parameters: string[],
+	skippedIds: number[],
 	guessCommand = false
 ): Promise<I18nProperties> {
 	const parsedRequest = parseRequest(parameters, guessCommand);
 	if (typeof parsedRequest === 'string') return ['didYouMean', `${command} ${parsedRequest}`];
-	if (parsedRequest[1] !== undefined) {
-		const beatmap = await fetchRequest(parsedRequest[0], parsedRequest[1]);
+	const request = await retrieveRequest(
+		[new Filter('different', 'id', skippedIds)].concat(parsedRequest[0]),
+		parsedRequest[1]
+	);
+	return request === 'requestNotFound'
+		? retrieveRequest(parsedRequest[0], parsedRequest[1])
+		: request;
+}
+
+async function retrieveRequest(
+	filters: Filter[],
+	useDoubleTime?: boolean
+): Promise<I18nProperties> {
+	if (useDoubleTime !== undefined) {
+		const beatmap = await fetchRequest(filters, useDoubleTime);
 		return beatmap === undefined
 			? 'requestNotFound'
-			: ['beatmapInformation', beatmap, parsedRequest[1] ? ' +DT |' : ''];
+			: ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : ''];
 	}
-	const useDoubleTime = parsedRequest[1] === undefined ? Math.random() >= 0.5 : parsedRequest[1];
-	let beatmap = await fetchRequest(parsedRequest[0], useDoubleTime);
+	useDoubleTime = useDoubleTime === undefined ? Math.random() >= 0.5 : useDoubleTime;
+	let beatmap = await fetchRequest(filters, useDoubleTime);
 	if (beatmap === undefined) {
-		beatmap = await fetchRequest(parsedRequest[0], !useDoubleTime);
+		beatmap = await fetchRequest(filters, !useDoubleTime);
 		return beatmap === undefined
 			? 'requestNotFound'
 			: ['beatmapInformation', beatmap, !useDoubleTime ? ' +DT |' : ''];

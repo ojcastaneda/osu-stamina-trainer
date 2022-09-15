@@ -7,7 +7,7 @@ use axum::{Extension, Router, Server};
 use dotenv::dotenv;
 use ost_utils::{osu_api, storage};
 use redis::aio::ConnectionManager;
-use sqlx::postgres::PgPoolOptions;
+use sqlx::{migrate, postgres::PgPoolOptions};
 use std::{env, net::SocketAddr};
 use tower_http::trace::TraceLayer;
 use tracing::info;
@@ -26,6 +26,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let database = PgPoolOptions::new()
         .connect(&env::var("DATABASE_URL")?)
         .await?;
+    migrate!().run(&database).await?;
     if moderator::retrieve(&database, 1).await?.is_some() {
         moderator::update_username(&database, 1, env::var("BASE_USERNAME")?).await?;
         moderator::update_password(&database, 1, env::var("BASE_PASSWORD")?).await?;
