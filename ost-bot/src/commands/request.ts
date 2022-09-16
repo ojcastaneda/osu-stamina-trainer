@@ -58,7 +58,7 @@ export const typeGuesses = Object.values(AlphanumericParameter).filter((key) => 
  *
  * @param filters - The filters used for the request.
  * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.
- * @returns A beatmaps that meets the request if available.
+ * @returns A beatmap that meets the request if available.
  */
 async function fetchRequest(
 	filters: Filter[],
@@ -152,8 +152,8 @@ function parseParameter(parameter: string): Filter[] | string | boolean {
 			const minimumValue = value.slice(0, splitIndex);
 			const minimum = parseNumericParameter(numericFilter, 'minimum', minimumValue);
 			if (!isCorrect || typeof maximum === 'number' || typeof minimum === 'number') {
-				return `${property}=${typeof minimum === 'number' ? minimum : maximumValue}-${
-					typeof maximum === 'number' ? maximum : minimumValue
+				return `${property}=${typeof minimum === 'number' ? minimum : minimumValue}-${
+					typeof maximum === 'number' ? maximum : maximumValue
 				}`;
 			}
 			if (maximum[0].value !== minimum[0].value) {
@@ -306,26 +306,51 @@ function parseAlphanumericParameter(parameter: string): Filter[] | string | bool
  *
  * @param command - The command used `!r` or `!request`.
  * @param parameters - The parameters to filter the request.
+ * @param skippedIds - The list of temporarily blacklisted requests.
  * @param guessCommand - Whether or not to guess the command even if it is correct.
  * @returns The corresponding i18n properties.
  */
 export async function request(
 	command: string,
 	parameters: string[],
+	skippedIds: number[],
 	guessCommand = false
 ): Promise<I18nProperties> {
 	const parsedRequest = parseRequest(parameters, guessCommand);
 	if (typeof parsedRequest === 'string') return ['didYouMean', `${command} ${parsedRequest}`];
-	if (parsedRequest[1] !== undefined) {
-		const beatmap = await fetchRequest(parsedRequest[0], parsedRequest[1]);
+	const request = await retrieveRequest(
+		[new Filter('different', 'id', skippedIds)].concat(parsedRequest[0]),
+		parsedRequest[1]
+	);
+	return request === 'requestNotFound'
+		? retrieveRequest(parsedRequest[0], parsedRequest[1])
+		: request;
+}
+
+/**
+ * Returns the i18n properties for `request` if a beatmap that meets the provided filters and modification.
+ * If `useDoubleTime` is undefined, randomly picks a modification,
+ * and uses the remaining modification if a beatmap did not meet the request.
+ * Otherwise, returns the i18n property for `request not found`.
+ *
+ * @param filters - The filters used for the request.
+ * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.
+ * @returns The corresponding i18n properties.
+ */
+async function retrieveRequest(
+	filters: Filter[],
+	useDoubleTime?: boolean
+): Promise<I18nProperties> {
+	if (useDoubleTime !== undefined) {
+		const beatmap = await fetchRequest(filters, useDoubleTime);
 		return beatmap === undefined
 			? 'requestNotFound'
-			: ['beatmapInformation', beatmap, parsedRequest[1] ? ' +DT |' : ''];
+			: ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : ''];
 	}
-	const useDoubleTime = parsedRequest[1] === undefined ? Math.random() >= 0.5 : parsedRequest[1];
-	let beatmap = await fetchRequest(parsedRequest[0], useDoubleTime);
+	useDoubleTime = useDoubleTime === undefined ? Math.random() >= 0.5 : useDoubleTime;
+	let beatmap = await fetchRequest(filters, useDoubleTime);
 	if (beatmap === undefined) {
-		beatmap = await fetchRequest(parsedRequest[0], !useDoubleTime);
+		beatmap = await fetchRequest(filters, !useDoubleTime);
 		return beatmap === undefined
 			? 'requestNotFound'
 			: ['beatmapInformation', beatmap, !useDoubleTime ? ' +DT |' : ''];

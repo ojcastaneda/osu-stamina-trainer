@@ -32,6 +32,15 @@ export async function analyzeNowPlaying(nowPlaying: string): Promise<I18nPropert
 		: ['beatmapInformation', await response.json(), ''];
 }
 
+/**
+ * Returns the i18n properties for `analysis` if the command is correct.
+ * If the beatmap is not available returns the i18n properties for `Analysis not found`.
+ * Otherwise, returns the the i18n property for `command not found`.
+ *
+ * @param command - The command used `!c` or `!check`.
+ * @param id - The id of the beatmap to analyze.
+ * @returns The corresponding i18n properties.
+ */
 export async function analyzeId(command: string, id: string): Promise<I18nProperties> {
 	const parsedId = parseInt(id);
 	if (isNaN(parsedId)) return ['didYouMean', `${command} 2766688`];

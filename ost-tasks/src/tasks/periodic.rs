@@ -39,7 +39,7 @@ pub async fn add_beatmaps(limit_date: i64, mut services: Services) -> TaskResult
             .osu_api
             .retrieve_leaderboard_beatmaps(cursor.approved_date, cursor.id, limit_date)
             .await?;
-        let mut tasks = Tasks::new(beatmaps.len(), beatmaps.len(), None);
+        let mut tasks = Tasks::new(beatmaps.len(), beatmaps.len(), false, None);
         for beatmap in beatmaps {
             tasks
                 .spawn(add_beatmap(
@@ -53,6 +53,7 @@ pub async fn add_beatmaps(limit_date: i64, mut services: Services) -> TaskResult
         log_date_progress(
             approved_date,
             limit_date,
+            false,
             start,
             "ranked beatmaps processed",
         );
@@ -69,6 +70,7 @@ async fn check_beatmaps(mut services: Services, submissions: Vec<i32>) -> TaskRe
     let mut tasks = Tasks::new(
         IDS_LIMIT,
         submissions.len(),
+        false,
         Some("unchecked beatmaps processed"),
     );
     let mut beatmaps = HashSet::with_capacity(IDS_LIMIT);
@@ -80,7 +82,9 @@ async fn check_beatmaps(mut services: Services, submissions: Vec<i32>) -> TaskRe
             beatmaps.remove(&beatmap.id);
             let database = services.database.clone();
             if beatmap.is_ranked() {
-                tasks.spawn(async move {unchecked_submission::delete(&database, beatmap.id).await}).await?;
+                tasks
+                    .spawn(async move { unchecked_submission::delete(&database, beatmap.id).await })
+                    .await?;
                 continue;
             }
             let title = format!(
@@ -118,7 +122,7 @@ async fn check_beatmapset(
 ) -> TaskResult<()> {
     if let Some(beatmapset) = osu_api.retrieve_beatmapset(id.abs()).await? {
         let beatmaps = beatmapset.beatmaps.unwrap();
-        let mut tasks = Tasks::new(beatmaps.len(), beatmaps.len(), None);
+        let mut tasks = Tasks::new(beatmaps.len(), beatmaps.len(), false, None);
         for beatmap in beatmaps {
             if beatmap.is_ranked() {
                 tasks.spawn(async { Ok(()) }).await?;
@@ -147,6 +151,7 @@ async fn check_beatmapsets(services: Services, submissions: Vec<i32>) -> TaskRes
     let mut tasks = Tasks::new(
         THREADS,
         submissions.len(),
+        false,
         Some("unchecked beatmapsets processed"),
     );
     for chunk in submissions.chunks(IDS_LIMIT) {
@@ -189,7 +194,7 @@ async fn process_submission(mut services: Services, beatmap: Beatmap) -> TaskRes
             .upload(&file, format!("beatmaps/{}.osu", beatmap.id))
             .await?;
         submission::approve(&services.database, beatmap.id).await?;
-        return Ok(())
+        return Ok(());
     }
     submission::delete(&services.database, beatmap.id).await?;
     Ok(())
@@ -197,7 +202,12 @@ async fn process_submission(mut services: Services, beatmap: Beatmap) -> TaskRes
 
 pub async fn process_submissions(mut services: Services) -> TaskResult<()> {
     let submissions = submission::retrieve_all_processing(&services.database).await?;
-    let mut tasks = Tasks::new(THREADS, submissions.len(), Some("submissions processed"));
+    let mut tasks = Tasks::new(
+        THREADS,
+        submissions.len(),
+        false,
+        Some("submissions processed"),
+    );
     let mut beatmaps = HashSet::with_capacity(IDS_LIMIT);
     for chunk in submissions.chunks(IDS_LIMIT) {
         let ids = chunk.iter().map(|beatmap| {
@@ -261,6 +271,7 @@ pub async fn synchronize_with_osu_api(mut services: Services) -> TaskResult<()> 
     let mut tasks = Tasks::new(
         IDS_LIMIT,
         beatmaps.len(),
+        false,
         Some("collection beatmaps processed"),
     );
     for chunk in beatmaps.chunks(IDS_LIMIT) {

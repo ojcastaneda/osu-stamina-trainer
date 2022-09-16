@@ -1,6 +1,5 @@
-use crate::{error::Error, ServerResult};
-
 use super::beatmap::RankedStatus;
+use crate::{error::Error, ServerResult};
 use serde::Deserialize;
 use sqlx::{
     postgres::PgArguments,
@@ -21,12 +20,12 @@ impl Filter {
         &self,
         query: QueryAs<'q, Postgres, T, PgArguments>,
     ) -> ServerResult<QueryAs<'q, Postgres, T, PgArguments>> {
-        Ok(match self.value {
+        Ok(match &self.value {
             Value::Date(date) => {
                 if !matches!(self.property, Property::LastUpdated) {
                     return Err(Error::DynamicFilter(self.property));
                 } else {
-                    query.bind(date)
+                    query.bind(*date)
                 }
             }
             Value::Integer(integer) => match self.property {
@@ -35,11 +34,11 @@ impl Filter {
                 | Property::CircleSize
                 | Property::DifficultyRating
                 | Property::StreamsDensity
-                | Property::StreamsSpacing => query.bind(integer as f32),
-                Property::RankedStatus | Property::LastUpdated => {
+                | Property::StreamsSpacing => query.bind(*integer as f32),
+                Property::RankedStatus | Property::LastUpdated | Property::Id => {
                     return Err(Error::DynamicFilter(self.property))
                 }
-                _ => query.bind(integer),
+                _ => query.bind(*integer),
             },
             Value::Decimal(decimal) => match self.property {
                 Property::Accuracy
@@ -47,8 +46,8 @@ impl Filter {
                 | Property::CircleSize
                 | Property::DifficultyRating
                 | Property::StreamsDensity
-                | Property::StreamsSpacing => query.bind(decimal),
-                Property::RankedStatus | Property::LastUpdated => {
+                | Property::StreamsSpacing => query.bind(*decimal),
+                Property::RankedStatus | Property::LastUpdated | Property::Id => {
                     return Err(Error::DynamicFilter(self.property))
                 }
                 _ => query.bind(decimal.round() as i16),
@@ -57,7 +56,14 @@ impl Filter {
                 if !matches!(self.property, Property::RankedStatus) {
                     return Err(Error::DynamicFilter(self.property));
                 } else {
-                    query.bind(ranked_status)
+                    query.bind(*ranked_status)
+                }
+            }
+            Value::SkippedIds(ids) => {
+                if !matches!(self.property, Property::Id) {
+                    return Err(Error::DynamicFilter(self.property));
+                } else {
+                    query.bind(ids.clone())
                 }
             }
         })
@@ -77,7 +83,7 @@ impl Filter {
         if !parsed_filters.is_empty() {
             format!("WHERE {}", parsed_filters.join(" AND "))
         } else {
-            String::with_capacity(0)
+            String::new()
         }
     }
 
@@ -89,6 +95,7 @@ impl Filter {
             Property::DifficultyRating => "difficulty_rating",
             Property::Bpm => "bpm",
             Property::FavoriteCount => "favorite_count",
+            Property::Id => "id",
             Property::LastUpdated => "last_updated",
             Property::Length => "length",
             Property::LongestStream => "longest_stream",
@@ -101,17 +108,23 @@ impl Filter {
             Property::StreamsSpacing => "streams_spacing",
         };
         let operator = match self.operator {
+            Operator::Different => "!=",
             Operator::Exact => "=",
             Operator::Maximum => "<=",
             Operator::Minimum => ">=",
         };
-        format!("{property} {operator} ${index}")
+        if matches!(self.value, Value::SkippedIds(_)) {
+            format!("{property} {operator} ALL(${index})")
+        } else {
+            format!("{property} {operator} ${index}")
+        }
     }
 }
 
 #[derive(Clone, Copy, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub enum Operator {
+    Different,
     Exact,
     Maximum,
     Minimum,
@@ -126,6 +139,7 @@ pub enum Property {
     CircleSize,
     DifficultyRating,
     FavoriteCount,
+    Id,
     LastUpdated,
     Length,
     LongestStream,
@@ -140,11 +154,12 @@ pub enum Property {
     StreamsSpacing,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Date(DateTime<Utc>),
     Integer(i16),
     Decimal(f32),
     RankedStatus(RankedStatus),
+    SkippedIds(Vec<i32>),
 }

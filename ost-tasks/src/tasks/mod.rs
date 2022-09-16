@@ -38,6 +38,7 @@ impl Services {
 pub struct Tasks<T> {
     current: usize,
     limit: usize,
+    log_progress: bool,
     tasks: Vec<JoinHandle<TaskResult<T>>>,
     unit: Option<&'static str>,
 }
@@ -55,8 +56,10 @@ where
     }
 
     pub fn log(&self) {
-        if self.unit.is_some() {
-            println!(
+        if self.unit.is_some()
+            && (self.log_progress || self.current == self.limit || self.current == 0)
+        {
+            tracing::info!(
                 "{:.2}% {}.",
                 100.0 * self.current as f64 / self.limit as f64,
                 self.unit.unwrap()
@@ -64,10 +67,16 @@ where
         }
     }
 
-    pub fn new(capacity: usize, limit: usize, unit: Option<&'static str>) -> Self {
+    pub fn new(
+        capacity: usize,
+        limit: usize,
+        log_progress: bool,
+        unit: Option<&'static str>,
+    ) -> Self {
         Self {
             current: 0,
             limit,
+            log_progress,
             tasks: Vec::with_capacity(capacity),
             unit,
         }
@@ -102,9 +111,17 @@ pub async fn create_beatmap(
     Ok(true)
 }
 
-pub fn log_date_progress(current: i64, limit: i64, start: i64, unit: &'static str) {
-    println!(
-        "{:.2}% {unit}.",
-        100.0 * (current - start) as f64 / (limit - start) as f64
-    );
+pub fn log_date_progress(
+    current: i64,
+    limit: i64,
+    log_progress: bool,
+    start: i64,
+    unit: &'static str,
+) {
+    if log_progress || current == start || current == limit {
+        tracing::info!(
+            "{:.2}% {unit}.",
+            100.0 * (current - start) as f64 / (limit - start) as f64
+        );
+    }
 }

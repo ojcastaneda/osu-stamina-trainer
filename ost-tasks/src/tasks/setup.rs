@@ -45,7 +45,7 @@ pub async fn setup_files(upload_files: bool) -> TaskResult<()> {
         .flatten()
         .filter(|file| file.path().as_path().extension() == Some(OsStr::new("osu")))
         .collect::<Vec<DirEntry>>();
-    let mut tasks = Tasks::new(THREADS, paths.len(), Some("files processed"));
+    let mut tasks = Tasks::new(THREADS, paths.len(), true, Some("files processed"));
     for path in paths {
         tasks
             .spawn(setup_file(storage.clone(), path.path(), upload_files))
@@ -94,7 +94,7 @@ async fn update_beatmaps(
             .osu_api
             .retrieve_leaderboard_beatmaps(cursor.approved_date, cursor.id, limit_date)
             .await?;
-        let mut tasks = Tasks::new(beatmaps.len(), beatmaps.len(), None);
+        let mut tasks = Tasks::new(beatmaps.len(), beatmaps.len(), true, None);
         for beatmap in beatmaps {
             if let Some(ids) = tasks
                 .spawn(update_beatmap(
@@ -113,6 +113,7 @@ async fn update_beatmaps(
         log_date_progress(
             approved_date,
             limit_date,
+            true,
             1_191_710_791_000,
             "ranked beatmaps processed",
         );
@@ -124,6 +125,7 @@ async fn update_beatmaps(
     let mut tasks = Tasks::new(
         THREADS,
         local_beatmaps.len(),
+        true,
         Some("not suitable beatmaps deleted"),
     );
     for id in local_beatmaps {
@@ -168,7 +170,12 @@ async fn update_submission(
 }
 
 async fn updated_submissions(mut services: Services, submissions: Vec<i32>) -> TaskResult<()> {
-    let mut tasks = Tasks::new(IDS_LIMIT, submissions.len(), Some("submissions processed"));
+    let mut tasks = Tasks::new(
+        IDS_LIMIT,
+        submissions.len(),
+        true,
+        Some("submissions processed"),
+    );
     let mut beatmaps = HashSet::with_capacity(IDS_LIMIT);
     for chunk in submissions.chunks(IDS_LIMIT) {
         chunk.iter().for_each(|beatmap| {

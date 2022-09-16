@@ -9,7 +9,7 @@ use std::collections::HashMap;
 
 /// Represents the information required to store a beatmap into a `.db` or a
 /// `.osdb` file.
-#[derive(Debug, FromRow)]
+#[derive(FromRow)]
 pub struct CollectionBeatmap {
     pub beatmapset_id: i32,
     pub bpm: i16,

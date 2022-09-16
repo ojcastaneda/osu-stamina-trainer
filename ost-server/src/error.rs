@@ -117,7 +117,7 @@ impl IntoResponse for Error {
         let status_code = if let Self::Authorization = self {
             StatusCode::UNAUTHORIZED
         } else {
-            tracing::error!("{:?}", self);
+            tracing::error!("Description={:?}", self);
             StatusCode::INTERNAL_SERVER_ERROR
         };
         (
