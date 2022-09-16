@@ -141,7 +141,7 @@ async fn track_activity(
     username: String,
 ) -> ServerResult<()> {
     let mut add_unique_user = true;
-    let tracking_username = format!("{username}_tracking");
+    let tracking_username = format!("{username} tracking");
     if let Ok(user_date_id) = cache.get::<String, i32>(tracking_username.clone()).await {
         add_unique_user = user_date_id < date_id;
     }
