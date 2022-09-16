@@ -18,7 +18,6 @@ pub struct Beatmap {
     pub difficulty_rating: f32,
     pub favorite_count: i32,
     pub id: i32,
-    pub last_requested: Option<DateTime<Utc>>,
     pub last_updated: DateTime<Utc>,
     pub length: i16,
     pub longest_stream: i16,
@@ -67,15 +66,15 @@ pub async fn create_or_update(
     query(
         r#"INSERT INTO beatmaps
             (accuracy, approach_rate, beatmapset_id, bpm, checksum, circle_size,
-                difficulty_rating, favorite_count, id, last_requested, last_updated, length,
+                difficulty_rating, favorite_count, id, last_updated, length,
                 longest_stream, performance_100, performance_95, play_count,
                 ranked_status, streams_density, streams_length, streams_spacing, title)
             VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13,
-                $14, $15, $16, $17, $18, $19, $20, $21)
+                $14, $15, $16, $17, $18, $19, $20)
             ON CONFLICT (id) DO
             UPDATE SET bpm = $4, difficulty_rating = $7, favorite_count = $8,
-                performance_100 = $14, performance_95 = $15, play_count = $16,
-                streams_density = $18, streams_length = $19, streams_spacing = $20"#,
+                performance_100 = $13, performance_95 = $14, play_count = $15,
+                streams_density = $17, streams_length = $18, streams_spacing = $19"#,
     )
     .bind(beatmap.accuracy)
     .bind(beatmap.approach_rate)
@@ -86,7 +85,6 @@ pub async fn create_or_update(
     .bind(beatmap.difficulty_rating)
     .bind(beatmap.favorite_count)
     .bind(beatmap.id)
-    .bind(beatmap.last_requested)
     .bind(beatmap.last_updated)
     .bind(beatmap.length)
     .bind(beatmap.longest_stream)
@@ -167,7 +165,6 @@ pub fn parse_beatmap(
             circle_size: beatmap_statistics.circle_size,
             difficulty_rating: beatmap_statistics.difficulty_rating.no_modification,
             favorite_count: beatmapset.favourite_count,
-            last_requested: None,
             last_updated: if let Some(ranked_date) = beatmapset.ranked_date {
                 ranked_date
             } else {
