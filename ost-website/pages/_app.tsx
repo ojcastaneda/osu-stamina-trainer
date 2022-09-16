@@ -6,7 +6,8 @@ import { NextPage } from 'next';
 import NavigationBar from '@components/navigation-bar';
 import Head from 'next/head';
 
-type MyAppProps = AppProps & {
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type MyAppProps = AppProps<any> & {
 	Component: NextPage & {
 		useCustomLayout?: boolean;
 		head: string;
