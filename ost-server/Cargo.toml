@@ -10,6 +10,7 @@ argon2 = "0.4.1"
 async-compression = { version = "0.3.14", features = ["gzip", "tokio"] }
 axum = { version = "0.5.16", features = ["headers"] }
 base64 = "0.13.0"
+chrono = "0.4.22"
 dotenv = "0.15.0"
 ost-utils = { path = "../ost-utils" }
 rand_core = { version = "0.6.3", features = ["std"] }

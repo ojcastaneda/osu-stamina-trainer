@@ -4,6 +4,7 @@ use crate::{
     models::{
         beatmap::{self, Beatmap, RankedStatus},
         filter::Filter,
+        tracking::record_activity,
         user::{self, parse_country_code},
     },
     ServerResult,
@@ -15,12 +16,14 @@ use axum::{
     routing::{get, post},
     Extension, Json, Router,
 };
+use chrono::{Datelike, Utc};
 use ost_utils::{beatmaps_processor::process_beatmap, osu_api, storage};
 use redis::{aio::ConnectionManager, AsyncCommands};
 use serde::{Deserialize, Serialize};
 use sqlx::{Pool, Postgres};
 
-const LANGUAGE_CACHE_EXPIRATION: usize = 86_400;
+const LANGUAGE_CACHE_EXPIRATION: usize = 14_400;
+const TRACKING_CACHE_EXPIRATION: usize = 86_400;
 
 async fn request_beatmap(
     Extension(database): Extension<Pool<Postgres>>,
@@ -108,6 +111,9 @@ async fn retrieve_language(
     Extension(mut osu_api): Extension<osu_api::Client>,
     Path(username): Path<String>,
 ) -> ServerResult<impl IntoResponse> {
+    let date = Utc::now().date();
+    let date_id = (date.year() * 10000) + (date.month() as i32 * 100) + date.day() as i32;
+    track_activity(&mut cache, &database, date_id, username.clone()).await?;
     if let Ok(language) = cache.get::<String, String>(username.clone()).await {
         Ok(language)
     } else if let Some(user) = user::retrieve(&database, username.clone()).await? {
@@ -126,6 +132,24 @@ async fn retrieve_language(
             .await?;
         Ok(language)
     }
+}
+
+async fn track_activity(
+    cache: &mut ConnectionManager,
+    database: &Pool<Postgres>,
+    date_id: i32,
+    username: String,
+) -> ServerResult<()> {
+    let mut add_unique_user = true;
+    let tracking_username = format!("{username}_tracking");
+    if let Ok(user_date_id) = cache.get::<String, i32>(tracking_username.clone()).await {
+        add_unique_user = user_date_id < date_id;
+    }
+    cache
+        .set_ex(tracking_username, date_id, TRACKING_CACHE_EXPIRATION)
+        .await?;
+    record_activity(add_unique_user, database, date_id).await?;
+    Ok(())
 }
 
 #[derive(Deserialize)]

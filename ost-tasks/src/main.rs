@@ -10,6 +10,9 @@ use tasks::{
     Services,
 };
 use tokio::time::sleep;
+use tracing_subscriber::{
+    filter::filter_fn, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer,
+};
 
 mod models;
 mod osu_files;
@@ -20,6 +23,16 @@ pub type TaskResult<T> = Result<T, Box<dyn Error + Sync + Send>>;
 #[tokio::main]
 async fn main() -> TaskResult<()> {
     dotenv::dotenv().ok();
+    tracing_subscriber::registry()
+        .with(
+            tracing_subscriber::fmt::layer()
+                .compact()
+                .with_target(false)
+                .with_filter(filter_fn(|metadata| {
+                    metadata.target().starts_with("ost_tasks")
+                })),
+        )
+        .init();
     if env::var("PERIODIC")?.parse()? {
         let starting_time = Instant::now();
         loop {

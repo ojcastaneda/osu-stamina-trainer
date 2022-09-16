@@ -50,7 +50,7 @@ pub struct BeatmapPagination {
     pub beatmaps: Vec<BeatmapByPage>,
 }
 
-#[derive(Clone, Copy, Deserialize, Serialize, Type, Debug)]
+#[derive(Clone, Copy, Deserialize, Serialize, Type)]
 #[sqlx(type_name = "enum_ranked_status", rename_all = "snake_case")]
 #[serde(rename_all = "snake_case")]
 pub enum RankedStatus {

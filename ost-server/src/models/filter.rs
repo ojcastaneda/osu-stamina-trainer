@@ -154,7 +154,7 @@ pub enum Property {
     StreamsSpacing,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize)]
 #[serde(untagged)]
 pub enum Value {
     Date(DateTime<Utc>),

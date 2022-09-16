@@ -14,3 +14,5 @@ sqlx = { version = "0.6.1", features = [
     "runtime-tokio-rustls",
 ] }
 tokio = { version = "1.21.1", features = ["full"] }
+tracing = "0.1.36"
+tracing-subscriber = "0.3.15"

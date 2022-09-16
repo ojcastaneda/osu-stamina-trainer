@@ -3,7 +3,7 @@ use sqlx::{query, query_as, FromRow, Pool, Postgres};
 
 use crate::ServerResult;
 
-#[derive(Debug, FromRow, Serialize)]
+#[derive(FromRow, Serialize)]
 pub struct User {
     pub id: i32,
     pub language: String,
@@ -23,8 +23,8 @@ pub async fn create_or_update(
         .await?;
     query(
         r#"INSERT INTO users (id, language, username) VALUES ($1, $2, $3)
-            ON CONFLICT (id) DO
-            UPDATE SET language = $2, username = $3"#,
+                ON CONFLICT (id) DO
+                UPDATE SET language = $2, username = $3"#,
     )
     .bind(id)
     .bind(language)

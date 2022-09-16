@@ -6,6 +6,7 @@ pub mod filter;
 pub mod moderator;
 pub mod order;
 pub mod submission;
+pub mod tracking;
 pub mod unchecked_submission;
 pub mod user;
 

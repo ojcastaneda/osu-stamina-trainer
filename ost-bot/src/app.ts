@@ -14,29 +14,31 @@ import { MessageDispatcher } from './messageDispatcher';
 const help = 'Type "!help en" for more details / Escriba "!help es" para más detalles';
 
 /**
- * Logs result of the interaction of a message sent by an user to any bot.
+ * Format a message to log to the console.
  *
+ * @param content - The content to log.
  * @param level - The Logging level of the interaction.
- * @param message - The original message from the user.
- * @param origin - The bot source of the interaction.
- * @param result - The result of the interaction.
- * @param user - The user that started the interaction.
+ * @param origin - The source of the interaction.
  */
-function logInteraction(
-	level: 'ERROR' | 'INFO',
-	message: string,
-	origin: 'Discord' | 'osu!',
-	result: string,
-	user: string
-) {
-	const log = `${new Date().toISOString()} ${level} ${origin} | ${user}: ${message} | ${result}`;
-	level === 'INFO' ? console.info(log) : console.error(log);
+function log(content: string, level: 'ERROR' | 'INFO', origin: 'Discord' | 'osu!') {
+	const timestamp = new Date().toISOString();
+	switch (level) {
+		case 'ERROR':
+			return console.error(
+				`\x1b[2m${timestamp}\x1b[0m \x1b[31m${level}\x1b[0m \u001b[1m${origin}:\x1b[0m ${content}`
+			);
+		case 'INFO':
+			return console.info(
+				`\x1b[2m${timestamp}\x1b[0m \x1b[32m${level}\x1b[0m \u001b[1m${origin}:\x1b[0m ${content}`
+			);
+	}
 }
 
 /**
  * Returns the properties for all the supported responses of the Discord bot.
  *
  * @param message - The message from the user.
+ * @param skippedIds - The list of temporarily blacklisted requests.
  * @returns The properties for the response.
  */
 async function processDiscordMessage(
@@ -71,6 +73,7 @@ async function processDiscordMessage(
  * Returns the i18n properties for all the supported responses of the osu! bot.
  *
  * @param message - The message from the user.
+ * @param skippedIds - The list of temporarily blacklisted requests.
  * @param username - The irc username of the user.
  * @returns The i18n properties for the response.
  */
@@ -127,6 +130,7 @@ async function retrieveLanguage(username: string): Promise<Languages> {
  * Otherwise, sends a generic error reply.
  *
  * @param privateMessage - The incoming message from an user.
+ * @param skippedIds - The list of temporarily blacklisted requests.
  */
 async function handleOsuPM(
 	{ message, user }: PrivateMessage,
@@ -139,17 +143,19 @@ async function handleOsuPM(
 		]);
 		const responseMessage = response === 'genericHelp' ? help : i18n(language, response);
 		if (process.env.NODE_ENV === 'production') await user.sendMessage(responseMessage);
-		logInteraction('INFO', message, 'osu!', responseMessage, user.ircUsername);
+		log(
+			`${user.ircUsername} | ${message} | ${language} | ${JSON.stringify(response)}`,
+			'INFO',
+			'osu!'
+		);
 		if (Array.isArray(response) && response[0] === 'beatmapInformation') return response[1].id;
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production')
 			user.sendMessage(i18n('en', 'unexpectedError')).catch(() => ({}));
-		logInteraction(
+		log(
+			`${user.ircUsername} | ${message} | ${error instanceof Error ? error.message : error}`,
 			'ERROR',
-			message,
-			'osu!',
-			error instanceof Error ? error.message : JSON.stringify(error),
-			user.ircUsername
+			'osu!'
 		);
 	}
 }
@@ -160,6 +166,7 @@ async function handleOsuPM(
  * Otherwise, sends a generic error reply.
  *
  * @param message - The incoming message from an user.
+ * @param skippedIds - The list of temporarily blacklisted requests.
  */
 async function handleDiscordMessage(
 	message: Message,
@@ -170,23 +177,15 @@ async function handleDiscordMessage(
 		if (response === undefined) return;
 		const responseMessage = formatDiscordResponse(response);
 		if (process.env.NODE_ENV === 'production') await message.reply(responseMessage);
-		logInteraction(
-			'INFO',
-			message.content,
-			'Discord',
-			JSON.stringify(responseMessage),
-			message.author.username
-		);
+		log(`${message.author.username} | ${message} | ${JSON.stringify(response)}`, 'INFO', 'Discord');
 		if (Array.isArray(response) && response[0] === 'beatmapInformation') return response[1].id;
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production')
 			message.reply(formatDiscordResponse('unexpectedError')).catch(() => ({}));
-		logInteraction(
+		log(
+			`${message.author.username} | ${message} | ${error instanceof Error ? error.message : error}`,
 			'ERROR',
-			message.content,
-			'Discord',
-			error instanceof Error ? error.message : JSON.stringify(error),
-			message.author.username
+			'Discord'
 		);
 	}
 }
@@ -200,13 +199,13 @@ async function startBot() {
 		username: process.env.OSU_USERNAME,
 		password: process.env.OSU_PASSWORD
 	});
-	const osuDispatcher = new MessageDispatcher<PrivateMessage>();
+	const osuDispatcher = new MessageDispatcher<PrivateMessage>(handleOsuPM);
 	bancho.on('PM', (message: PrivateMessage) => {
 		if (message.self) return;
-		osuDispatcher.enqueue(handleOsuPM, message, message.user.ircUsername);
+		osuDispatcher.enqueue(message, message.user.ircUsername);
 	});
 	await bancho.connect();
-	console.info('osu! bot connected');
+	log('Bot connected', 'INFO', 'osu!');
 	const discord = new Client({
 		intents: [
 			GatewayIntentBits.DirectMessages,
@@ -216,13 +215,13 @@ async function startBot() {
 		],
 		partials: [Partials.Channel]
 	});
-	const discordDispatcher = new MessageDispatcher<Message>();
+	const discordDispatcher = new MessageDispatcher<Message>(handleDiscordMessage);
 	discord.on('messageCreate', (message: Message) => {
 		if (message.author.bot) return;
-		discordDispatcher.enqueue(handleDiscordMessage, message, message.author.id);
+		discordDispatcher.enqueue(message, message.author.id);
 	});
 	await discord.login(process.env.DISCORD_TOKEN);
-	console.info('Discord bot connected');
+	log('Bot connected', 'INFO', 'Discord');
 }
 
 startBot();

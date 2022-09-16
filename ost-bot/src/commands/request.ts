@@ -58,7 +58,7 @@ export const typeGuesses = Object.values(AlphanumericParameter).filter((key) => 
  *
  * @param filters - The filters used for the request.
  * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.
- * @returns A beatmaps that meets the request if available.
+ * @returns A beatmap that meets the request if available.
  */
 async function fetchRequest(
 	filters: Filter[],
@@ -306,6 +306,7 @@ function parseAlphanumericParameter(parameter: string): Filter[] | string | bool
  *
  * @param command - The command used `!r` or `!request`.
  * @param parameters - The parameters to filter the request.
+ * @param skippedIds - The list of temporarily blacklisted requests.
  * @param guessCommand - Whether or not to guess the command even if it is correct.
  * @returns The corresponding i18n properties.
  */
@@ -326,6 +327,16 @@ export async function request(
 		: request;
 }
 
+/**
+ * Returns the i18n properties for `request` if a beatmap that meets the provided filters and modification.
+ * If `useDoubleTime` is undefined, randomly picks a modification,
+ * and uses the remaining modification if a beatmap did not meet the request.
+ * Otherwise, returns the i18n property for `request not found`.
+ *
+ * @param filters - The filters used for the request.
+ * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.
+ * @returns The corresponding i18n properties.
+ */
 async function retrieveRequest(
 	filters: Filter[],
 	useDoubleTime?: boolean
