@@ -56,9 +56,7 @@ where
     }
 
     pub fn log(&self) {
-        if self.unit.is_some()
-            && (self.log_progress || self.current == self.limit || self.current == 0)
-        {
+        if self.unit.is_some() && self.log_progress {
             tracing::info!(
                 "{:.2}% {}.",
                 100.0 * self.current as f64 / self.limit as f64,
@@ -118,7 +116,7 @@ pub fn log_date_progress(
     start: i64,
     unit: &'static str,
 ) {
-    if log_progress || current == start || current == limit {
+    if log_progress {
         tracing::info!(
             "{:.2}% {unit}.",
             100.0 * (current - start) as f64 / (limit - start) as f64

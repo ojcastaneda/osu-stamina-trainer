@@ -11,7 +11,7 @@ use axum::{
 use dotenv::dotenv;
 use ost_utils::{osu_api, storage};
 use redis::aio::ConnectionManager;
-use sqlx::{postgres::PgPoolOptions};
+use sqlx::postgres::PgPoolOptions;
 use std::{env, net::SocketAddr, time::Duration};
 use tower_http::trace::TraceLayer;
 use tracing::Span;

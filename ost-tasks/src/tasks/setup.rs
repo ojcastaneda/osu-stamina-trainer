@@ -40,6 +40,7 @@ async fn setup_file(storage: storage::Client, path: PathBuf, upload_file: bool) 
 }
 
 pub async fn setup_files(upload_files: bool) -> TaskResult<()> {
+    tracing::info!("Setting up files: start");
     let storage = storage::Client::from_environment().await?;
     let paths = read_dir("./beatmaps")?
         .flatten()
@@ -51,6 +52,7 @@ pub async fn setup_files(upload_files: bool) -> TaskResult<()> {
             .spawn(setup_file(storage.clone(), path.path(), upload_files))
             .await?;
     }
+    tracing::info!("Setting up files: end");
     Ok(())
 }
 
@@ -139,6 +141,7 @@ async fn update_beatmaps(
 }
 
 pub async fn update_collection(limit_date: i64, services: Services) -> TaskResult<()> {
+    tracing::info!("Updating collection: start");
     let mut ranked_beatmaps = HashSet::new();
     let mut submissions = Vec::new();
     for beatmap in beatmap::retrieve_all(&services.database).await? {
@@ -152,6 +155,7 @@ pub async fn update_collection(limit_date: i64, services: Services) -> TaskResul
         update_beatmaps(limit_date, ranked_beatmaps, services.clone()),
         updated_submissions(services, submissions)
     )?;
+    tracing::info!("Updating collection: end");
     Ok(())
 }
 
@@ -170,6 +174,7 @@ async fn update_submission(
 }
 
 async fn updated_submissions(mut services: Services, submissions: Vec<i32>) -> TaskResult<()> {
+    tracing::info!("Starting submissions update");
     let mut tasks = Tasks::new(
         IDS_LIMIT,
         submissions.len(),

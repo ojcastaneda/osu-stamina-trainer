@@ -14,7 +14,6 @@ RUN cargo build --release
 
 FROM debian:bullseye-slim
 
-COPY --from=build /ost-server/migrations /migrations
 COPY --from=build /ost-server/target/release/ost-server /ost-server
 
 RUN apt-get update -y

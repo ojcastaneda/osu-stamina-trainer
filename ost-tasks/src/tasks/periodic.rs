@@ -32,6 +32,7 @@ pub async fn add_beatmap(
 }
 
 pub async fn add_beatmaps(limit_date: i64, mut services: Services) -> TaskResult<()> {
+    tracing::info!("Adding ranked beatmaps: start");
     let mut cursor = Cursor::retrieve(&services.storage).await?;
     let start = cursor.approved_date;
     loop {
@@ -63,6 +64,7 @@ pub async fn add_beatmaps(limit_date: i64, mut services: Services) -> TaskResult
             break;
         }
     }
+    tracing::info!("Adding ranked beatmaps: end");
     Ok(())
 }
 
@@ -169,6 +171,7 @@ async fn check_beatmapsets(services: Services, submissions: Vec<i32>) -> TaskRes
 }
 
 pub async fn check_submissions(services: Services) -> TaskResult<()> {
+    tracing::info!("Checking submissions: start");
     let submissions = unchecked_submission::retrieve_all(&services.database).await?;
     let mut beatmaps = Vec::new();
     let mut beatmapsets = Vec::new();
@@ -183,6 +186,7 @@ pub async fn check_submissions(services: Services) -> TaskResult<()> {
         check_beatmaps(services.clone(), beatmaps),
         check_beatmapsets(services, beatmapsets)
     )?;
+    tracing::info!("Checking submissions: end");
     Ok(())
 }
 
@@ -201,6 +205,7 @@ async fn process_submission(mut services: Services, beatmap: Beatmap) -> TaskRes
 }
 
 pub async fn process_submissions(mut services: Services) -> TaskResult<()> {
+    tracing::info!("Processing submissions: start");
     let submissions = submission::retrieve_all_processing(&services.database).await?;
     let mut tasks = Tasks::new(
         THREADS,
@@ -231,6 +236,7 @@ pub async fn process_submissions(mut services: Services) -> TaskResult<()> {
                 .await?;
         }
     }
+    tracing::info!("Processing submissions: end");
     Ok(())
 }
 
@@ -266,6 +272,7 @@ async fn synchronize_beatmap(
 }
 
 pub async fn synchronize_with_osu_api(mut services: Services) -> TaskResult<()> {
+    tracing::info!("Synchronizing with osu! API: start");
     let beatmaps = beatmap::retrieve_all(&services.database).await?;
     let mut submissions = HashMap::with_capacity(IDS_LIMIT);
     let mut tasks = Tasks::new(
@@ -303,5 +310,6 @@ pub async fn synchronize_with_osu_api(mut services: Services) -> TaskResult<()> 
                 .await?;
         }
     }
+    tracing::info!("Synchronizing with osu! API: end");
     Ok(())
 }
