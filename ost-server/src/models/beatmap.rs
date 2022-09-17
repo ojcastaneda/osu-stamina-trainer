@@ -1,7 +1,11 @@
 use super::{filter::Filter, order::Order, Limit};
 use crate::{collection_generator::CollectionBeatmap, ServerResult};
 use serde::{Deserialize, Serialize};
-use sqlx::{query_as, FromRow, Pool, Postgres, Type};
+use sqlx::{
+    query_as,
+    types::chrono::{DateTime, Utc},
+    FromRow, Pool, Postgres, Type,
+};
 
 #[derive(FromRow, Serialize)]
 pub struct Beatmap {
@@ -32,6 +36,7 @@ pub struct BeatmapByPage {
     pub difficulty_rating: f32,
     pub favorite_count: i32,
     pub id: i32,
+    pub last_updated: DateTime<Utc>,
     pub length: i16,
     pub longest_stream: i16,
     pub performance_100: i16,
