@@ -39,9 +39,9 @@ impl Client {
         Ok(())
     }
 
-    fn filter_beatmaps(beatmaps: &mut Vec<Beatmap>, beatmapset: Beatmapset) {
+    fn extract_beatmaps(beatmaps: &mut Vec<Beatmap>, beatmapset: Beatmapset) {
         for beatmap in beatmapset.beatmaps.unwrap() {
-            if beatmap.mode != "osu" {
+            if !beatmap.is_standard() {
                 continue;
             }
             beatmaps.push(Beatmap {
@@ -116,11 +116,16 @@ impl Client {
             .send()
             .await;
         self.drop_permit().await?;
-        let beatmap = response?;
-        if beatmap.status() == 404 {
+        let beatmap_response = response?;
+        if beatmap_response.status() == 404 {
             return Ok(None);
         }
-        Ok(Some(beatmap.json::<Beatmap>().await?))
+        let beatmap = beatmap_response.json::<Beatmap>().await?;
+        if beatmap.is_standard() {
+            Ok(Some(beatmap))
+        } else {
+            Ok(None)
+        }
     }
 
     pub async fn retrieve_beatmaps(&mut self, ids: &[i32]) -> Result<Vec<Beatmap>, Error> {
@@ -140,7 +145,11 @@ impl Client {
             .send()
             .await;
         self.drop_permit().await?;
-        Ok(response?.json::<Beatmaps>().await?.beatmaps)
+        let beatmaps = response?.json::<Beatmaps>().await?.beatmaps;
+        Ok(beatmaps
+            .into_iter()
+            .filter(|beatmap| beatmap.is_standard())
+            .collect())
     }
 
     pub async fn retrieve_beatmapset(
@@ -156,11 +165,20 @@ impl Client {
             .send()
             .await;
         self.drop_permit().await?;
-        let beatmapset = response?;
-        if beatmapset.status() == 404 {
+        let beatmapset_response = response?;
+        if beatmapset_response.status() == 404 {
             return Ok(None);
         }
-        Ok(Some(beatmapset.json::<Beatmapset>().await?))
+        let mut beatmapset = beatmapset_response.json::<Beatmapset>().await?;
+        beatmapset.beatmaps = Some(
+            beatmapset
+                .beatmaps
+                .unwrap()
+                .into_iter()
+                .filter(|beatmap| beatmap.is_standard())
+                .collect(),
+        );
+        Ok(Some(beatmapset))
     }
 
     pub async fn retrieve_leaderboard_beatmaps(
@@ -194,7 +212,7 @@ impl Client {
             let approved_date = ranked_date.timestamp_millis();
             if approved_date <= limit_date {
                 (new_approved_date, new_id) = (approved_date, beatmapset.id);
-                Self::filter_beatmaps(&mut beatmaps, beatmapset);
+                Self::extract_beatmaps(&mut beatmaps, beatmapset);
             }
         }
         Ok((beatmaps, new_approved_date, new_id))
@@ -257,7 +275,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_retrieve_beatmap() -> Result<(), Box<dyn Error>> {
-        let mut client = setup_test(2)?;
+        let mut client = setup_test(3)?;
         let beatmap = client.retrieve_beatmap(555797).await?.unwrap();
         assert_eq!(beatmap.beatmapset_id, 158023);
         assert_eq!(beatmap.checksum, "a84050da9b68ca1bd8e2d1700b9c6ca5");
@@ -281,12 +299,42 @@ mod tests {
         );
         assert_eq!(beatmapset.title, "Everything will freeze");
         assert!(client.retrieve_beatmap(1).await?.is_none());
+        assert!(client.retrieve_beatmap(132889).await?.is_none());
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_retrieve_beatmaps() -> Result<(), Box<dyn Error>> {
+        let mut client = setup_test(2)?;
+        let beatmaps = client.retrieve_beatmaps(&[555797]).await?;
+        assert_eq!(beatmaps[0].beatmapset_id, 158023);
+        assert_eq!(beatmaps[0].checksum, "a84050da9b68ca1bd8e2d1700b9c6ca5");
+        assert_eq!(beatmaps[0].id, 555797);
+        assert_eq!(
+            beatmaps[0].last_updated,
+            DateTime::<Utc>::from_str("2015-03-17T22:31:07+00:00")?
+        );
+        assert_eq!(beatmaps[0].mode, "osu");
+        assert_eq!(beatmaps[0].ranked, 1);
+        assert_eq!(beatmaps[0].total_length, 194);
+        assert_eq!(beatmaps[0].version, "Time Freeze");
+        let beatmapset = beatmaps[0].beatmapset.as_ref().unwrap();
+        assert!(beatmapset.beatmaps.is_none());
+        assert!(beatmapset.favourite_count > 21000);
+        assert_eq!(beatmapset.id, 158023);
+        assert!(beatmapset.play_count > 47000000);
+        assert_eq!(
+            beatmapset.ranked_date.unwrap(),
+            DateTime::<Utc>::from_str("2015-03-24T22:40:14+00:00")?
+        );
+        assert_eq!(beatmapset.title, "Everything will freeze");
+        assert!(client.retrieve_beatmaps(&[1, 132889]).await?.is_empty());
         Ok(())
     }
 
     #[tokio::test]
     async fn test_retrieve_beatmapset() -> Result<(), Box<dyn Error>> {
-        let mut client = setup_test(2)?;
+        let mut client = setup_test(3)?;
         let beatmapset = client.retrieve_beatmapset(158023).await?.unwrap();
         assert!(beatmapset.favourite_count > 21000);
         assert_eq!(beatmapset.id, 158023);
@@ -312,6 +360,16 @@ mod tests {
         assert_eq!(beatmap.ranked, 1);
         assert_eq!(beatmap.version, "Time Freeze");
         assert!(client.retrieve_beatmapset(121252).await?.is_none());
+        assert_eq!(
+            client
+                .retrieve_beatmapset(41823)
+                .await?
+                .unwrap()
+                .beatmaps
+                .unwrap()
+                .len(),
+            1
+        );
         Ok(())
     }
 

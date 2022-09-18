@@ -22,6 +22,10 @@ impl Beatmap {
     pub fn is_loved(&self) -> bool {
         self.ranked == 4
     }
+
+    pub fn is_standard(&self) -> bool {
+        self.mode == "osu"
+    }
 }
 #[derive(Deserialize)]
 pub struct Beatmaps {
