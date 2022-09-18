@@ -334,7 +334,7 @@ export async function request(
  * and uses the remaining modification if a beatmap did not meet the request.
  * Otherwise, returns the i18n property for `request not found`.
  *
- * @param alreadyRequested - The indicator of whether or not it should warn the user that the beatmaps 
+ * @param alreadyRequested - The indicator of whether or not it should warn the user that the beatmaps
  * will repeat until the cache session expires.
  * @param filters - The filters used for the request.
  * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.

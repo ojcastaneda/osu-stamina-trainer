@@ -39,6 +39,7 @@ pub fn parse_country_code(country_code: String) -> String {
     String::from(match country_code.as_str() {
         "AR" | "BO" | "CL" | "CO" | "CR" | "CU" | "DO" | "EC" | "SV" | "GQ" | "GT" | "HN"
         | "MX" | "NI" | "PA" | "PY" | "PR" | "PE" | "ES" | "UY" | "VE" => "es",
+        "BR" => "br",
         _ => "en",
     })
 }
