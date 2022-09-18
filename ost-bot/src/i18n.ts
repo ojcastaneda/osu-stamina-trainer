@@ -12,7 +12,7 @@ export type ConstantResponses = keyof Omit<
  * i18n properties for responses.
  */
 export type I18nProperties =
-	| ['beatmapInformation', Beatmap, string]
+	| ['beatmapInformation', Beatmap, string, boolean]
 	| ['didYouMean', string]
 	| ['languageUpdate', Languages]
 	| ConstantResponses;
@@ -27,7 +27,7 @@ export type Languages = keyof typeof languages;
  */
 export interface I18nResponse<T> {
 	analysisNotFound: T;
-	beatmapInformation: (beatmap: Beatmap, modification: string) => T;
+	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) => T;
 	commandNotFount: T;
 	didYouMean: (suggestion: string) => T;
 	help: T;
@@ -46,7 +46,8 @@ export interface I18nResponse<T> {
 export const english: Readonly<I18nResponse<string>> = {
 	analysisNotFound:
 		'Beatmap analysis is only available for ranked beatmaps or beatmaps that are part of the collection',
-	beatmapInformation: (beatmap: Beatmap, modification: string) =>
+	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
+		`${alreadyRequested ? 'The are no beatmaps left that have not been recently requested. It is recommended to change the filters used ' : ''}` +
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
 		`${english[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
 		`Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
@@ -56,7 +57,7 @@ export const english: Readonly<I18nResponse<string>> = {
 		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	commandNotFount: `No command was detected, type [${process.env.WEBSITE_URL}/commands !help en] to see the available commands`,
 	didYouMean: (suggestion: string) =>
-		`The detected command is incorrect, did you mean "${suggestion}"?`,
+		`The detected command is incorrect, did you mean "${suggestion}" (This suggestion may not be accurate with unnecessary spaces as spaces are used to detect filters)?`,
 	help: `Available commands: [${process.env.WEBSITE_URL}/commands !request [BPM] [filters], /np, !check [beatmap's id], !help [language code]]`,
 	languageUpdate: 'Language updated successfully',
 	languageUpdateForbidden: 'The provided id does not match your username',
@@ -74,7 +75,8 @@ export const english: Readonly<I18nResponse<string>> = {
 export const spanish: Readonly<I18nResponse<string>> = {
 	analysisNotFound:
 		'El análisis de mapas solo está disponible para mapas clasificados o mapas que sean parte de la colección',
-	beatmapInformation: (beatmap: Beatmap, modification: string) =>
+	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
+		`${alreadyRequested ? 'No hay mapas más mapas que no hayan sido recientemente solicitados. Es recomendable cambiar los filtros usados ' : ''}` +
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
 		`${english[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
 		`Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
@@ -85,7 +87,7 @@ export const spanish: Readonly<I18nResponse<string>> = {
 	unexpectedError: `El bot falló inesperadamente, por favor reporte este error vía [${process.env.DISCORD_URL} Discord]`,
 	commandNotFount: `No se detectó ningún comando, escriba [${process.env.WEBSITE_URL}/es/commands !help es] para ver los comandos disponibles`,
 	didYouMean: (suggestion: string) =>
-		`El comando detectado es incorrecto, quiso decir "${suggestion}"?`,
+		`El comando detectado es incorrecto, quiso decir "${suggestion}" (Esta sugerencia puede no ser precisa si se usan espacios innecesarios ya que los espacios son usados para detectar filtros)?`,
 	help: `Comandos disponibles: [${process.env.WEBSITE_URL}/es/commands !request [BPM] [filtros], /np, !check [id del mapa], !help [código de lenguaje]]`,
 	languageUpdate: 'Lenguaje actualizado exitosamente',
 	languageUpdateForbidden: 'El id suministrado no concuerda con su nombre de usuario',
@@ -131,6 +133,6 @@ export function i18n(language: Languages, properties: I18nProperties): string {
 		case 'languageUpdate':
 			return languages[properties[1]].languageUpdate;
 		case 'beatmapInformation':
-			return response.beatmapInformation(properties[1], properties[2]);
+			return response.beatmapInformation(properties[1], properties[2], properties[3]);
 	}
 }

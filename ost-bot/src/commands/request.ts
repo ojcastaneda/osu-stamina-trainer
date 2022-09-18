@@ -319,11 +319,12 @@ export async function request(
 	const parsedRequest = parseRequest(parameters, guessCommand);
 	if (typeof parsedRequest === 'string') return ['didYouMean', `${command} ${parsedRequest}`];
 	const request = await retrieveRequest(
+		false,
 		[new Filter('different', 'id', skippedIds)].concat(parsedRequest[0]),
 		parsedRequest[1]
 	);
 	return request === 'requestNotFound'
-		? retrieveRequest(parsedRequest[0], parsedRequest[1])
+		? retrieveRequest(true, parsedRequest[0], parsedRequest[1])
 		: request;
 }
 
@@ -333,11 +334,14 @@ export async function request(
  * and uses the remaining modification if a beatmap did not meet the request.
  * Otherwise, returns the i18n property for `request not found`.
  *
+ * @param alreadyRequested - The indicator of whether or not it should warn the user that the beatmaps 
+ * will repeat until the cache session expires.
  * @param filters - The filters used for the request.
  * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.
  * @returns The corresponding i18n properties.
  */
 async function retrieveRequest(
+	alreadyRequested: boolean,
 	filters: Filter[],
 	useDoubleTime?: boolean
 ): Promise<I18nProperties> {
@@ -345,7 +349,7 @@ async function retrieveRequest(
 		const beatmap = await fetchRequest(filters, useDoubleTime);
 		return beatmap === undefined
 			? 'requestNotFound'
-			: ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : ''];
+			: ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : '', alreadyRequested];
 	}
 	useDoubleTime = useDoubleTime === undefined ? Math.random() >= 0.5 : useDoubleTime;
 	let beatmap = await fetchRequest(filters, useDoubleTime);
@@ -353,7 +357,7 @@ async function retrieveRequest(
 		beatmap = await fetchRequest(filters, !useDoubleTime);
 		return beatmap === undefined
 			? 'requestNotFound'
-			: ['beatmapInformation', beatmap, !useDoubleTime ? ' +DT |' : ''];
+			: ['beatmapInformation', beatmap, !useDoubleTime ? ' +DT |' : '', alreadyRequested];
 	}
-	return ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : ''];
+	return ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : '', alreadyRequested];
 }
