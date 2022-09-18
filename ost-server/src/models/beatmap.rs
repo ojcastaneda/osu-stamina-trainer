@@ -157,7 +157,7 @@ pub async fn retrieve_request(
                 id, last_updated, length, longest_stream, performance_100,
                 performance_95, ranked_status, streams_density, streams_length,
                 streams_spacing, title
-            FROM {table} {} limit 1"#,
+            FROM {table} {} ORDER BY random() LIMIT 1"#,
         Filter::parse_multiple(filters, false)
     );
     let mut beatmap = query_as::<_, Beatmap>(&beatmap_sql);
