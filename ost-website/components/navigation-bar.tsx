@@ -98,7 +98,7 @@ export default function NavigationBar({ activeSession }: NavigationBarProps) {
 							</span>
 							<select onChange={changeLanguage}>
 								<option value="">{t('language')}</option>
-								<option value="en">English (American)</option>
+								<option value="en">English (US)</option>
 								<option value="es">Español</option>
 							</select>
 						</div>

@@ -176,9 +176,9 @@ function BotCommands() {
 							<div>
 								<select onChange={({ target }) => target.value && setLanguage(target.value)}>
 									<option value="">{t('language', { ns: 'common' })}</option>
-									<option value="en">English (American)</option>
+									<option value="en">English (US)</option>
 									<option value="es">Español</option>
-									<option value="br">Português (Brasil)</option>
+									<option value="br">Português (BR)</option>
 								</select>
 								<span>
 									<MdTranslate size={20} />

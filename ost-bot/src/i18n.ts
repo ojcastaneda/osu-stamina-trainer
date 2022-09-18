@@ -97,7 +97,7 @@ export const spanish: Readonly<I18nResponse<string>> = {
 				: ''
 		}` +
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
-		`${english[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
+		`${spanish[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
 		`Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
 		`Densidad de streams: ${beatmap.streams_density} | Espaciado de streams: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
@@ -136,7 +136,7 @@ export const brazilianPortuguese: Readonly<I18nResponse<string>> = {
 				: ''
 		}` +
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
-		`${english[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
+		`${brazilianPortuguese[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
 		`Longitud da streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
 		`Densidade da streams: ${beatmap.streams_density} | Espaçamento da streams: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
