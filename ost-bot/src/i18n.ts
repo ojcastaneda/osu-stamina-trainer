@@ -5,7 +5,7 @@ import { Beatmap } from './models';
  */
 export type ConstantResponses = keyof Omit<
 	I18nResponse<string>,
-	'beatmapInformation' | 'didYouMean' | 'languageUpdate'
+	'beatmapInformation' | 'didYouMean' | 'help' | 'languageUpdate'
 >;
 
 /**
@@ -14,6 +14,7 @@ export type ConstantResponses = keyof Omit<
 export type I18nProperties =
 	| ['beatmapInformation', Beatmap, string, boolean]
 	| ['didYouMean', string]
+	| ['help', Languages]
 	| ['languageUpdate', Languages]
 	| ConstantResponses;
 
@@ -30,7 +31,9 @@ export interface I18nResponse<T> {
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) => T;
 	commandNotFount: T;
 	didYouMean: (suggestion: string) => T;
+	genericHelp: T;
 	help: T;
+	languages: T;
 	languageUpdate: T;
 	languageUpdateForbidden: T;
 	loved: T;
@@ -47,7 +50,11 @@ export const english: Readonly<I18nResponse<string>> = {
 	analysisNotFound:
 		'Beatmap analysis is only available for ranked beatmaps or beatmaps that are part of the collection',
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
-		`${alreadyRequested ? 'The are no beatmaps left that have not been recently requested. It is recommended to change the filters used ' : ''}` +
+		`${
+			alreadyRequested
+				? 'The are no beatmaps left that have not been recently requested. It is recommended to change the filters used '
+				: ''
+		}` +
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
 		`${english[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
 		`Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
@@ -57,8 +64,16 @@ export const english: Readonly<I18nResponse<string>> = {
 		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
 	commandNotFount: `No command was detected, type [${process.env.WEBSITE_URL}/commands !help en] to see the available commands`,
 	didYouMean: (suggestion: string) =>
-		`The detected command is incorrect, did you mean "${suggestion}" (This suggestion may not be accurate with unnecessary spaces as spaces are used to detect filters)?`,
-	help: `Available commands: [${process.env.WEBSITE_URL}/commands !request [BPM] [filters], /np, !check [beatmap's id], !help [language code]]`,
+		`The detected command is incorrect, did you mean "${suggestion}"? ` +
+		`This suggestion may not be accurate with unnecessary spaces as spaces are used to detect filters`,
+	genericHelp:
+		'Type "!help en" for more details / Escriba "!help es" para más detalles / Digite "!help br" para mais detalhes',
+	help:
+		`[${process.env.WEBSITE_URL}/commands Available commands:] Request a beatmap: "!request [BPM] [filters]", ` +
+		`Analyze current beatmap: "/np", Analyze a beatmap: "!check [beatmap's id]", List commands: "!help [language code]", ` +
+		`Change language: "!language [language code]", List languages: "!languages"`,
+	languages:
+		'"en": English (American), "es": Español, "br": Português (Brasil)',
 	languageUpdate: 'Language updated successfully',
 	languageUpdateForbidden: 'The provided id does not match your username',
 	loved: 'Loved',
@@ -76,7 +91,11 @@ export const spanish: Readonly<I18nResponse<string>> = {
 	analysisNotFound:
 		'El análisis de mapas solo está disponible para mapas clasificados o mapas que sean parte de la colección',
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
-		`${alreadyRequested ? 'No hay mapas más mapas que no hayan sido recientemente solicitados. Es recomendable cambiar los filtros usados ' : ''}` +
+		`${
+			alreadyRequested
+				? 'No hay mapas más mapas que no hayan sido recientemente solicitados. Es recomendable cambiar los filtros usados '
+				: ''
+		}` +
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
 		`${english[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
 		`Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
@@ -87,8 +106,14 @@ export const spanish: Readonly<I18nResponse<string>> = {
 	unexpectedError: `El bot falló inesperadamente, por favor reporte este error vía [${process.env.DISCORD_URL} Discord]`,
 	commandNotFount: `No se detectó ningún comando, escriba [${process.env.WEBSITE_URL}/es/commands !help es] para ver los comandos disponibles`,
 	didYouMean: (suggestion: string) =>
-		`El comando detectado es incorrecto, quiso decir "${suggestion}" (Esta sugerencia puede no ser precisa si se usan espacios innecesarios ya que los espacios son usados para detectar filtros)?`,
-	help: `Comandos disponibles: [${process.env.WEBSITE_URL}/es/commands !request [BPM] [filtros], /np, !check [id del mapa], !help [código de lenguaje]]`,
+		`El comando detectado es incorrecto, quiso decir "${suggestion}"? ` +
+		`Esta sugerencia puede no ser precisa si se usan espacios innecesarios ya que los espacios son usados para detectar filtros`,
+	genericHelp: english.genericHelp,
+	help:
+		`[${process.env.WEBSITE_URL}/es/commands Comandos disponibles:] Solicitar un mapa: "!request [BPM] [filtros]", ` +
+		`Analizar mapa actual: "/np", Analizar un mapa: "!check [id del mapa]", Listar comandos: "!help [código de idioma]", ` +
+		`Cambiar idioma: "!language [código de idioma]", Listar idiomas: "!languages"`,
+	languages: english.languages,
 	languageUpdate: 'Lenguaje actualizado exitosamente',
 	languageUpdateForbidden: 'El id suministrado no concuerda con su nombre de usuario',
 	loved: 'Amado',
@@ -96,6 +121,46 @@ export const spanish: Readonly<I18nResponse<string>> = {
 	requestNotFound:
 		'No se encontraron mapas que coincidan con los filtros suministrados, reduzca el número de filtros o cambie sus valores',
 	unranked: 'No clasificado'
+};
+
+/**
+ * Brazilian portuguese i18n responses.
+ */
+export const brazilianPortuguese: Readonly<I18nResponse<string>> = {
+	analysisNotFound:
+		'A análise do Beatmap só está disponível para os beatmaps ou beatmaps classificados que fazem parte da coleção',
+	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
+		`${
+			alreadyRequested
+				? 'Já não existem beatmaps que não tenham sido solicitados recentemente. Recomenda-se a troca dos filtros utilizados '
+				: ''
+		}` +
+		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
+		`${english[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
+		`Longitud da streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
+		`Densidade da streams: ${beatmap.streams_density} | Espaçamento da streams: ${beatmap.streams_spacing} | ` +
+		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
+		`CS: ${beatmap.circle_size} | Duração: ${formatLength(beatmap.length)} | ` +
+		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
+	unexpectedError: `O bot falhou inesperadamente, favor reportar este erro via [${process.env.DISCORD_URL} Discord]`,
+	commandNotFount: `Nenhum comando detectado, digite [${process.env.WEBSITE_URL}/commands !help br (site não disponível em português)] para visualizar os comandos disponíveis`,
+	didYouMean: (suggestion: string) =>
+		`O comando detectado é incorreto, significava dizer "${suggestion}" ` +
+		`(Esta sugestão pode não ser precisa se espaços desnecessários forem utilizados como espaços para detectar filtros)?`,
+	genericHelp: english.genericHelp,
+	help:
+		`[${process.env.WEBSITE_URL}/commands Comandos disponíveis (site não disponível em português):] ` +
+		`Solicite um beatmap: "!request [BPM] [filtros]", Analisar beatmap atual: "/np", ` +
+		`Analisar um beatmap: "!check [o id do beatmap]", Listar comandos: "!help [código do idioma]", ` +
+		`Mudar o idioma: "!language [código do idioma]", Listar idiomas: "!languages"]`,
+	languages: english.languages,
+	languageUpdate: 'Idioma atualizado com sucesso',
+	languageUpdateForbidden: 'A identificação fornecida não corresponde ao seu nome de usuário',
+	loved: 'Loved',
+	ranked: 'Ranqueado',
+	requestNotFound:
+		'Nenhum mapa de batidas encontrado que combine com os filtros fornecidos, reduza o número de filtros ou altere seus valores',
+	unranked: 'Não ranqueado'
 };
 
 /**
@@ -114,7 +179,8 @@ export function formatLength(length: number): string {
  */
 export const languages: Record<string, I18nResponse<string>> = {
 	en: english,
-	es: spanish
+	es: spanish,
+	br: brazilianPortuguese
 };
 
 /**
@@ -130,6 +196,8 @@ export function i18n(language: Languages, properties: I18nProperties): string {
 	switch (properties[0]) {
 		case 'didYouMean':
 			return response.didYouMean(properties[1]);
+		case 'help':
+			return languages[properties[1]].help;
 		case 'languageUpdate':
 			return languages[properties[1]].languageUpdate;
 		case 'beatmapInformation':

@@ -35,7 +35,9 @@ export function formatDiscordResponse(properties: I18nProperties | 'invite'): Me
 			case 'didYouMean':
 				return { embeds: [discordResponse.didYouMean(properties[1])] };
 			case 'beatmapInformation':
-				return { embeds: [discordResponse.beatmapInformation(properties[1], properties[2], properties[3])] };
+				return {
+					embeds: [discordResponse.beatmapInformation(properties[1], properties[2], properties[3])]
+				};
 		}
 	}
 	return {
@@ -57,14 +59,16 @@ export const discordResponse: Pick<
 > &
 	Partial<I18nResponse<EmbedBuilder>> = {
 	analysisNotFound: new EmbedBuilder({ description: english.analysisNotFound }),
-	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) => 
+	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
 		new EmbedBuilder({
 			title: `${modification} ${beatmap.title}`,
 			url: `https://osu.ppy.sh/b/${beatmap.id}`,
 			thumbnail: {
 				url: `${process.env.WEBSITE_URL}/${beatmap.ranked_status}.png`
 			},
-			description: alreadyRequested ? 'The are no beatmaps left that have not been recently requested. It is recommended to change the current filters' : undefined, 
+			description: alreadyRequested
+				? 'The are no beatmaps left that have not been recently requested. It is recommended to change the current filters'
+				: undefined,
 			fields: [
 				{
 					name: `\u25B8 BPM: \`${beatmap.bpm}\``,

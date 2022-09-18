@@ -176,8 +176,9 @@ function BotCommands() {
 							<div>
 								<select onChange={({ target }) => target.value && setLanguage(target.value)}>
 									<option value="">{t('language', { ns: 'common' })}</option>
-									<option value="en">English</option>
+									<option value="en">English (American)</option>
 									<option value="es">Español</option>
+									<option value="es">Português (Brasil)</option>
 								</select>
 								<span>
 									<MdTranslate size={20} />
@@ -185,6 +186,10 @@ function BotCommands() {
 							</div>
 						</div>
 					</div>
+				</section>
+				<section>
+					<div>!languages</div>
+					<div>{t('languages')}.</div>
 				</section>
 				<section>
 					<div>!invite / !i ({t('discord_only')})</div>

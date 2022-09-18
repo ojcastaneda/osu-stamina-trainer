@@ -7,6 +7,7 @@
 	"invite": "Displays a button to invite the bot to a Discord server",
 	"invite_discord": "Invite the Discord bot to a server",
 	"language": "Changes the language in which the bot is going to reply",
+	"languages": "Lists the available languages with which the bot is going to reply",
 	"language_command": "Language update command",
 	"now_playing": "Requests the streams related statistics of the currently playing beatmap",
 	"osu_only": "Only available in osu!",

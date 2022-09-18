@@ -7,11 +7,7 @@ import { analyzeId, analyzeNowPlaying } from './commands/analyze';
 import { updateLanguage } from './commands/updateLanguage';
 import { formatDiscordResponse } from './discord';
 import { MessageDispatcher } from './messageDispatcher';
-
-/**
- * Default help message for all users.
- */
-const help = 'Type "!help en" for more details / Escriba "!help es" para más detalles';
+import levenary from 'levenary';
 
 /**
  * Format a message to log to the console.
@@ -57,7 +53,7 @@ async function processDiscordMessage(
 			return request(command, parameters, skippedIds);
 		case '!h':
 		case '!help':
-			return 'help';
+			return ['help', 'en'];
 		case '!i':
 		case '!invite':
 			return 'invite';
@@ -98,10 +94,15 @@ async function processOsuMessage(
 			return analyzeId(command, parameters[0]);
 		case '!h':
 		case '!help':
-			return parameters.length === 0 ? 'genericHelp' : 'help';
+			if (parameters.length === 0) return 'genericHelp';
+			return languages[parameters[1]] !== undefined
+				? ['help', parameters[1]]
+				: ['didYouMean', `!help ${levenary(parameters[1], Object.keys(languages))}`];
 		case '!l':
 		case '!language':
 			return updateLanguage(parameters[0], parameters[1], username);
+		case '!languages':
+			return 'languages';
 		default:
 			return 'commandNotFount';
 	}
@@ -141,14 +142,15 @@ async function handleOsuPM(
 			retrieveLanguage(user.ircUsername),
 			processOsuMessage(message, skippedIds, user.ircUsername)
 		]);
-		const responseMessage = response === 'genericHelp' ? help : i18n(language, response);
+		const responseMessage = i18n(language, response);
 		if (process.env.NODE_ENV === 'production') await user.sendMessage(responseMessage);
 		log(
 			`${user.ircUsername} | ${message} | ${language} | ${JSON.stringify(response)}`,
 			'INFO',
 			'osu!'
 		);
-		if (Array.isArray(response) && response[0] === 'beatmapInformation' && !response[3]) return response[1].id;
+		if (Array.isArray(response) && response[0] === 'beatmapInformation' && !response[3])
+			return response[1].id;
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production')
 			user.sendMessage(i18n('en', 'unexpectedError')).catch(() => ({}));
@@ -178,7 +180,8 @@ async function handleDiscordMessage(
 		const responseMessage = formatDiscordResponse(response);
 		if (process.env.NODE_ENV === 'production') await message.reply(responseMessage);
 		log(`${message.author.username} | ${message} | ${JSON.stringify(response)}`, 'INFO', 'Discord');
-		if (Array.isArray(response) && response[0] === 'beatmapInformation' && !response[3]) return response[1].id;
+		if (Array.isArray(response) && response[0] === 'beatmapInformation' && !response[3])
+			return response[1].id;
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production')
 			message.reply(formatDiscordResponse('unexpectedError')).catch(() => ({}));
