@@ -178,7 +178,7 @@ function BotCommands() {
 									<option value="">{t('language', { ns: 'common' })}</option>
 									<option value="en">English (American)</option>
 									<option value="es">Español</option>
-									<option value="es">Português (Brasil)</option>
+									<option value="br">Português (Brasil)</option>
 								</select>
 								<span>
 									<MdTranslate size={20} />

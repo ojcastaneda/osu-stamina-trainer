@@ -73,7 +73,7 @@ export const english: Readonly<I18nResponse<string>> = {
 		`Analyze current beatmap: "/np", Analyze a beatmap: "!check [beatmap's id]", List commands: "!help [language code]", ` +
 		`Change language: "!language [language code]", List languages: "!languages"`,
 	languages:
-		'"en": English (American), "es": Español, "br": Português (Brasil)',
+		'English (American): "en", Español: "es", Português (Brasil): "br"',
 	languageUpdate: 'Language updated successfully',
 	languageUpdateForbidden: 'The provided id does not match your username',
 	loved: 'Loved',
