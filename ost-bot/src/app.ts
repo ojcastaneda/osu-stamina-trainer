@@ -148,7 +148,7 @@ async function handleOsuPM(
 			'INFO',
 			'osu!'
 		);
-		if (Array.isArray(response) && response[0] === 'beatmapInformation') return response[1].id;
+		if (Array.isArray(response) && response[0] === 'beatmapInformation' && !response[3]) return response[1].id;
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production')
 			user.sendMessage(i18n('en', 'unexpectedError')).catch(() => ({}));
@@ -178,7 +178,7 @@ async function handleDiscordMessage(
 		const responseMessage = formatDiscordResponse(response);
 		if (process.env.NODE_ENV === 'production') await message.reply(responseMessage);
 		log(`${message.author.username} | ${message} | ${JSON.stringify(response)}`, 'INFO', 'Discord');
-		if (Array.isArray(response) && response[0] === 'beatmapInformation') return response[1].id;
+		if (Array.isArray(response) && response[0] === 'beatmapInformation' && !response[3]) return response[1].id;
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production')
 			message.reply(formatDiscordResponse('unexpectedError')).catch(() => ({}));

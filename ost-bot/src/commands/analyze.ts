@@ -29,7 +29,7 @@ export async function analyzeNowPlaying(nowPlaying: string): Promise<I18nPropert
 	const response = await fetch(`${process.env.API_URL}/api/bot/beatmap/${id}`);
 	return response.status === 404
 		? 'analysisNotFound'
-		: ['beatmapInformation', await response.json(), ''];
+		: ['beatmapInformation', await response.json(), '', false];
 }
 
 /**
@@ -47,5 +47,5 @@ export async function analyzeId(command: string, id: string): Promise<I18nProper
 	const response = await fetch(`${process.env.API_URL}/api/bot/beatmap/${parsedId}`);
 	return response.status === 404
 		? 'analysisNotFound'
-		: ['beatmapInformation', await response.json(), ''];
+		: ['beatmapInformation', await response.json(), '', false];
 }
