@@ -95,9 +95,9 @@ async function processOsuMessage(
 		case '!h':
 		case '!help':
 			if (parameters.length === 0) return 'genericHelp';
-			return languages[parameters[1]] !== undefined
-				? ['help', parameters[1]]
-				: ['didYouMean', `!help ${levenary(parameters[1], Object.keys(languages))}`];
+			return languages[parameters[0]] !== undefined
+				? ['help', parameters[0]]
+				: ['didYouMean', `!help ${levenary(parameters[0], Object.keys(languages))}`];
 		case '!l':
 		case '!language':
 			return updateLanguage(parameters[0], parameters[1], username);
@@ -115,7 +115,7 @@ async function processOsuMessage(
  * @param username - The irc username of the user.
  * @returns The language code for the user.
  */
-async function retrieveLanguage(username: string): Promise<Languages> {
+export async function retrieveLanguage(username: string): Promise<Languages> {
 	try {
 		const response = await fetch(`${process.env.API_URL}/api/bot/user/${username}`);
 		const language = await response.text();
@@ -133,7 +133,7 @@ async function retrieveLanguage(username: string): Promise<Languages> {
  * @param privateMessage - The incoming message from an user.
  * @param skippedIds - The list of temporarily blacklisted requests.
  */
-async function handleOsuPM(
+export async function handleOsuPM(
 	{ message, user }: PrivateMessage,
 	skippedIds: number[]
 ): Promise<number | undefined> {
@@ -170,7 +170,7 @@ async function handleOsuPM(
  * @param message - The incoming message from an user.
  * @param skippedIds - The list of temporarily blacklisted requests.
  */
-async function handleDiscordMessage(
+export async function handleDiscordMessage(
 	message: Message,
 	skippedIds: number[]
 ): Promise<number | undefined> {
@@ -179,14 +179,14 @@ async function handleDiscordMessage(
 		if (response === undefined) return;
 		const responseMessage = formatDiscordResponse(response);
 		if (process.env.NODE_ENV === 'production') await message.reply(responseMessage);
-		log(`${message.author.username} | ${message} | ${JSON.stringify(response)}`, 'INFO', 'Discord');
+		log(`${message.author.username} | ${message.content} | ${JSON.stringify(response)}`, 'INFO', 'Discord');
 		if (Array.isArray(response) && response[0] === 'beatmapInformation' && !response[3])
 			return response[1].id;
 	} catch (error) {
 		if (process.env.NODE_ENV === 'production')
 			message.reply(formatDiscordResponse('unexpectedError')).catch(() => ({}));
 		log(
-			`${message.author.username} | ${message} | ${error instanceof Error ? error.message : error}`,
+			`${message.author.username} | ${message.content} | ${error instanceof Error ? error.message : error}`,
 			'ERROR',
 			'Discord'
 		);
