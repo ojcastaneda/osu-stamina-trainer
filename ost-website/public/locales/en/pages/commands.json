@@ -14,7 +14,9 @@
 	"osu_profile": "osu! bot Profile",
 	"request": "Requests a stream intensive beatmap with a specified BPM, which may include additional filters",
 	"request_command": "Request beatmap command",
+	"remove_double_time": "Remove DT",
 	"use_complete": "Use complete version",
+	"use_double_time": "Use DT",
 	"use_shortcut": "Use shortcut version",
 	"user_id": "User's ID"
 }

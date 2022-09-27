@@ -9,7 +9,6 @@ import {
 	alphanumericFilters,
 	AlphanumericParameter,
 	Filter,
-	Modification,
 	numericFilters,
 	NumericProperty
 } from '../../src/models';
@@ -36,6 +35,38 @@ botTest(
 			(type) => new Assertion(['didYouMean', `!r ${bpm} ${type}`], `!r ${bpm} type=${type}`)
 		),
 		description: 'Reply to beatmap request command using deprecated "type" filter'
+	},
+	(handleMessage) => handleMessage()
+);
+
+botTest(
+	{
+		assertions: numericGuesses
+			.map((property) => {
+				const value = numericFilters[property].value;
+				return [
+					new Assertion(
+						['didYouMean', `!r ${bpm} ${property}=${value}`],
+						`!r ${bpm} ${property}_=${value} ${property}=${value}`
+					),
+					new Assertion(
+						['didYouMean', `!r ${bpm} ${property}=${value}`],
+						`!r ${bpm} ${property}=${value}_ ${property}=${value}`
+					),
+					new Assertion(
+						['didYouMean', `!r ${bpm} ${property}=${value}`],
+						`!r ${bpm} ${property}=${value}_ ${property}=${value}_`
+					)
+				];
+			})
+			.concat(
+				alphanumericGuesses.map(
+					(guess) =>
+						new Assertion(['didYouMean', `!r ${bpm} ${guess}`], `!r ${bpm} ${guess}_ ${guess}`)
+				)
+			)
+			.flat(),
+		description: 'Reply to beatmap request command guessing incorrect repeated properties'
 	},
 	(handleMessage) => handleMessage()
 );
@@ -237,7 +268,7 @@ botTest(
 	(handleMessage) => handleMessage()
 );
 
-botTest<Filter[] | [boolean | number, Filter[]]>(
+botTest<Filter[] | [boolean, Filter[]]>(
 	{
 		assertions: Object.values(AlphanumericParameter)
 			.filter((key) => typeof key === 'string')
@@ -251,19 +282,12 @@ botTest<Filter[] | [boolean | number, Filter[]]>(
 					alphanumericFilters[
 						AlphanumericParameter[alphanumericProperty as keyof typeof AlphanumericParameter]
 					];
-				if (typeof parameter === 'number') {
-					if (parameter === Modification.FreeModification)
-						return new Assertion(expectedTestBeatmap, message, [0.6, filters]);
-					const useDoubleTime = parameter === Modification.DoubleTime;
-					return new Assertion(
-						useDoubleTime
-							? ['beatmapInformation', testBeatmap, ' +DT |', false]
-							: expectedTestBeatmap,
-						message,
-						[useDoubleTime, filters]
-					);
+				if (typeof parameter === 'boolean') {
+					return new Assertion(['beatmapInformation', testBeatmap, ' +DT |', false], message, [
+						parameter,
+						filters
+					]);
 				}
-
 				const { property, value } = parameter;
 				if (typeof value === 'string')
 					return new Assertion(
@@ -281,15 +305,7 @@ botTest<Filter[] | [boolean | number, Filter[]]>(
 	},
 	async (handleMessage, data) => {
 		if (data === undefined) return;
-		const useDoubleTime = typeof data[0] === 'boolean' ? data[0] : false;
-		if (typeof data[0] === 'number') {
-			jest.spyOn(global.Math, 'random').mockReturnValueOnce(data[0]);
-			mockFetch(
-				404,
-				`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=${!useDoubleTime}`,
-				'POST'
-			);
-		}
+		const useDoubleTime = typeof data[0] === 'boolean';
 		mockFetch(
 			testBeatmap,
 			`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=${useDoubleTime}`,
@@ -303,9 +319,7 @@ botTest<Filter[] | [boolean | number, Filter[]]>(
 				headers: {
 					'Content-Type': 'application/json'
 				},
-				body: JSON.stringify(
-					typeof data[0] === 'boolean' || typeof data[0] === 'number' ? data[1] : data
-				)
+				body: JSON.stringify(typeof data[0] === 'boolean' ? data[1] : data)
 			}
 		);
 	}
@@ -317,7 +331,6 @@ botTest(
 		description: 'Reply to beatmap request command when no beatmap was found'
 	},
 	async (handleMessage) => {
-		mockFetch(404, `${process.env.API_URL}/api/bot/beatmap/request?use_double_time=false`, 'POST');
 		mockFetch(404, `${process.env.API_URL}/api/bot/beatmap/request?use_double_time=false`, 'POST');
 		await handleMessage();
 		expect(fetch).toBeCalledWith(

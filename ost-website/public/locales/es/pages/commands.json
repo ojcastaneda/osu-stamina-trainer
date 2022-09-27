@@ -14,7 +14,9 @@
 	"osu_profile": "Perfil de osu!",
 	"request": "Solicita un mapa de determinado BPM con un enfoque intensivo en estamina, el cual puede incluir filtros adicionales",
 	"request_command": "Comando de solicitar mapa",
+	"remove_double_time": "Remover DT",
 	"use_complete": "Usar versión completa",
+	"use_double_time": "Usar DT",
 	"use_shortcut": "Usar versión corta",
 	"user_id": "ID del usuario"
 }
