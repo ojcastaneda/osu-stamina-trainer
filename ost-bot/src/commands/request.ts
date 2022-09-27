@@ -335,6 +335,6 @@ export async function request(
 			: parsedRequest[0];
 	const request = await fetchRequest(false, filters, parsedRequest[1]);
 	return request === 'requestNotFound' && skippedIds.length > 0
-		? fetchRequest(true, filters, parsedRequest[1])
+		? fetchRequest(true, parsedRequest[0], parsedRequest[1])
 		: request;
 }
