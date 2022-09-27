@@ -32,6 +32,7 @@ function BotCommands() {
 	const [beatmapId, setBeatmapId] = useState(0);
 	const [language, setLanguage] = useState('en');
 	const [useShortcut, setUseShortcut] = useState(false);
+	const [useDoubleTime, setUseDoubleTime] = useState(false);
 
 	function setFiltersCommands(state: SetStateAction<Filters>) {
 		setFilters((prevState) => {
@@ -49,8 +50,8 @@ function BotCommands() {
 		if (filters[Property.bpm] === undefined) {
 			checkedFilters[Property.bpm] = new Filter(Operator.default, [180, 0]);
 		}
-		setRequest(parseFilters(checkedFilters, useShortcut));
-	}, [filters, useShortcut]);
+		setRequest(parseFilters(checkedFilters, useShortcut, useDoubleTime));
+	}, [filters, useShortcut, useDoubleTime]);
 
 	return (
 		<FiltersContext.Provider value={[filters, setFiltersCommands]}>
@@ -92,6 +93,11 @@ function BotCommands() {
 									onClick={() => navigator.clipboard.writeText(request)}
 								>
 									<FaCopy />
+								</button>
+							</div>
+							<div>
+								<button onClick={() => setUseDoubleTime((previousState) => !previousState)}>
+									{useDoubleTime ? t('use_double_time') : t('remove_double_time')}
 								</button>
 							</div>
 							<div>
@@ -218,7 +224,7 @@ export async function getServerSideProps(
 	};
 }
 
-function parseFilters(filters: Filters, useShort: boolean): string {
+function parseFilters(filters: Filters, useShort: boolean, useDoubleTime: boolean): string {
 	const parameters = [];
 	for (const [property, filter] of Object.entries(filters)) {
 		const parsedProperty = parseInt(property);
@@ -232,6 +238,7 @@ function parseFilters(filters: Filters, useShort: boolean): string {
 		}
 		parameters.push(parsedFilter);
 	}
+	if (useDoubleTime) parameters.unshift(useShort ? 'dt' : 'doubletime');
 	parameters.unshift(useShort ? '!r' : '!request');
 	return parameters.join(' ');
 }

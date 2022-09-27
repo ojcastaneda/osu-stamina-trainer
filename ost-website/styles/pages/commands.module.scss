@@ -196,18 +196,17 @@
 	}
 
 	& > div {
-		&:first-of-type {
-			@media (max-width: $small-responsive) {
-				margin: $lg-spacing 0;
-			}
+		@media (max-width: $small-responsive) {
+			margin-top: $lg-spacing;
 		}
-
-		&:last-of-type > button {
+		&:not(:first-of-type) > button {
+			justify-content: center;
 			margin-left: $lg-spacing;
 			white-space: nowrap;
 
 			@media (max-width: $small-responsive) {
 				margin: 0 auto;
+				width: 100%;
 			}
 		}
 	}

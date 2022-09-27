@@ -1,5 +1,4 @@
 import levenary from 'levenary';
-import { I18nProperties } from '../i18n';
 import {
 	alphanumericFilters,
 	AlphanumericParameter,
@@ -10,6 +9,8 @@ import {
 	NumericProperty,
 	Operator
 } from '../models';
+
+export type ModificationIndicator = '' | ' +DT |';
 
 /**
  * Guesses for properties of numeric filters.
@@ -33,37 +34,33 @@ export const numericGuesses: NumericProperty[] = [
  * Guesses for parameters of alphanumeric filters.
  */
 export const alphanumericGuesses = Object.values(AlphanumericParameter).filter(
-	(key) => typeof key === 'string'
+	(key) => typeof key === 'string' && key.length > 1
 ) as string[];
 
 /**
  * Guesses for legacy parameters.
  */
-export const typeGuesses = Object.values(AlphanumericParameter).filter((key) => {
-	if (typeof key === 'number') return false;
-	switch (AlphanumericParameter[key as keyof typeof AlphanumericParameter]) {
-		case AlphanumericParameter.bursts:
-		case AlphanumericParameter.deathstreams:
-		case AlphanumericParameter.streams:
-			return true;
-		default:
-			return false;
-	}
-}) as string[];
+export const typeGuesses: (keyof typeof AlphanumericParameter)[] = [
+	'bursts',
+	'deathstreams',
+	'streams'
+];
 
 /**
- * Fetches the request from the server.
- * Returns a beatmap if a beatmap from the collection meets the filters.
- * Otherwise, returns undefined.
+ * Returns the i18n properties for `request` if a beatmap that meets the provided filters and modification.
+ * Otherwise, returns the i18n property for `request not found`.
  *
+ * @param alreadyRequested - The indicator of whether or not it should warn the user that the beatmaps
+ * will repeat until the cache session expires.
  * @param filters - The filters used for the request.
  * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.
- * @returns A beatmap that meets the request if available.
+ * @returns The corresponding i18n properties.
  */
 async function fetchRequest(
+	alreadyRequested: boolean,
 	filters: Filter[],
 	useDoubleTime: boolean
-): Promise<Beatmap | undefined> {
+): Promise<'requestNotFound' | ['beatmapInformation', Beatmap, ModificationIndicator, boolean]> {
 	const response = await fetch(
 		`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=${useDoubleTime}`,
 		{
@@ -74,7 +71,15 @@ async function fetchRequest(
 			body: JSON.stringify(filters)
 		}
 	);
-	return response.status === 404 ? undefined : response.json();
+
+	return response.status === 404
+		? 'requestNotFound'
+		: [
+				'beatmapInformation',
+				await response.json(),
+				useDoubleTime ? ' +DT |' : '',
+				alreadyRequested
+		  ];
 }
 
 /**
@@ -89,29 +94,31 @@ async function fetchRequest(
 export function parseRequest(
 	parameters: string[],
 	guessCommand = false
-): [Filter[], boolean | undefined] | string {
+): [Filter[], boolean] | string {
 	if (parameters.length < 1) return `${numericFilters['bpm'].value}`;
 	let filters: Filter[] = [];
 	const guessedCommand: string[] = [];
 	let incorrectFilters = false;
-	let useDoubleTime;
+	let useDoubleTime = false;
 	parameters[0] =
 		parameters[0][0] === '<' || parameters[0][0] === '>'
 			? `bpm${parameters[0]}`
 			: `bpm=${parameters[0]}`;
 	for (const parameter of parameters) {
 		const filter = parseParameter(parameter);
+		const concatGuess = (newGuess: string) =>
+			guessedCommand.find((guess) => newGuess === guess) === undefined;
 		switch (typeof filter) {
 			case 'string':
-				guessedCommand.push(filter);
+				if (concatGuess(filter)) guessedCommand.push(filter);
 				incorrectFilters = true;
 				break;
 			case 'boolean':
-				guessedCommand.push(parameter);
+				if (concatGuess(parameter)) guessedCommand.push(parameter);
 				useDoubleTime = filter;
 				break;
 			default:
-				guessedCommand.push(parameter);
+				if (concatGuess(parameter)) guessedCommand.push(parameter);
 				filters = filters.concat(filter);
 				break;
 		}
@@ -258,7 +265,7 @@ function parseNumericParameter(
  * @param value - The year to filter.
  * @returns The parsed date.
  */
-function parseYear(operator: 'maximum' | 'minimum', value: number): Filter {
+export function parseYear(operator: 'maximum' | 'minimum', value: number): Filter {
 	return operator === 'maximum'
 		? new Filter(operator, 'last_updated', new Date(`${value}-12-31T23:59:59.999+00:00`))
 		: new Filter(operator, 'last_updated', new Date(`${value}-01-01T00:00:00+00:00`));
@@ -315,49 +322,19 @@ export async function request(
 	parameters: string[],
 	skippedIds: number[],
 	guessCommand = false
-): Promise<I18nProperties> {
+): Promise<
+	| 'requestNotFound'
+	| ['beatmapInformation', Beatmap, ModificationIndicator, boolean]
+	| ['didYouMean', string]
+> {
 	const parsedRequest = parseRequest(parameters, guessCommand);
 	if (typeof parsedRequest === 'string') return ['didYouMean', `${command} ${parsedRequest}`];
-	const request = await retrieveRequest(
-		false,
-		[new Filter('different', 'id', skippedIds)].concat(parsedRequest[0]),
-		parsedRequest[1]
-	);
-	return request === 'requestNotFound'
-		? retrieveRequest(true, parsedRequest[0], parsedRequest[1])
+	const filters =
+		skippedIds.length > 0
+			? [new Filter('different', 'id', skippedIds)].concat(parsedRequest[0])
+			: parsedRequest[0];
+	const request = await fetchRequest(false, filters, parsedRequest[1]);
+	return request === 'requestNotFound' && skippedIds.length > 0
+		? fetchRequest(true, filters, parsedRequest[1])
 		: request;
-}
-
-/**
- * Returns the i18n properties for `request` if a beatmap that meets the provided filters and modification.
- * If `useDoubleTime` is undefined, randomly picks a modification,
- * and uses the remaining modification if a beatmap did not meet the request.
- * Otherwise, returns the i18n property for `request not found`.
- *
- * @param alreadyRequested - The indicator of whether or not it should warn the user that the beatmaps
- * will repeat until the cache session expires.
- * @param filters - The filters used for the request.
- * @param useDoubleTime - Whether or not to request a beatmap based on its double time statistics.
- * @returns The corresponding i18n properties.
- */
-async function retrieveRequest(
-	alreadyRequested: boolean,
-	filters: Filter[],
-	useDoubleTime?: boolean
-): Promise<I18nProperties> {
-	if (useDoubleTime !== undefined) {
-		const beatmap = await fetchRequest(filters, useDoubleTime);
-		return beatmap === undefined
-			? 'requestNotFound'
-			: ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : '', alreadyRequested];
-	}
-	useDoubleTime = useDoubleTime === undefined ? Math.random() >= 0.5 : useDoubleTime;
-	let beatmap = await fetchRequest(filters, useDoubleTime);
-	if (beatmap === undefined) {
-		beatmap = await fetchRequest(filters, !useDoubleTime);
-		return beatmap === undefined
-			? 'requestNotFound'
-			: ['beatmapInformation', beatmap, !useDoubleTime ? ' +DT |' : '', alreadyRequested];
-	}
-	return ['beatmapInformation', beatmap, useDoubleTime ? ' +DT |' : '', alreadyRequested];
 }
