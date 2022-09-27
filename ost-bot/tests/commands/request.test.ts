@@ -283,10 +283,11 @@ botTest<Filter[] | [boolean, Filter[]]>(
 						AlphanumericParameter[alphanumericProperty as keyof typeof AlphanumericParameter]
 					];
 				if (typeof parameter === 'boolean') {
-					return new Assertion(['beatmapInformation', testBeatmap, ' +DT |', false], message, [
-						parameter,
-						filters
-					]);
+					return new Assertion(
+						parameter ? ['beatmapInformation', testBeatmap, ' +DT |', false] : expectedTestBeatmap,
+						message,
+						[parameter, filters]
+					);
 				}
 				const { property, value } = parameter;
 				if (typeof value === 'string')
@@ -305,7 +306,7 @@ botTest<Filter[] | [boolean, Filter[]]>(
 	},
 	async (handleMessage, data) => {
 		if (data === undefined) return;
-		const useDoubleTime = typeof data[0] === 'boolean';
+		const useDoubleTime = typeof data[0] === 'boolean' && data[0];
 		mockFetch(
 			testBeatmap,
 			`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=${useDoubleTime}`,
