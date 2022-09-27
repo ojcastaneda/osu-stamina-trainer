@@ -1,4 +1,5 @@
-import { I18nProperties, Languages, languages } from '../i18n';
+import levenary from 'levenary';
+import { languages, Languages } from '../osu/formatter';
 
 /**
  * Returns the user id and language code if the command is correct.
@@ -15,12 +16,13 @@ export function parseLanguage(
 	let incorrect = false;
 	let parsedLanguage = language;
 	if (languages[language] === undefined) {
-		parsedLanguage = 'en';
+		parsedLanguage = levenary(language, Object.keys(languages));
 		incorrect = true;
 	}
-	let parsedId = parseInt(id);
+	let parsedId = Number(id);
 	if (isNaN(parsedId)) {
-		parsedId = 6484647;
+		parsedId = parseInt(id);
+		parsedId = isNaN(parsedId) ? 6484647 : parsedId;
 		incorrect = true;
 	}
 	return incorrect
@@ -43,10 +45,10 @@ export async function updateLanguage(
 	id: string,
 	language: string,
 	username: string
-): Promise<I18nProperties> {
+): Promise<['didYouMean', string] | ['languageUpdate', Languages] | 'languageUpdateForbidden'> {
 	const [parsedId, parsedLanguage] = parseLanguage(id, language);
 	if (typeof parsedId === 'string') return [parsedId, parsedLanguage];
-	const request = await fetch(`/api/bot/user/${username}`, {
+	const request = await fetch(`${process.env.API_URL}/api/bot/user/${username}`, {
 		method: 'POST',
 		body: JSON.stringify({
 			id: parsedId,

@@ -1,4 +1,5 @@
-import { ConstantResponses, I18nProperties } from '../i18n';
+import { Beatmap } from '../models';
+import { ModificationIndicator } from './request';
 
 /**
  * Returns the beatmap id  if the message from the user is formatted according to the now playing command.
@@ -7,7 +8,7 @@ import { ConstantResponses, I18nProperties } from '../i18n';
  * @param nowPlaying - The message from the user.
  * @returns The i18n property for `command not found` or the beatmap id.
  */
-export function parseNowPlaying(nowPlaying: string): ConstantResponses | number {
+function parseNowPlaying(nowPlaying: string): 'commandNotFount' | number {
 	const idStart = nowPlaying.indexOf('#/');
 	if (idStart < 0) return 'commandNotFount';
 	const splittedString = nowPlaying.slice(idStart + 2);
@@ -23,7 +24,13 @@ export function parseNowPlaying(nowPlaying: string): ConstantResponses | number 
  * @param nowPlaying - The message from the user.
  * @returns The corresponding i18n properties.
  */
-export async function analyzeNowPlaying(nowPlaying: string): Promise<I18nProperties> {
+export async function analyzeNowPlaying(
+	nowPlaying: string
+): Promise<
+	| 'analysisNotFound'
+	| 'commandNotFount'
+	| ['beatmapInformation', Beatmap, ModificationIndicator, boolean]
+> {
 	const id = parseNowPlaying(nowPlaying);
 	if (typeof id === 'string') return id;
 	const response = await fetch(`${process.env.API_URL}/api/bot/beatmap/${id}`);
@@ -41,9 +48,19 @@ export async function analyzeNowPlaying(nowPlaying: string): Promise<I18nPropert
  * @param id - The id of the beatmap to analyze.
  * @returns The corresponding i18n properties.
  */
-export async function analyzeId(command: string, id: string): Promise<I18nProperties> {
-	const parsedId = parseInt(id);
-	if (isNaN(parsedId)) return ['didYouMean', `${command} 2766688`];
+export async function analyzeId(
+	command: string,
+	id: string
+): Promise<
+	| 'analysisNotFound'
+	| ['beatmapInformation', Beatmap, ModificationIndicator, boolean]
+	| ['didYouMean', string]
+> {
+	let parsedId = Number(id);
+	if (isNaN(parsedId)) {
+		parsedId = parseInt(id);
+		return ['didYouMean', `${command} ${isNaN(parsedId) ? 2766688 : parsedId}`];
+	}
 	const response = await fetch(`${process.env.API_URL}/api/bot/beatmap/${parsedId}`);
 	return response.status === 404
 		? 'analysisNotFound'

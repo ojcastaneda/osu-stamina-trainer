@@ -1,15 +1,17 @@
 import levenary from 'levenary';
-import { I18nProperties } from '../i18n';
 import {
 	alphanumericFilters,
 	AlphanumericParameter,
 	Beatmap,
 	Filter,
+	Modification,
 	NumericFilter,
 	numericFilters,
 	NumericProperty,
 	Operator
 } from '../models';
+
+export type ModificationIndicator = '' | ' +DT |';
 
 /**
  * Guesses for properties of numeric filters.
@@ -33,23 +35,17 @@ export const numericGuesses: NumericProperty[] = [
  * Guesses for parameters of alphanumeric filters.
  */
 export const alphanumericGuesses = Object.values(AlphanumericParameter).filter(
-	(key) => typeof key === 'string'
+	(key) => typeof key === 'string' && key.length > 1
 ) as string[];
 
 /**
  * Guesses for legacy parameters.
  */
-export const typeGuesses = Object.values(AlphanumericParameter).filter((key) => {
-	if (typeof key === 'number') return false;
-	switch (AlphanumericParameter[key as keyof typeof AlphanumericParameter]) {
-		case AlphanumericParameter.bursts:
-		case AlphanumericParameter.deathstreams:
-		case AlphanumericParameter.streams:
-			return true;
-		default:
-			return false;
-	}
-}) as string[];
+export const typeGuesses: (keyof typeof AlphanumericParameter)[] = [
+	'bursts',
+	'deathstreams',
+	'streams'
+];
 
 /**
  * Fetches the request from the server.
@@ -94,7 +90,7 @@ export function parseRequest(
 	let filters: Filter[] = [];
 	const guessedCommand: string[] = [];
 	let incorrectFilters = false;
-	let useDoubleTime;
+	let modification = Modification.NoModification;
 	parameters[0] =
 		parameters[0][0] === '<' || parameters[0][0] === '>'
 			? `bpm${parameters[0]}`
@@ -106,9 +102,9 @@ export function parseRequest(
 				guessedCommand.push(filter);
 				incorrectFilters = true;
 				break;
-			case 'boolean':
+			case 'number':
 				guessedCommand.push(parameter);
-				useDoubleTime = filter;
+				modification = filter;
 				break;
 			default:
 				guessedCommand.push(parameter);
@@ -119,6 +115,8 @@ export function parseRequest(
 	guessedCommand[0] = guessedCommand[0].slice(
 		guessedCommand[0][3] === '<' || guessedCommand[0][3] === '>' ? 3 : 4
 	);
+	let useDoubleTime: boolean | undefined = modification === Modification.DoubleTime;
+	if (modification === Modification.FreeModification) useDoubleTime = undefined;
 	return incorrectFilters || guessCommand ? guessedCommand.join(' ') : [filters, useDoubleTime];
 }
 
@@ -129,7 +127,7 @@ export function parseRequest(
  * @param parameter - The parameter to parse.
  * @returns The parsed or guessed parameter.
  */
-function parseParameter(parameter: string): Filter[] | string | boolean {
+function parseParameter(parameter: string): Filter[] | string | Modification {
 	let splitIndex = parameter.indexOf('=');
 	if (splitIndex > 0) {
 		const numericProperty = parameter.slice(0, splitIndex);
@@ -258,7 +256,7 @@ function parseNumericParameter(
  * @param value - The year to filter.
  * @returns The parsed date.
  */
-function parseYear(operator: 'maximum' | 'minimum', value: number): Filter {
+export function parseYear(operator: 'maximum' | 'minimum', value: number): Filter {
 	return operator === 'maximum'
 		? new Filter(operator, 'last_updated', new Date(`${value}-12-31T23:59:59.999+00:00`))
 		: new Filter(operator, 'last_updated', new Date(`${value}-01-01T00:00:00+00:00`));
@@ -271,11 +269,11 @@ function parseYear(operator: 'maximum' | 'minimum', value: number): Filter {
  * @param parameter - The alphanumeric parameter to parse.
  * @returns The parsed or guessed alphanumeric parameter.
  */
-function parseAlphanumericParameter(parameter: string): Filter[] | string | boolean {
+function parseAlphanumericParameter(parameter: string): Filter[] | string | Modification {
 	const alphanumericFilter =
 		alphanumericFilters[AlphanumericParameter[parameter as keyof typeof AlphanumericParameter]];
 	switch (typeof alphanumericFilter) {
-		case 'boolean':
+		case 'number':
 			return alphanumericFilter;
 		case 'object': {
 			const filters: Filter[] = [];
@@ -315,16 +313,20 @@ export async function request(
 	parameters: string[],
 	skippedIds: number[],
 	guessCommand = false
-): Promise<I18nProperties> {
+): Promise<
+	| 'requestNotFound'
+	| ['beatmapInformation', Beatmap, ModificationIndicator, boolean]
+	| ['didYouMean', string]
+> {
 	const parsedRequest = parseRequest(parameters, guessCommand);
 	if (typeof parsedRequest === 'string') return ['didYouMean', `${command} ${parsedRequest}`];
-	const request = await retrieveRequest(
-		false,
-		[new Filter('different', 'id', skippedIds)].concat(parsedRequest[0]),
-		parsedRequest[1]
-	);
-	return request === 'requestNotFound'
-		? retrieveRequest(true, parsedRequest[0], parsedRequest[1])
+	const filters =
+		skippedIds.length > 0
+			? [new Filter('different', 'id', skippedIds)].concat(parsedRequest[0])
+			: parsedRequest[0];
+	const request = await retrieveRequest(false, filters, parsedRequest[1]);
+	return request === 'requestNotFound' && skippedIds.length > 0
+		? retrieveRequest(true, filters, parsedRequest[1])
 		: request;
 }
 
@@ -344,7 +346,7 @@ async function retrieveRequest(
 	alreadyRequested: boolean,
 	filters: Filter[],
 	useDoubleTime?: boolean
-): Promise<I18nProperties> {
+): Promise<'requestNotFound' | ['beatmapInformation', Beatmap, ModificationIndicator, boolean]> {
 	if (useDoubleTime !== undefined) {
 		const beatmap = await fetchRequest(filters, useDoubleTime);
 		return beatmap === undefined

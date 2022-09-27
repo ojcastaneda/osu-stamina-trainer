@@ -10,18 +10,26 @@ export enum AlphanumericParameter {
 	deathstreams = 2,
 	dt = 3,
 	doubletime = 3,
-	l = 4,
-	loved = 4,
-	nm = 5,
-	nomod = 5,
-	r = 6,
-	ranked = 6,
-	s = 7,
-	spaced = 8,
-	stacked = 9,
-	streams = 7,
-	u = 10,
-	unranked = 10
+	f = 4,
+	freemod = 4,
+	l = 5,
+	loved = 5,
+	nm = 6,
+	nomod = 6,
+	r = 7,
+	ranked = 7,
+	s = 8,
+	spaced = 9,
+	stacked = 10,
+	streams = 8,
+	u = 11,
+	unranked = 11
+}
+
+export enum Modification {
+	DoubleTime,
+	FreeModification,
+	NoModification
 }
 
 /**
@@ -82,7 +90,7 @@ export type RankedStatus = 'loved' | 'ranked' | 'unranked';
 /**
  * Response from the server for beatmap request or beatmaps analysis.
  */
-export interface Beatmap {
+export type Beatmap = {
 	accuracy: number;
 	approach_rate: number;
 	bpm: number;
@@ -99,7 +107,7 @@ export interface Beatmap {
 	streams_length: number;
 	streams_spacing: number;
 	title: string;
-}
+};
 
 /**
  * Values for parsing or guessing alphanumeric parameters.
@@ -154,19 +162,21 @@ export class NumericFilter {
 /**
  * Record of alphanumeric parameters for parsing or guessing commands.
  */
-export const alphanumericFilters: Record<AlphanumericParameter, AlphanumericFilter | boolean> = {
-	[AlphanumericParameter.alternate]: new AlphanumericFilter('streams_spacing', [1.66, undefined]),
-	[AlphanumericParameter.bursts]: new AlphanumericFilter('streams_length', [undefined, 8]),
-	[AlphanumericParameter.deathstreams]: new AlphanumericFilter('streams_length', [25, undefined]),
-	[AlphanumericParameter.doubletime]: true,
-	[AlphanumericParameter.loved]: new AlphanumericFilter('ranked_status', 'loved'),
-	[AlphanumericParameter.nomod]: false,
-	[AlphanumericParameter.ranked]: new AlphanumericFilter('ranked_status', 'ranked'),
-	[AlphanumericParameter.spaced]: new AlphanumericFilter('streams_spacing', [0.51, 1.65]),
-	[AlphanumericParameter.stacked]: new AlphanumericFilter('streams_spacing', [undefined, 0.5]),
-	[AlphanumericParameter.streams]: new AlphanumericFilter('streams_length', [9, 24]),
-	[AlphanumericParameter.unranked]: new AlphanumericFilter('ranked_status', 'unranked')
-};
+export const alphanumericFilters: Record<AlphanumericParameter, AlphanumericFilter | Modification> =
+	{
+		[AlphanumericParameter.alternate]: new AlphanumericFilter('streams_spacing', [1.66, undefined]),
+		[AlphanumericParameter.bursts]: new AlphanumericFilter('streams_length', [undefined, 8]),
+		[AlphanumericParameter.deathstreams]: new AlphanumericFilter('streams_length', [25, undefined]),
+		[AlphanumericParameter.doubletime]: Modification.DoubleTime,
+		[AlphanumericParameter.freemod]: Modification.FreeModification,
+		[AlphanumericParameter.loved]: new AlphanumericFilter('ranked_status', 'loved'),
+		[AlphanumericParameter.nomod]: Modification.NoModification,
+		[AlphanumericParameter.ranked]: new AlphanumericFilter('ranked_status', 'ranked'),
+		[AlphanumericParameter.spaced]: new AlphanumericFilter('streams_spacing', [0.51, 1.65]),
+		[AlphanumericParameter.stacked]: new AlphanumericFilter('streams_spacing', [undefined, 0.5]),
+		[AlphanumericParameter.streams]: new AlphanumericFilter('streams_length', [9, 24]),
+		[AlphanumericParameter.unranked]: new AlphanumericFilter('ranked_status', 'unranked')
+	};
 
 /**
  * Record of numeric parameters for parsing or guessing commands.
@@ -186,3 +196,24 @@ export const numericFilters: Record<NumericProperty, NumericFilter> = {
 	stars: new NumericFilter('difficulty_rating', 0.25, 4),
 	year: new NumericFilter('last_updated', 0, 2018)
 };
+
+/**
+ * Format a message to log to the console.
+ *
+ * @param content - The content to log.
+ * @param level - The Logging level of the interaction.
+ * @param origin - The source of the interaction.
+ */
+export function log(content: string, level: 'ERROR' | 'INFO', origin: 'Discord' | 'osu!') {
+	const timestamp = new Date().toISOString();
+	switch (level) {
+		case 'ERROR':
+			return console.error(
+				`\x1b[2m${timestamp}\x1b[0m \x1b[31m${level}\x1b[0m \u001b[1m${origin}:\x1b[0m ${content}`
+			);
+		case 'INFO':
+			return console.info(
+				`\x1b[2m${timestamp}\x1b[0m \x1b[32m${level}\x1b[0m \u001b[1m${origin}:\x1b[0m ${content}`
+			);
+	}
+}
