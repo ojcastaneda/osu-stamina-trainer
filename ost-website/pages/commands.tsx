@@ -97,7 +97,7 @@ function BotCommands() {
 							</div>
 							<div>
 								<button onClick={() => setUseDoubleTime((previousState) => !previousState)}>
-									{useDoubleTime ? t('use_double_time') : t('remove_double_time')}
+									{useDoubleTime ? t('remove_double_time') : t('use_double_time')}
 								</button>
 							</div>
 							<div>
