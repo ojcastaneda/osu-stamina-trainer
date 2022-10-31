@@ -22,6 +22,12 @@ import { SetStateAction, useEffect, useState } from 'react';
 import { FaCopy, FaDiscord } from 'react-icons/fa';
 import { MdTranslate } from 'react-icons/md';
 
+enum Modification {
+	NoMod,
+	DoubleTime,
+	FreeMod
+}
+
 function BotCommands() {
 	const { t } = useTranslation(['pages/commands', 'common']);
 	const [filters, setFilters] = useState<Filters>({
@@ -31,8 +37,8 @@ function BotCommands() {
 	const [userId, setUserId] = useState(0);
 	const [beatmapId, setBeatmapId] = useState(0);
 	const [language, setLanguage] = useState('en');
-	const [useShortcut, setUseShortcut] = useState(false);
-	const [useDoubleTime, setUseDoubleTime] = useState(false);
+	const [useShort, setUseShort] = useState(false);
+	const [modification, setModification] = useState(Modification.NoMod);
 
 	function setFiltersCommands(state: SetStateAction<Filters>) {
 		setFilters((prevState) => {
@@ -50,8 +56,8 @@ function BotCommands() {
 		if (filters[Property.bpm] === undefined) {
 			checkedFilters[Property.bpm] = new Filter(Operator.default, [180, 0]);
 		}
-		setRequest(parseFilters(checkedFilters, useShortcut, useDoubleTime));
-	}, [filters, useShortcut, useDoubleTime]);
+		setRequest(parseFilters(checkedFilters, modification, useShort));
+	}, [filters, useShort, modification]);
 
 	return (
 		<FiltersContext.Provider value={[filters, setFiltersCommands]}>
@@ -96,13 +102,19 @@ function BotCommands() {
 								</button>
 							</div>
 							<div>
-								<button onClick={() => setUseDoubleTime((previousState) => !previousState)}>
-									{useDoubleTime ? t('remove_double_time') : t('use_double_time')}
-								</button>
+								<select
+									onChange={({ target }) => setModification(parseInt(target.value))}
+									value={-1}
+								>
+									<option value={-1}>{t('filter_by_modification')}</option>
+									<option value={Modification.DoubleTime}>{t('use_double_time')}</option>
+									<option value={Modification.NoMod}>{t('use_no_modification')}</option>
+									<option value={Modification.FreeMod}>{t('use_free_modification')}</option>
+								</select>
 							</div>
 							<div>
-								<button onClick={() => setUseShortcut((previousState) => !previousState)}>
-									{useShortcut ? t('use_complete') : t('use_shortcut')}
+								<button onClick={() => setUseShort((previousState) => !previousState)}>
+									{useShort ? t('switch_to_long') : t('switch_to_short')}
 								</button>
 							</div>
 						</div>
@@ -224,7 +236,7 @@ export async function getServerSideProps(
 	};
 }
 
-function parseFilters(filters: Filters, useShort: boolean, useDoubleTime: boolean): string {
+function parseFilters(filters: Filters, modification: Modification, useShort: boolean): string {
 	const parameters = [];
 	for (const [property, filter] of Object.entries(filters)) {
 		const parsedProperty = parseInt(property);
@@ -238,7 +250,14 @@ function parseFilters(filters: Filters, useShort: boolean, useDoubleTime: boolea
 		}
 		parameters.push(parsedFilter);
 	}
-	if (useDoubleTime) parameters.unshift(useShort ? 'dt' : 'doubletime');
+	switch (modification) {
+		case Modification.DoubleTime:
+			parameters.unshift(useShort ? 'dt' : 'doubletime');
+			break;
+		case Modification.FreeMod:
+			parameters.unshift('freemod');
+			break;
+	}
 	parameters.unshift(useShort ? '!r' : '!request');
 	return parameters.join(' ');
 }
