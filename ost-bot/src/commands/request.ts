@@ -4,6 +4,7 @@ import {
 	AlphanumericParameter,
 	Beatmap,
 	Filter,
+	Modification,
 	NumericFilter,
 	numericFilters,
 	NumericProperty,
@@ -94,12 +95,12 @@ async function fetchRequest(
 export function parseRequest(
 	parameters: string[],
 	guessCommand = false
-): [Filter[], boolean] | string {
+): [Filter[], Modification] | string {
 	if (parameters.length < 1) return `${numericFilters['bpm'].value}`;
 	let filters: Filter[] = [];
 	const guessedCommand: string[] = [];
 	let incorrectFilters = false;
-	let useDoubleTime = false;
+	let useDoubleTime = Modification.NoMod;
 	parameters[0] =
 		parameters[0][0] === '<' || parameters[0][0] === '>'
 			? `bpm${parameters[0]}`
@@ -113,7 +114,7 @@ export function parseRequest(
 				if (concatGuess(filter)) guessedCommand.push(filter);
 				incorrectFilters = true;
 				break;
-			case 'boolean':
+			case 'number':
 				if (concatGuess(parameter)) guessedCommand.push(parameter);
 				useDoubleTime = filter;
 				break;
@@ -136,7 +137,7 @@ export function parseRequest(
  * @param parameter - The parameter to parse.
  * @returns The parsed or guessed parameter.
  */
-function parseParameter(parameter: string): Filter[] | string | boolean {
+function parseParameter(parameter: string): Filter[] | string | Modification {
 	let splitIndex = parameter.indexOf('=');
 	if (splitIndex > 0) {
 		const numericProperty = parameter.slice(0, splitIndex);
@@ -278,11 +279,11 @@ export function parseYear(operator: 'maximum' | 'minimum', value: number): Filte
  * @param parameter - The alphanumeric parameter to parse.
  * @returns The parsed or guessed alphanumeric parameter.
  */
-function parseAlphanumericParameter(parameter: string): Filter[] | string | boolean {
+function parseAlphanumericParameter(parameter: string): Filter[] | string | Modification {
 	const alphanumericFilter =
 		alphanumericFilters[AlphanumericParameter[parameter as keyof typeof AlphanumericParameter]];
 	switch (typeof alphanumericFilter) {
-		case 'boolean':
+		case 'number':
 			return alphanumericFilter;
 		case 'object': {
 			const filters: Filter[] = [];
@@ -333,8 +334,20 @@ export async function request(
 		skippedIds.length > 0
 			? [new Filter('different', 'id', skippedIds)].concat(parsedRequest[0])
 			: parsedRequest[0];
-	const request = await fetchRequest(false, filters, parsedRequest[1]);
+	if (parsedRequest[1] !== Modification.FreeMod) {
+		const useDoubleTime = parsedRequest[1] === Modification.DoubleTime;
+		const request = await fetchRequest(false, filters, useDoubleTime);
+		return request === 'requestNotFound' && skippedIds.length > 0
+			? fetchRequest(true, parsedRequest[0], useDoubleTime)
+			: request;
+	}
+	const useDoubleTime = Math.random() < 0.5;
+	let request = await fetchRequest(false, filters, useDoubleTime);
+	if (request !== 'requestNotFound') return request;
+	request = await fetchRequest(false, filters, !useDoubleTime);
+	if (request !== 'requestNotFound') return request;
+	request = await fetchRequest(true, parsedRequest[0], useDoubleTime);
 	return request === 'requestNotFound' && skippedIds.length > 0
-		? fetchRequest(true, parsedRequest[0], parsedRequest[1])
+		? fetchRequest(true, parsedRequest[0], !useDoubleTime)
 		: request;
 }

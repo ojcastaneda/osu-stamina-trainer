@@ -9,13 +9,32 @@ import {
 	alphanumericFilters,
 	AlphanumericParameter,
 	Filter,
+	Modification,
 	numericFilters,
 	NumericProperty
 } from '../../src/models';
 
 const bpm = testBeatmap.bpm;
 
+const defaultFilters = [
+	new Filter('minimum', 'bpm', bpm - numericFilters.bpm.range),
+	new Filter('maximum', 'bpm', bpm + numericFilters.bpm.range)
+];
+
 const numericProperties = numericGuesses.concat('bpm');
+
+function expectRequest<T>(body: T, useDoubleTime = false) {
+	expect(fetch).toBeCalledWith(
+		`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=${useDoubleTime}`,
+		{
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json'
+			},
+			body: JSON.stringify(body)
+		}
+	);
+}
 
 function formatRequest(
 	property: NumericProperty,
@@ -165,13 +184,7 @@ botTest<Filter[]>(
 		assertions: numericProperties
 			.map((numericProperty) => {
 				const { property, range, value } = numericFilters[numericProperty];
-				const filters =
-					numericProperty === 'bpm'
-						? []
-						: [
-								new Filter('minimum', 'bpm', bpm - numericFilters.bpm.range),
-								new Filter('maximum', 'bpm', bpm + numericFilters.bpm.range)
-						  ];
+				const filters = numericProperty === 'bpm' ? [] : defaultFilters;
 				return [
 					new Assertion(
 						expectedTestBeatmap,
@@ -245,16 +258,7 @@ botTest<Filter[]>(
 			'POST'
 		);
 		await handleMessage();
-		expect(fetch).toBeCalledWith(
-			`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=false`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(data)
-			}
-		);
+		expectRequest(data);
 	}
 );
 
@@ -268,84 +272,100 @@ botTest(
 	(handleMessage) => handleMessage()
 );
 
-botTest<Filter[] | [boolean, Filter[]]>(
+botTest<Filter[] | [Modification, boolean, Filter[]]>(
 	{
 		assertions: Object.values(AlphanumericParameter)
 			.filter((key) => typeof key === 'string')
 			.map((alphanumericProperty) => {
 				const message = `!r ${bpm} ${alphanumericProperty}`;
-				let filters = [
-					new Filter('minimum', 'bpm', bpm - numericFilters.bpm.range),
-					new Filter('maximum', 'bpm', bpm + numericFilters.bpm.range)
-				];
 				const parameter =
 					alphanumericFilters[
 						AlphanumericParameter[alphanumericProperty as keyof typeof AlphanumericParameter]
 					];
-				if (typeof parameter === 'boolean') {
-					return new Assertion(
-						parameter ? ['beatmapInformation', testBeatmap, ' +DT |', false] : expectedTestBeatmap,
-						message,
-						[parameter, filters]
-					);
+
+				if (typeof parameter === 'number') {
+					const assertions: Assertion<[Modification, boolean, Filter[]]>[] = [];
+					if (parameter === Modification.FreeMod || parameter === Modification.DoubleTime)
+						assertions.push(
+							new Assertion(['beatmapInformation', testBeatmap, ' +DT |', false], message, [
+								parameter,
+								true,
+								defaultFilters
+							])
+						);
+					if (parameter === Modification.FreeMod || parameter === Modification.NoMod)
+						assertions.push(
+							new Assertion(expectedTestBeatmap, message, [parameter, false, defaultFilters])
+						);
+					return assertions;
 				}
 				const { property, value } = parameter;
 				if (typeof value === 'string')
-					return new Assertion(
-						expectedTestBeatmap,
-						message,
-						filters.concat([new Filter('exact', property, value)])
-					);
+					return [
+						new Assertion(
+							expectedTestBeatmap,
+							message,
+							defaultFilters.concat([new Filter('exact', property, value)])
+						)
+					];
+				let filters: Filter[] = defaultFilters;
 				if (value[0] !== undefined)
 					filters = filters.concat([new Filter('minimum', property, value[0])]);
 				if (value[1] !== undefined)
 					filters = filters.concat([new Filter('maximum', property, value[1])]);
-				return new Assertion(expectedTestBeatmap, message, filters);
-			}),
+				return [new Assertion(expectedTestBeatmap, message, filters)];
+			})
+			.flat(),
 		description: 'Reply to beatmap request command using alphanumeric filters'
 	},
 	async (handleMessage, data) => {
 		if (data === undefined) return;
-		const useDoubleTime = typeof data[0] === 'boolean' && data[0];
+		const useDoubleTime = typeof data[1] === 'boolean' && data[1];
+		if (data[0] === Modification.FreeMod)
+			jest.spyOn(global.Math, 'random').mockReturnValue(useDoubleTime ? 0.1 : 0.6);
 		mockFetch(
 			testBeatmap,
 			`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=${useDoubleTime}`,
 			'POST'
 		);
 		await handleMessage();
-		expect(fetch).toBeCalledWith(
-			`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=${useDoubleTime}`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify(typeof data[0] === 'boolean' ? data[1] : data)
-			}
-		);
+		expectRequest(typeof data[1] === 'boolean' ? data[2] : data, useDoubleTime);
 	}
 );
 
 botTest(
 	{
-		assertions: new Assertion('requestNotFound', `!r ${bpm}`),
+		assertions: new Assertion('requestNotFound', `!r ${bpm}`, undefined, undefined, [
+			testBeatmap.id
+		]),
 		description: 'Reply to beatmap request command when no beatmap was found'
 	},
 	async (handleMessage) => {
 		mockFetch(404, `${process.env.API_URL}/api/bot/beatmap/request?use_double_time=false`, 'POST');
+		mockFetch(404, `${process.env.API_URL}/api/bot/beatmap/request?use_double_time=false`, 'POST');
 		await handleMessage();
-		expect(fetch).toBeCalledWith(
-			`${process.env.API_URL}/api/bot/beatmap/request?use_double_time=false`,
-			{
-				method: 'POST',
-				headers: {
-					'Content-Type': 'application/json'
-				},
-				body: JSON.stringify([
-					new Filter('minimum', 'bpm', bpm - numericFilters.bpm.range),
-					new Filter('maximum', 'bpm', bpm + numericFilters.bpm.range)
-				])
-			}
-		);
+		expectRequest([new Filter('different', 'id', [testBeatmap.id])].concat(defaultFilters));
+		expectRequest(defaultFilters);
+	}
+);
+
+botTest(
+	{
+		assertions: new Assertion('requestNotFound', `!r ${bpm} freemod`, undefined, undefined, [
+			testBeatmap.id
+		]),
+		description: 'Reply to beatmap request command when no beatmap was found using freemod filter'
+	},
+	async (handleMessage) => {
+		jest.spyOn(global.Math, 'random').mockReturnValue(0.1);
+		mockFetch(404, `${process.env.API_URL}/api/bot/beatmap/request?use_double_time=true`, 'POST');
+		mockFetch(404, `${process.env.API_URL}/api/bot/beatmap/request?use_double_time=false`, 'POST');
+		mockFetch(404, `${process.env.API_URL}/api/bot/beatmap/request?use_double_time=true`, 'POST');
+		mockFetch(404, `${process.env.API_URL}/api/bot/beatmap/request?use_double_time=false`, 'POST');
+		await handleMessage();
+		expectRequest([new Filter('different', 'id', [testBeatmap.id])].concat(defaultFilters), true);
+		expectRequest([new Filter('different', 'id', [testBeatmap.id])].concat(defaultFilters));
+		expectRequest(defaultFilters, true);
+		expectRequest(defaultFilters);
 	}
 );

@@ -10,6 +10,7 @@ export enum AlphanumericParameter {
 	deathstreams = 2,
 	dt = 3,
 	doubletime = 3,
+	freemod = 4,
 	l = 5,
 	loved = 5,
 	nm = 6,
@@ -22,6 +23,12 @@ export enum AlphanumericParameter {
 	streams = 8,
 	u = 11,
 	unranked = 11
+}
+
+export enum Modification {
+	NoMod,
+	DoubleTime,
+	FreeMod
 }
 
 /**
@@ -154,19 +161,21 @@ export class NumericFilter {
 /**
  * Record of alphanumeric parameters for parsing or guessing commands.
  */
-export const alphanumericFilters: Record<AlphanumericParameter, AlphanumericFilter | boolean> = {
-	[AlphanumericParameter.alternate]: new AlphanumericFilter('streams_spacing', [1.66, undefined]),
-	[AlphanumericParameter.bursts]: new AlphanumericFilter('streams_length', [undefined, 8]),
-	[AlphanumericParameter.deathstreams]: new AlphanumericFilter('streams_length', [25, undefined]),
-	[AlphanumericParameter.doubletime]: true,
-	[AlphanumericParameter.loved]: new AlphanumericFilter('ranked_status', 'loved'),
-	[AlphanumericParameter.nomod]: false,
-	[AlphanumericParameter.ranked]: new AlphanumericFilter('ranked_status', 'ranked'),
-	[AlphanumericParameter.spaced]: new AlphanumericFilter('streams_spacing', [0.51, 1.65]),
-	[AlphanumericParameter.stacked]: new AlphanumericFilter('streams_spacing', [undefined, 0.5]),
-	[AlphanumericParameter.streams]: new AlphanumericFilter('streams_length', [9, 24]),
-	[AlphanumericParameter.unranked]: new AlphanumericFilter('ranked_status', 'unranked')
-};
+export const alphanumericFilters: Record<AlphanumericParameter, AlphanumericFilter | Modification> =
+	{
+		[AlphanumericParameter.alternate]: new AlphanumericFilter('streams_spacing', [1.66, undefined]),
+		[AlphanumericParameter.bursts]: new AlphanumericFilter('streams_length', [undefined, 8]),
+		[AlphanumericParameter.deathstreams]: new AlphanumericFilter('streams_length', [25, undefined]),
+		[AlphanumericParameter.doubletime]: Modification.DoubleTime,
+		[AlphanumericParameter.freemod]: Modification.FreeMod,
+		[AlphanumericParameter.loved]: new AlphanumericFilter('ranked_status', 'loved'),
+		[AlphanumericParameter.nomod]: Modification.NoMod,
+		[AlphanumericParameter.ranked]: new AlphanumericFilter('ranked_status', 'ranked'),
+		[AlphanumericParameter.spaced]: new AlphanumericFilter('streams_spacing', [0.51, 1.65]),
+		[AlphanumericParameter.stacked]: new AlphanumericFilter('streams_spacing', [undefined, 0.5]),
+		[AlphanumericParameter.streams]: new AlphanumericFilter('streams_length', [9, 24]),
+		[AlphanumericParameter.unranked]: new AlphanumericFilter('ranked_status', 'unranked')
+	};
 
 /**
  * Record of numeric parameters for parsing or guessing commands.

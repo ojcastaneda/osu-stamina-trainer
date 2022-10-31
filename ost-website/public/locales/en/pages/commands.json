@@ -3,6 +3,7 @@
 	"check": "Requests the streams related statistics of the beatmap with the provided ID",
 	"copy_command": "Copy command",
 	"discord_only": "Only available in Discord",
+	"filter_by_modification": "Filter by mod",
 	"help": "Displays a list of all the bot commands as a hyperlink to the website",
 	"invite": "Displays a button to invite the bot to a Discord server",
 	"invite_discord": "Invite the Discord bot to a server",
@@ -14,9 +15,10 @@
 	"osu_profile": "osu! bot Profile",
 	"request": "Requests a stream intensive beatmap with a specified BPM, which may include additional filters",
 	"request_command": "Request beatmap command",
-	"remove_double_time": "Remove DT",
-	"use_complete": "Use complete version",
+	"switch_to_long": "Switch to long version",
+	"switch_to_short": "Switch to short version",
 	"use_double_time": "Use DT",
-	"use_shortcut": "Use shortcut version",
+	"use_free_modification": "Use random",
+	"use_no_modification": "Use NM",
 	"user_id": "User's ID"
 }

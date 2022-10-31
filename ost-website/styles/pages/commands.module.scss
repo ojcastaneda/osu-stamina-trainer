@@ -199,13 +199,15 @@
 		@media (max-width: $small-responsive) {
 			margin-top: $lg-spacing;
 		}
-		&:not(:first-of-type) > button {
+		&:not(:first-of-type) > button,
+		select {
 			justify-content: center;
 			margin-left: $lg-spacing;
 			white-space: nowrap;
 
 			@media (max-width: $small-responsive) {
 				margin: 0 auto;
+				text-align: center;
 				width: 100%;
 			}
 		}
