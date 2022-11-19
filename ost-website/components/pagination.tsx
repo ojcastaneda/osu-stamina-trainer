@@ -45,12 +45,11 @@ export default function Pagination({ limit }: PaginationProps) {
 
 			newPages.push(
 				<Link
+					aria-label={t(`${index === 0 ? 'first' : 'last'}_page`)}
 					href={{ query: { ...router.query, page: `${index === 0 ? 1 : limit}` } }}
 					key={`page=${index === 0 ? 'first' : 'last'}`}
 				>
-					<a aria-label={t(`${index === 0 ? 'first' : 'last'}_page`)}>
-						{index === 0 ? <FaAngleDoubleLeft size={20} /> : <FaAngleDoubleRight size={20} />}
-					</a>
+					{index === 0 ? <FaAngleDoubleLeft size={20} /> : <FaAngleDoubleRight size={20} />}
 				</Link>
 			);
 		}

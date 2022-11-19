@@ -38,24 +38,25 @@ export default function Card({ beatmap }: CardProps) {
 					<FaQuestion size={20} />
 				)}
 			</span>
-			<Link href={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}#osu/${beatmap.id}`}>
-				<a className="osu-image" target="_blank">
-					<Image
-						alt={beatmap.title}
-						layout="fill"
-						onError={() => setBackgound('/cover.png')}
-						priority
-						src={background}
-					/>
-				</a>
+			<Link
+				className="osu-image"
+				href={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}#osu/${beatmap.id}`}
+				target="_blank"
+			>
+				<Image
+					alt={beatmap.title}
+					layout="fill"
+					onError={() => setBackgound('/cover.png')}
+					priority
+					src={background}
+				/>
 			</Link>
-			<Link href={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}#osu/${beatmap.id}`}>
-				<a
-					className={`${styles['card-title']} ${expanded ? styles['expanded'] : ''}`}
-					target="_blank"
-				>
-					{beatmap.title}
-				</a>
+			<Link
+				className={`${styles['card-title']} ${expanded ? styles['expanded'] : ''}`}
+				href={`https://osu.ppy.sh/beatmapsets/${beatmap.beatmapset_id}#osu/${beatmap.id}`}
+				target="_blank"
+			>
+				{beatmap.title}
 			</Link>
 			<div className={styles['card-content']}>
 				<div>
