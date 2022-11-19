@@ -70,8 +70,8 @@ function BotCommands() {
 						</svg>
 						<div>osu!: Sombrax79</div>
 					</h2>
-					<Link href={`https://osu.ppy.sh/users/${process.env.NEXT_PUBLIC_OSU_ID}`}>
-						<a target="_blank">{t('osu_profile')}</a>
+					<Link href={`https://osu.ppy.sh/users/${process.env.NEXT_PUBLIC_OSU_ID}`} target="_blank">
+						{t('osu_profile')}
 					</Link>
 				</div>
 				<div>
@@ -81,8 +81,9 @@ function BotCommands() {
 					</h2>
 					<Link
 						href={`https://discord.com/api/oauth2/authorize?client_id=${process.env.NEXT_PUBLIC_DISCORD_ID}&permissions=2048&scope=applications.commands%20bot`}
+						target="_blank"
 					>
-						<a target="_blank">{t('invite_discord')}</a>
+						{t('invite_discord')}
 					</Link>
 				</div>
 			</div>
@@ -252,10 +253,10 @@ function parseFilters(filters: Filters, modification: Modification, useShort: bo
 	}
 	switch (modification) {
 		case Modification.DoubleTime:
-			parameters.unshift(useShort ? 'dt' : 'doubletime');
+			parameters.splice(1, 0, useShort ? 'dt' : 'doubletime');
 			break;
 		case Modification.FreeMod:
-			parameters.unshift('freemod');
+			parameters.splice(1, 0, 'freemod');
 			break;
 	}
 	parameters.unshift(useShort ? '!r' : '!request');

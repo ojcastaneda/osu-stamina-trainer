@@ -61,8 +61,8 @@ export default function NavigationBar({ activeSession }: NavigationBarProps) {
 			<nav id={styles['navigation-bar']}>
 				<div>
 					<div id={styles['navigation-bar-main']}>
-						<Link href="/">
-							<a id={styles['logo']}>osu! Stamina Trainer</a>
+						<Link href="/" id={styles['logo']}>
+							osu! Stamina Trainer
 						</Link>
 						<div id={styles['mobile-menu']}>
 							<button aria-label={t('expand_navigation')} onClick={() => setExpanded(!expanded)}>
@@ -77,20 +77,26 @@ export default function NavigationBar({ activeSession }: NavigationBarProps) {
 						{activeSession && <Link href="/submissions">{t('submissions')}</Link>}
 					</div>
 					<div id={styles['navigation-bar-right']} className={expanded ? '' : styles['hidden']}>
-						<Link href={process.env.NEXT_PUBLIC_DISCORD_URL ?? '/'}>
-							<a aria-label="Discord" target="_blank">
-								<FaDiscord size={25} />
-							</a>
+						<Link
+							aria-label="Discord"
+							href={process.env.NEXT_PUBLIC_DISCORD_URL ?? '/'}
+							target="_blank"
+						>
+							<FaDiscord size={25} />
 						</Link>
-						<Link href={process.env.NEXT_PUBLIC_GITHUB_URL ?? '/'}>
-							<a aria-label="Github" target="_blank">
-								<FaGithub size={25} />
-							</a>
+						<Link
+							aria-label="Github"
+							href={process.env.NEXT_PUBLIC_GITHUB_URL ?? '/'}
+							target="_blank"
+						>
+							<FaGithub size={25} />
 						</Link>
-						<Link href={process.env.NEXT_PUBLIC_PATREON_URL ?? '/'}>
-							<a aria-label="Patreon" target="_blank">
-								<FaPatreon size={25} />
-							</a>
+						<Link
+							aria-label="Patreon"
+							href={process.env.NEXT_PUBLIC_PATREON_URL ?? '/'}
+							target="_blank"
+						>
+							<FaPatreon size={25} />
 						</Link>
 						<div id={styles['languages']}>
 							<span>

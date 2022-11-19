@@ -47,29 +47,26 @@ export default function Card({ submission }: CardProps) {
 				)}
 			</span>
 			<Link
+				className="osu-image"
 				href={`https://osu.ppy.sh/beatmapsets/${submission.beatmapset_id}#osu/${submission.id}`}
+				target="_blank"
 			>
-				<a className="osu-image" target="_blank">
-					<Image
-						alt={submission.title}
-						layout="fill"
-						onError={() => setBackground('/cover.png')}
-						priority
-						src={background}
-					/>
-				</a>
+				<Image
+					alt={submission.title}
+					layout="fill"
+					onError={() => setBackground('/cover.png')}
+					priority
+					src={background}
+				/>
 			</Link>
 			<Link
+				className={`${styles['card-title']} ${expanded ? styles['expanded'] : ''}`}
 				href={`https://osu.ppy.sh/beatmapsets/${submission.beatmapset_id}#osu/${submission.id}`}
+				onMouseEnter={() => setExpanded(true)}
+				onMouseLeave={() => setExpanded(false)}
+				target="_blank"
 			>
-				<a
-					className={`${styles['card-title']} ${expanded ? styles['expanded'] : ''}`}
-					onMouseEnter={() => setExpanded(true)}
-					onMouseLeave={() => setExpanded(false)}
-					target="_blank"
-				>
-					{submission.title}
-				</a>
+				{submission.title}
 			</Link>
 			<div className={styles['card-content']}>
 				<button

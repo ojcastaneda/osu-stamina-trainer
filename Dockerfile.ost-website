@@ -1,4 +1,4 @@
-FROM node:alpine AS dependencies
+FROM node:19.1.0-alpine AS dependencies
 
 RUN npm install -g pnpm
 
@@ -6,7 +6,7 @@ WORKDIR /ost-website
 COPY ost-website/package.json ost-website/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-FROM node:alpine AS build
+FROM node:19.1.0-alpine AS build
 
 RUN npm install -g pnpm
 
@@ -15,7 +15,7 @@ COPY --from=dependencies /ost-website/node_modules ./node_modules
 COPY ost-website/ ./
 RUN pnpm run build
 
-FROM node:alpine
+FROM node:19.1.0-alpine
 
 ENV NODE_ENV production
 
