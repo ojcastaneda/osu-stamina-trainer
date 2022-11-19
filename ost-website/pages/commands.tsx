@@ -159,7 +159,7 @@ function BotCommands() {
 								initialValue={beatmapId}
 								size={12}
 								setValue={setBeatmapId}
-								placeholder={t('user_id')}
+								placeholder={t('beatmap_id')}
 							/>
 						</div>
 					</div>
