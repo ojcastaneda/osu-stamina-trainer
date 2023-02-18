@@ -31,7 +31,8 @@ export const br: Readonly<I18nResponse> = {
 		`[${process.env.WEBSITE_URL}/commands Comandos disponíveis (site não disponível em português):] ` +
 		`Solicite um beatmap: "!request [BPM] [filtros]", Analisar beatmap atual: "/np", ` +
 		`Analisar um beatmap: "!check [o id do beatmap]", Listar comandos: "!help [código do idioma]", ` +
-		`Mudar o idioma: "!language [código do idioma]", Listar idiomas: "!languages"]`,
+		`Mudar o idioma: "!language [identificação do usuário] [código do idioma]", Listar idiomas: "!languages"]`,
+	incompleteLanguageUpdate: `Não se esqueça de fornecer tanto a sua identificação de usuário como o código do idioma "!language [identificação do usuário] [código do idioma]"`,
 	languageUpdate: 'Idioma atualizado com sucesso',
 	languageUpdateForbidden: 'A identificação fornecida não corresponde ao seu nome de usuário',
 	loved: 'Loved',
