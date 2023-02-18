@@ -11,6 +11,7 @@ export type I18nResponse = {
 	didYouMean: (suggestion: string) => string;
 	genericHelp: string;
 	help: string;
+	incompleteLanguageUpdate: string;
 	languageUpdate: string;
 	languageUpdateForbidden: string;
 	loved: string;

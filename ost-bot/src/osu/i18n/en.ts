@@ -29,7 +29,8 @@ export const en: Readonly<I18nResponse> = {
 	help:
 		`[${process.env.WEBSITE_URL}/commands Available commands:] Request a beatmap: "!request [BPM] [filters]", ` +
 		`Analyze current beatmap: "/np", Analyze a beatmap: "!check [beatmap's id]", List commands: "!help [language code]", ` +
-		`Change language: "!language [language code]", List languages: "!languages"`,
+		`Change language: "!language [user's id] [language code]", List languages: "!languages"`,
+	incompleteLanguageUpdate: `Don't forget to provide both your user id and the language code "!language [user's id] [language code]"`,
 	languageUpdate: 'Language updated successfully',
 	languageUpdateForbidden: 'The provided id does not match your username',
 	loved: 'Loved',

@@ -10,9 +10,10 @@ import { languages, Languages } from '../osu/formatter';
  * @returns An array with the parsed user id and language code or the guess for the command.
  */
 export function parseLanguage(
-	id: string,
-	language: string
-): [number, Languages] | ['didYouMean', string] {
+	id: string | undefined,
+	language: string | undefined
+): [number, Languages] | ['didYouMean', string] | 'incompleteLanguageUpdate' {
+	if (id === undefined || language === undefined) return 'incompleteLanguageUpdate';
 	let incorrect = false;
 	let parsedLanguage = language;
 	if (languages[language] === undefined) {
@@ -42,11 +43,19 @@ export function parseLanguage(
  * @returns The corresponding i18n properties.
  */
 export async function updateLanguage(
-	id: string,
-	language: string,
+	id: string | undefined,
+	language: string | undefined,
 	username: string
-): Promise<['didYouMean', string] | ['languageUpdate', Languages] | 'languageUpdateForbidden'> {
-	const [parsedId, parsedLanguage] = parseLanguage(id, language);
+): Promise<
+	| ['didYouMean', string]
+	| ['languageUpdate', Languages]
+	| 'incompleteLanguageUpdate'
+	| 'languageUpdateForbidden'
+> {
+	const parsedResult = parseLanguage(id, language);
+	console.log(parsedResult)
+	if (typeof parsedResult === 'string') return parsedResult;
+	const [parsedId, parsedLanguage] = parsedResult;
 	if (typeof parsedId === 'string') return [parsedId, parsedLanguage];
 	const request = await fetch(`${process.env.API_URL}/api/bot/user/${username}`, {
 		method: 'POST',

@@ -30,7 +30,9 @@ export const es: Readonly<I18nResponse> = {
 	help:
 		`[${process.env.WEBSITE_URL}/es/commands Comandos disponibles:] Solicitar un mapa: "!request [BPM] [filtros]", ` +
 		`Analizar mapa actual: "/np", Analizar un mapa: "!check [id del mapa]", Listar comandos: "!help [código de idioma]", ` +
-		`Cambiar idioma: "!language [código de idioma]", Listar idiomas: "!languages"`,
+		`Cambiar idioma: "!language [id de usuario] [código de idioma]", Listar idiomas: "!languages"`,
+	incompleteLanguageUpdate:
+		'No olvide proveer tanto su id de usuario como código de idioma "!language [id de usuario] [código de idioma]"',
 	languageUpdate: 'Lenguaje actualizado exitosamente',
 	languageUpdateForbidden: 'El id suministrado no concuerda con su nombre de usuario',
 	loved: 'Amado',

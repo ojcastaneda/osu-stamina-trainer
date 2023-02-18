@@ -62,17 +62,26 @@ botTest<number>(
 
 botTest(
 	{
-		assertions: Object.keys(languages)
-			.map(
-				(language) =>
-					new Assertion(
-						['didYouMean', `!language 6484647 ${language}`],
-						`!language 6484647 ${language}_`
-					)
-			)
-			.concat(new Assertion(['didYouMean', `!language 6484647 en`], `!language 6484647_ en`)),
+		assertions: Object.keys(languages).map(
+			(language) =>
+				new Assertion(
+					['didYouMean', `!language 6484647 ${language}`],
+					`!language 6484647 ${language}_`
+				)
+		),
 		bot: 'osu!',
 		description: 'Reply to update language command guessing incorrect language and id'
+	},
+	(handleMessage) => handleMessage()
+);
+
+botTest(
+	{
+		assertions: Object.keys(languages).map(
+			(language) => new Assertion('incompleteLanguageUpdate', `!language ${language}`)
+		),
+		bot: 'osu!',
+		description: 'Reply to update language command lacking language and id'
 	},
 	(handleMessage) => handleMessage()
 );
