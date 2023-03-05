@@ -3,7 +3,7 @@ http://ost.sombrax79.org {
 }
 
 https://ost.sombrax79.org {
-	route /api/bot/* {
+	route /api/bot/user/* {
 		respond "Access denied" 403
 	}
 
