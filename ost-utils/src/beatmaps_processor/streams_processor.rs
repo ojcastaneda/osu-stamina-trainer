@@ -1,7 +1,19 @@
-use super::models::{Beatmap, Interval, PredominantBpm, Stream, TimingPoint};
+use rosu_pp::beatmap::TimingPoint;
+
+use super::models::{Beatmap, Interval, PredominantBpm, Stream};
 use std::cmp;
 
-/// Estimates the most common bpm during streams using a weight system
+/// Calculates the BPM of a beatmap.
+///
+/// This function updates the `predominant_bpm` field in the `Beatmap` struct with the new calculated BPM.
+///
+/// # Arguments
+///
+/// * `beatmap` - A mutable reference to a `Beatmap` struct.
+///
+/// # Returns
+///
+/// `bool` - Whether the BPM calculation needs to be executed again.
 fn calculate_bpm(beatmap: &mut Beatmap) -> bool {
     let mut current_weight = 0.0;
     for (bpm, statistics) in beatmap.bpm_frequencies.iter() {
@@ -47,6 +59,14 @@ fn calculate_streams_statistics(beatmap: &mut Beatmap) {
     beatmap.streams_length = streams_length.cbrt().round() as i16
 }
 
+/// Calculates the statistics of the streams in a beatmap.
+///
+/// This function updates the `longest_stream`, `streams_length`,
+/// and `streams_spacing` fields in the `Beatmap` struct with the new calculated statistics.
+///
+/// # Arguments
+///
+/// * `beatmap` - A mutable reference to a `Beatmap` struct.
 fn filter_bpm(beatmap: &mut Beatmap, hit_objects: usize) -> bool {
     let mut intervals = 0;
     let mut recalculate = false;
@@ -72,21 +92,11 @@ fn filter_bpm(beatmap: &mut Beatmap, hit_objects: usize) -> bool {
 /// process a beatmap
 pub fn process_beatmap(parsed_beatmap: &rosu_pp::Beatmap) -> Beatmap {
     let mut beatmap = Beatmap::new(parsed_beatmap.cs);
-    let mut timing_points = Vec::<TimingPoint>::new();
-    for timing_point in &parsed_beatmap.timing_points {
-        if timing_point.beat_len.is_sign_negative() {
-            continue;
-        }
-        timing_points.push(TimingPoint {
-            bpm: (60000.0 / timing_point.beat_len).round(),
-            start_time: timing_point.time,
-        });
-    }
-    process_intervals(&mut beatmap, parsed_beatmap, &timing_points);
+    process_intervals(&mut beatmap, parsed_beatmap);
     while filter_bpm(&mut beatmap, parsed_beatmap.hit_objects.len()) || calculate_bpm(&mut beatmap)
     {
         beatmap.reset();
-        process_intervals(&mut beatmap, parsed_beatmap, &timing_points);
+        process_intervals(&mut beatmap, parsed_beatmap);
     }
     calculate_streams_statistics(&mut beatmap);
     if beatmap.longest_stream > 1 {
@@ -103,42 +113,46 @@ pub fn process_beatmap(parsed_beatmap: &rosu_pp::Beatmap) -> Beatmap {
 }
 
 ///
-fn process_intervals(
-    beatmap: &mut Beatmap,
-    parsed_beatmap: &rosu_pp::Beatmap,
-    timing_points: &[TimingPoint],
-) {
+fn process_intervals(beatmap: &mut Beatmap, parsed_beatmap: &rosu_pp::Beatmap) {
+    let mut previous = None;
     let mut stream = Stream::default();
-    let mut timing_point = 0;
-    let mut hit_objects = parsed_beatmap.hit_objects.iter();
-    let mut first_hit_object = hit_objects.next().unwrap();
-    for hit_object in hit_objects {
-        let interval = Interval::new(first_hit_object, hit_object);
-        first_hit_object = hit_object;
-        if timing_point + 1 < timing_points.len()
-            && interval.start_time >= timing_points[timing_point + 1].start_time
-        {
-            timing_point += 1;
+    for hit_object in parsed_beatmap.hit_objects.iter() {
+        if hit_object.is_spinner() {
+            continue;
         }
-        process_interval(
-            beatmap,
-            &interval,
-            &mut stream,
-            &timing_points[timing_point],
-        );
+        if let Some(previous_hit_object) = previous {
+            let interval = Interval::new(previous_hit_object, hit_object);
+            process_interval(
+                beatmap,
+                &interval,
+                &mut stream,
+                &parsed_beatmap.timing_point_at(previous_hit_object.start_time),
+            );
+        }
+        previous = Some(hit_object);
     }
     terminate_stream(beatmap, &mut stream);
 }
 
+/// Processes a given interval.
+///
+/// # Arguments
+///
+/// * `beatmap` - A mutable reference to the Beatmap object.
+/// * `interval` - A reference to the Interval object to be processed.
+/// * `stream` - A mutable reference to the Stream object.
+/// * `timing_point` - A reference to the TimingPoint object.
+/// ```
 fn process_interval(
     beatmap: &mut Beatmap,
     interval: &Interval,
     stream: &mut Stream,
     timing_point: &TimingPoint,
 ) {
-    let division = (interval.bpm / timing_point.bpm).round();
+    let timing_point_bpm = (60000.0 / timing_point.beat_len).round();
+    let division = (interval.bpm / timing_point_bpm).round();
     if division >= 3.0 {
-        let bpm = (timing_point.bpm * division / 4.0).round() as i16;
+        let bpm = (timing_point_bpm * division / 4.0).round() as i16;
         let spacing = interval.spacing / (54.4 - 4.48 * beatmap.circle_size);
         if beatmap.skipped_bpms.contains(&bpm) || spacing > 4.0 {
             beatmap.update_bpm_frequencies(1, bpm, false);
@@ -157,6 +171,7 @@ fn process_interval(
     terminate_stream(beatmap, stream);
 }
 
+/// Terminates a Stream object and updates the corresponding Beatmap.
 fn terminate_stream(beatmap: &mut Beatmap, stream: &mut Stream) {
     match stream.length {
         0 => return,

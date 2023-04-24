@@ -6,13 +6,13 @@ edition = "2021"
 [dependencies]
 dotenv = "0.15.0"
 ost-utils = { path = "../ost-utils" }
-reqwest = "0.11.11"
-rosu-pp = { version = "0.8.0", features = ["async_tokio"] }
-sqlx = { version = "0.6.1", features = [
+reqwest = "0.11.16"
+rosu-pp = { version = "0.9.4", features = ["async_tokio"] }
+sqlx = { version = "0.6.3", features = [
     "chrono",
     "postgres",
     "runtime-tokio-rustls",
 ] }
-tokio = { version = "1.21.1", features = ["full"] }
-tracing = "0.1.36"
-tracing-subscriber = "0.3.15"
+tokio = { version = "1.27.0", features = ["full"] }
+tracing = "0.1.37"
+tracing-subscriber = "0.3.17"

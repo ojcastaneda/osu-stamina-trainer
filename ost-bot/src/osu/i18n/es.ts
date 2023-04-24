@@ -1,4 +1,4 @@
-import { Beatmap } from '../../models';
+import { Beatmap, parseStreamsLength } from '../../models';
 import { availableLanguages, formatLength, genericHelp, I18nResponse } from '../models';
 
 /**
@@ -16,13 +16,16 @@ export const es: Readonly<I18nResponse> = {
 		}` +
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
 		`${es[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
-		`Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
+		`Longitud de streams: ${beatmap.streams_length} (${beatmap.longest_stream}) [${
+			es[parseStreamsLength(beatmap.streams_length)]
+		}] | ` +
 		`Densidad de streams: ${beatmap.streams_density} | Espaciado de streams: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
 		`CS: ${beatmap.circle_size} | Duración: ${formatLength(beatmap.length)} | ` +
 		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
-	unexpectedError: `El bot falló inesperadamente, por favor reporte este error vía [${process.env.DISCORD_URL} Discord]`,
+	bursts: 'Bursts',
 	commandNotFount: `No se detectó ningún comando, escriba [${process.env.WEBSITE_URL}/es/commands !help es] para ver los comandos disponibles`,
+	deathstreams: 'Deathstreams',
 	didYouMean: (suggestion: string) =>
 		`El comando detectado es incorrecto, quiso decir "${suggestion}"? ` +
 		`Esta sugerencia puede no ser precisa si se usan espacios innecesarios ya que los espacios son usados para detectar filtros`,
@@ -39,5 +42,7 @@ export const es: Readonly<I18nResponse> = {
 	ranked: 'Clasificado',
 	requestNotFound:
 		'No se encontraron mapas que coincidan con los filtros suministrados, reduzca el número de filtros o cambie sus valores',
+	streams: 'Streams',
+	unexpectedError: `El bot falló inesperadamente, por favor reporte este error vía [${process.env.DISCORD_URL} Discord]`,
 	unranked: 'No clasificado'
 };

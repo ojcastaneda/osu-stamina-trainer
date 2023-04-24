@@ -1,9 +1,12 @@
 use rosu_pp::ParseError;
 use std::{error, fmt, num::ParseIntError};
 
+/// Represents the different types of errors that can occur while processing.
 #[derive(Debug)]
 pub enum Error {
+    /// An error that occurs when parsing a beatmap.
     ParseBeatmap(ParseError),
+    /// An error that occurs when parsing an integer value.
     ParseInt(ParseIntError),
 }
 

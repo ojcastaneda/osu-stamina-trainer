@@ -87,6 +87,11 @@ export type Operator = 'exact' | 'maximum' | 'minimum';
 export type RankedStatus = 'loved' | 'ranked' | 'unranked';
 
 /**
+ * Values for streams length.
+ */
+export type StreamsLength = 'bursts' | 'streams' | 'deathstreams';
+
+/**
  * Response from the server for beatmap request or beatmaps analysis.
  */
 export type Beatmap = {
@@ -195,6 +200,12 @@ export const numericFilters: Record<NumericProperty, NumericFilter> = {
 	stars: new NumericFilter('difficulty_rating', 0.25, 4),
 	year: new NumericFilter('last_updated', 0, 2018)
 };
+
+export function parseStreamsLength(streams_length: number): StreamsLength {
+	if (streams_length < 9) return 'bursts';
+	else if (streams_length < 25) return 'streams';
+	return 'deathstreams';
+}
 
 /**
  * Format a message to log to the console.

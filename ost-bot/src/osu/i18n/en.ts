@@ -1,4 +1,4 @@
-import { Beatmap } from '../../models';
+import { Beatmap, parseStreamsLength } from '../../models';
 import { availableLanguages, formatLength, genericHelp, I18nResponse } from '../models';
 
 /**
@@ -16,12 +16,16 @@ export const en: Readonly<I18nResponse> = {
 		}` +
 		`[https://osu.ppy.sh/b/${beatmap.id} ${beatmap.title}]${modification} ` +
 		`${en[beatmap.ranked_status]} | BPM: ${beatmap.bpm} | ` +
-		`Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) | ` +
+		`Streams length: ${beatmap.streams_length} (${beatmap.longest_stream}) [${
+			en[parseStreamsLength(beatmap.streams_length)]
+		}] | ` +
 		`Streams density: ${beatmap.streams_density} | Streams spacing: ${beatmap.streams_spacing} | ` +
 		`${beatmap.difficulty_rating} ★ | AR: ${beatmap.approach_rate} | OD: ${beatmap.accuracy} | ` +
 		`CS: ${beatmap.circle_size} | Duration: ${formatLength(beatmap.length)} | ` +
 		`95%: ${beatmap.performance_95}PP | 100%: ${beatmap.performance_100}PP`,
+	bursts: 'Bursts',
 	commandNotFount: `No command was detected, type [${process.env.WEBSITE_URL}/commands !help en] to see the available commands`,
+	deathstreams: 'Deathstreams',
 	didYouMean: (suggestion: string) =>
 		`The detected command is incorrect, did you mean "${suggestion}"? ` +
 		`This suggestion may not be accurate with unnecessary spaces as spaces are used to detect filters`,
@@ -37,6 +41,7 @@ export const en: Readonly<I18nResponse> = {
 	ranked: 'Ranked',
 	requestNotFound:
 		'No beatmaps found that match the provided filters, reduce the number of filters or change their values',
+	streams: 'Streams',
 	unexpectedError: `The bot failed unexpectedly, please report this error via [${process.env.DISCORD_URL} Discord]`,
 	unranked: 'Unranked'
 };

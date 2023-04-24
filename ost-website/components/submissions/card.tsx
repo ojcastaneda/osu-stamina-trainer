@@ -53,7 +53,7 @@ export default function Card({ submission }: CardProps) {
 			>
 				<Image
 					alt={submission.title}
-					layout="fill"
+					fill
 					onError={() => setBackground('/cover.png')}
 					priority
 					src={background}

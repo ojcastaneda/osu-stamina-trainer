@@ -43,8 +43,8 @@ pub async fn generate_osdb(
 fn write_beatmaps(beatmaps: Vec<CollectionBeatmap>, buffer: &mut Vec<u8>) {
     buffer.extend_from_slice((beatmaps.len() as i32).to_le_bytes().as_slice());
     for beatmap in beatmaps {
-        buffer.extend_from_slice((beatmap.id as i32).to_le_bytes().as_slice());
-        buffer.extend_from_slice((beatmap.beatmapset_id as i32).to_le_bytes().as_slice());
+        buffer.extend_from_slice((beatmap.id).to_le_bytes().as_slice());
+        buffer.extend_from_slice((beatmap.beatmapset_id).to_le_bytes().as_slice());
         write_string(buffer, &beatmap.checksum);
         buffer.push(0_u8);
         buffer.push(1_u8);

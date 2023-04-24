@@ -34,8 +34,8 @@ function BotCommands() {
 		[Property.bpm]: new Filter(Operator.default, [180, 0])
 	});
 	const [request, setRequest] = useState('');
-	const [userId, setUserId] = useState(0);
-	const [beatmapId, setBeatmapId] = useState(0);
+	const [userId, setUserId] = useState(6484647);
+	const [beatmapId, setBeatmapId] = useState(2766688);
 	const [language, setLanguage] = useState('en');
 	const [useShort, setUseShort] = useState(false);
 	const [modification, setModification] = useState(Modification.NoMod);
@@ -155,12 +155,7 @@ function BotCommands() {
 									<FaCopy />
 								</button>
 							</div>
-							<NumericInput
-								initialValue={beatmapId}
-								size={12}
-								setValue={setBeatmapId}
-								placeholder={t('beatmap_id')}
-							/>
+							<NumericInput size={12} setValue={setBeatmapId} placeholder={t('beatmap_id')} />
 						</div>
 					</div>
 				</section>
@@ -186,12 +181,7 @@ function BotCommands() {
 									<FaCopy />
 								</button>
 							</div>
-							<NumericInput
-								initialValue={userId}
-								size={12}
-								setValue={setUserId}
-								placeholder={t('user_id')}
-							/>
+							<NumericInput size={12} setValue={setUserId} placeholder={t('user_id')} />
 							<div>
 								<select onChange={({ target }) => target.value && setLanguage(target.value)}>
 									<option value="">{t('language', { ns: 'common' })}</option>

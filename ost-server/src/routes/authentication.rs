@@ -1,14 +1,14 @@
 use crate::{models::moderator, Error, ServerResult};
 use axum::{
     async_trait,
-    extract::{FromRequest, RequestParts},
+    extract::FromRequestParts,
     headers::Cookie,
-    http::{header::SET_COOKIE, HeaderMap, HeaderValue, StatusCode},
+    http::{header::SET_COOKIE, request::Parts, HeaderMap, HeaderValue, StatusCode},
     response::IntoResponse,
     routing::{delete, post},
     Extension, Json, Router, TypedHeader,
 };
-use base64::encode;
+use base64::engine::{general_purpose::STANDARD, Engine as _};
 use rand_core::{OsRng, RngCore};
 use redis::{aio::ConnectionManager, AsyncCommands};
 use serde::Deserialize;
@@ -29,15 +29,16 @@ pub struct Session {
 }
 
 #[async_trait]
-impl<R> FromRequest<R> for Session
+impl<S> FromRequestParts<S> for Session
 where
-    R: Send,
+    S: Send + Sync,
 {
     type Rejection = Error;
 
-    async fn from_request(request: &mut RequestParts<R>) -> Result<Self, Self::Rejection> {
-        let Extension(mut cache) = Extension::<ConnectionManager>::from_request(request).await?;
-        let cookies = TypedHeader::<Cookie>::from_request(request)
+    async fn from_request_parts(request: &mut Parts, state: &S) -> Result<Self, Self::Rejection> {
+        let Extension(mut cache) =
+            Extension::<ConnectionManager>::from_request_parts(request, state).await?;
+        let cookies = TypedHeader::<Cookie>::from_request_parts(request, state)
             .await
             .map_err(|_| Error::Authorization)?;
         let cookie = cookies.get(SESSION_COOKIE).ok_or(Error::Authorization)?;
@@ -59,7 +60,7 @@ async fn create_session(
 ) -> ServerResult<()> {
     let mut session_bytes = Vec::from([0u8; 64]);
     OsRng.fill_bytes(&mut session_bytes);
-    let session = encode(session_bytes);
+    let session = STANDARD.encode(session_bytes);
     let cookie = format!("{SESSION_COOKIE}={session}; SameSite=Strict; Path=/");
     cache.set_ex(session, id, SESSION_CACHE_EXPIRATION).await?;
     headers.insert(SET_COOKIE, HeaderValue::from_str(&cookie)?);
@@ -72,7 +73,8 @@ async fn login(
     Json(payload): Json<AuthenticationCredentials>,
 ) -> ServerResult<impl IntoResponse> {
     if let Some(moderator) =
-        moderator::retrieve_from_credentials(&database, payload.password, payload.username).await?
+        moderator::retrieve_from_credentials(&database, &payload.password, &payload.username)
+            .await?
     {
         let mut headers = HeaderMap::new();
         create_session(&mut cache, &mut headers, moderator.id).await?;

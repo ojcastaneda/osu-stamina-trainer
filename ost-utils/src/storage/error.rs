@@ -1,17 +1,24 @@
 use aws_sdk_s3::{
-    error::{DeleteObjectError, GetObjectError, PutObjectError},
-    types::SdkError,
+    operation::delete_object::DeleteObjectError, operation::get_object::GetObjectError,
+    operation::put_object::PutObjectError,
 };
-use aws_smithy_http::byte_stream;
+use aws_smithy_http::{byte_stream, result::SdkError};
 use std::{env::VarError, error, fmt};
 
+/// Represents the different types of errors that can occur while using the `Client`.
 #[derive(Debug)]
 pub enum Error {
-    ByteStream(byte_stream::Error),
+    /// An error related to creating a `ByteStream` for a request body.
+    ByteStream(byte_stream::error::Error),
+    /// An error related to deleting an object from the S3 bucket.
     DeleteObject(String),
+    /// An error related to retrieving an object from the S3 bucket.
     GetObject(String),
+    /// An error related to uploading an object to the S3 bucket.
     PutObject(String),
+    /// An error related to serializing or deserializing JSON data.
     SerdeJson(serde_json::Error),
+    /// An error related to accessing an environment variable.
     Var(VarError),
 }
 
@@ -30,8 +37,8 @@ impl fmt::Display for Error {
     }
 }
 
-impl From<byte_stream::Error> for Error {
-    fn from(error: byte_stream::Error) -> Self {
+impl From<byte_stream::error::Error> for Error {
+    fn from(error: byte_stream::error::Error) -> Self {
         Self::ByteStream(error)
     }
 }

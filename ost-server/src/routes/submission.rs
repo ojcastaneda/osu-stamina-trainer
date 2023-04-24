@@ -69,9 +69,9 @@ async fn remove(
 
 async fn retrieve_by_page(
     Extension(database): Extension<Pool<Postgres>>,
-    Json(payload): Json<SubmissionsByPageFilters>,
     Path(page): Path<i32>,
     _: Session,
+    Json(payload): Json<SubmissionsByPageFilters>,
 ) -> ServerResult<impl IntoResponse> {
     Ok((
         StatusCode::OK,
