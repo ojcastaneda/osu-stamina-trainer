@@ -53,7 +53,6 @@ export async function updateLanguage(
 	| 'languageUpdateForbidden'
 > {
 	const parsedResult = parseLanguage(id, language);
-	console.log(parsedResult);
 	if (typeof parsedResult === 'string') return parsedResult;
 	const [parsedId, parsedLanguage] = parsedResult;
 	if (typeof parsedId === 'string') return [parsedId, parsedLanguage];
