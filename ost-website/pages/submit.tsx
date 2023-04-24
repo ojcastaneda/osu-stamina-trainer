@@ -77,7 +77,7 @@ function SubmitBeatmaps() {
 				<div className="osu-image">
 					<Image
 						alt={background}
-						layout="fill"
+						fill
 						onError={() => setBackground('/cover.png')}
 						priority
 						src={background}

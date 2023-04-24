@@ -157,13 +157,7 @@ function Filter({ filter, property, setFilter }: FilterProps) {
 		}
 		switch (filter.operator) {
 			case Operator.default:
-				newInputs.push(
-					<NumericInput
-						initialValue={filter.value[0]}
-						setValue={changeValue}
-						placeholder={t('default')}
-					/>
-				);
+				newInputs.push(<NumericInput setValue={changeValue} placeholder={t('default')} />);
 				newInputs.push(
 					<input
 						aria-label={t('default_range')}
@@ -175,37 +169,15 @@ function Filter({ filter, property, setFilter }: FilterProps) {
 				);
 				return setInputs(newInputs);
 			case Operator.maximum:
-				newInputs.push(
-					<NumericInput
-						initialValue={filter.value[0]}
-						setValue={changeValue}
-						placeholder={t('maximum')}
-					/>
-				);
+				newInputs.push(<NumericInput setValue={changeValue} placeholder={t('maximum')} />);
 				return setInputs(newInputs);
 			case Operator.minimum:
-				newInputs.push(
-					<NumericInput
-						initialValue={filter.value[0]}
-						setValue={changeValue}
-						placeholder={t('minimum')}
-					/>
-				);
+				newInputs.push(<NumericInput setValue={changeValue} placeholder={t('minimum')} />);
 				return setInputs(newInputs);
 			case Operator.range:
+				newInputs.push(<NumericInput setValue={changeValue} placeholder={t('minimum')} />);
 				newInputs.push(
-					<NumericInput
-						initialValue={filter.value[0]}
-						setValue={changeValue}
-						placeholder={t('minimum')}
-					/>
-				);
-				newInputs.push(
-					<NumericInput
-						initialValue={filter.value[1]}
-						setValue={(value) => changeValue(value, 1)}
-						placeholder={t('maximum')}
-					/>
+					<NumericInput setValue={(value) => changeValue(value, 1)} placeholder={t('maximum')} />
 				);
 				return setInputs(newInputs);
 		}
@@ -249,13 +221,7 @@ function Filter({ filter, property, setFilter }: FilterProps) {
 				);
 				break;
 			default:
-				newInputs.push(
-					<NumericInput
-						initialValue={filter.value[0]}
-						setValue={changeValue}
-						placeholder={t('exact')}
-					/>
-				);
+				newInputs.push(<NumericInput setValue={changeValue} placeholder={t('exact')} />);
 				break;
 		}
 		setInputs(newInputs);

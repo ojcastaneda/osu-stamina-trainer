@@ -9,7 +9,7 @@ use tasks::{
     setup::{setup_files, update_collection},
     Services,
 };
-use tokio::time::sleep;
+use tokio::{fs::create_dir_all, time::sleep};
 use tracing_subscriber::{
     filter::filter_fn, prelude::__tracing_subscriber_SubscriberExt, util::SubscriberInitExt, Layer,
 };
@@ -33,7 +33,11 @@ async fn main() -> TaskResult<()> {
                 })),
         )
         .init();
-    if env::var("PERIODIC")?.parse()? {
+    create_dir_all("./beatmaps").await?;
+    if env::var("PERIODIC")
+        .unwrap_or_else(|_| String::from("false"))
+        .parse()?
+    {
         let starting_time = Instant::now();
         loop {
             let current_time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis() as i64;

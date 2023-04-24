@@ -4,10 +4,9 @@ pub mod models;
 use self::models::{
     Beatmap, Beatmaps, Beatmapset, Credentials, Headers, LeaderboardBeatmapsets, Token, User,
 };
-use base64::encode;
+use base64::engine::{general_purpose::STANDARD, Engine as _};
 use chrono::Utc;
 use std::{
-    cmp::{max, min},
     collections::VecDeque,
     env,
     fmt::Display,
@@ -67,9 +66,9 @@ impl Client {
     }
 
     pub fn from_environment(requests_per_minute: usize) -> Result<Self, Error> {
-        let requests_rate = max(min(requests_per_minute, 1000), 1);
+        let requests_rate = requests_per_minute.clamp(1, 1000);
         let mut request_queue = VecDeque::<Instant>::with_capacity(requests_rate);
-        let starting_instant = Instant::now() - Duration::from_secs(60);
+        let starting_instant = Instant::now().checked_sub(Duration::from_secs(60)).unwrap();
         for _ in 0..requests_rate {
             request_queue.push_front(starting_instant);
         }
@@ -190,7 +189,7 @@ impl Client {
         if approved_date >= limit_date {
             return Ok((Vec::new(), approved_date, id));
         }
-        let cursor_string = encode(format!(
+        let cursor_string = STANDARD.encode(format!(
             r#"{{"approved_date":"{approved_date}","id":"{id}"}}"#
         ));
         self.request_permit().await?;

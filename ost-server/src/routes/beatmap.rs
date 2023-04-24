@@ -27,8 +27,8 @@ pub struct BeatmapsCollectionFilters {
 
 async fn retrieve_by_page(
     Extension(database): Extension<Pool<Postgres>>,
-    Json(payload): Json<BeatmapsByPageFilters>,
     Path(page): Path<i32>,
+    Json(payload): Json<BeatmapsByPageFilters>,
 ) -> ServerResult<impl IntoResponse> {
     Ok((
         StatusCode::OK,

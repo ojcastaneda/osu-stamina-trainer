@@ -22,22 +22,24 @@ use tracing_subscriber::{
 use crate::models::moderator;
 
 pub type Error = error::Error;
+
+pub type GenericResult = Result<(), Box<dyn std::error::Error>>;
 pub type ServerResult<T> = Result<T, Error>;
 
 #[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
+async fn main() -> GenericResult {
     dotenv().ok();
     let database = PgPoolOptions::new()
         .connect(&env::var("DATABASE_URL")?)
         .await?;
     if moderator::retrieve(&database, 1).await?.is_some() {
-        moderator::update_username(&database, 1, env::var("BASE_USERNAME")?).await?;
-        moderator::update_password(&database, 1, env::var("BASE_PASSWORD")?).await?;
+        moderator::update_username(&database, 1, &env::var("BASE_USERNAME")?).await?;
+        moderator::update_password(&database, 1, &env::var("BASE_PASSWORD")?).await?;
     } else {
         moderator::create(
             &database,
-            env::var("BASE_PASSWORD")?,
-            env::var("BASE_USERNAME")?,
+            &env::var("BASE_PASSWORD")?,
+            &env::var("BASE_USERNAME")?,
         )
         .await?;
     }

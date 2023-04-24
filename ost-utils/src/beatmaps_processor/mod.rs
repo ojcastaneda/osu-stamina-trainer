@@ -58,7 +58,9 @@ pub async fn process_beatmap(file: &[u8]) -> Result<Beatmap, Error> {
         || beatmap_file.hit_objects.len() < 2
         || beatmap_file.timing_points.is_empty()
     {
-        return Err(Error::ParseBeatmap(rosu_pp::ParseError::InvalidMode));
+        return Err(Error::ParseBeatmap(
+            rosu_pp::ParseError::IncorrectFileHeader,
+        ));
     }
     let (double_time, no_modification) = (
         OsuPP::new(&beatmap_file)

@@ -1,23 +1,32 @@
 use rosu_pp::parse::HitObject;
 use std::collections::{HashMap, HashSet};
 
-/// Represents the information required to process a beatmap with the streams
-/// processor.
+/// A struct representing a beatmap.
 pub struct Beatmap {
+    /// The BPM frequencies for each BPM in the beatmap
     pub bpm_frequencies: HashMap<i16, BpmFrequency>,
+    /// The circle size of the beatmap
     pub circle_size: f64,
+    /// The length of the longest stream in the beatmap
     pub longest_stream: i16,
+    /// The predominant BPM of the beatmap
     pub predominant_bpm: PredominantBpm,
+    /// The BPMs that were skipped when processing the beatmap
     pub skipped_bpms: HashSet<i16>,
+    /// The streams in the beatmap
     pub streams: Vec<Stream>,
+    /// The density of streams in the beatmap
     pub streams_density: f64,
+    /// The total length of streams in the beatmap
     pub streams_length: i16,
+    /// The total spacing between streams in the beatmap
     pub streams_spacing: f64,
+    /// The total length of the beatmap
     pub total_length: i16,
 }
 
 impl Beatmap {
-    /// Constructs a new beatmap with default values.
+    /// Creates a new [`Beatmap`] with the specified circle size
     pub fn new(cs: f32) -> Self {
         Self {
             bpm_frequencies: HashMap::new(),
@@ -33,6 +42,7 @@ impl Beatmap {
         }
     }
 
+    /// Resets all data in the [`Beatmap`] to its default values
     pub fn reset(&mut self) {
         self.bpm_frequencies = HashMap::new();
         self.longest_stream = 0;
@@ -43,6 +53,7 @@ impl Beatmap {
         self.streams_spacing = 0.0;
     }
 
+    /// Updates the `bpm_frequencies` in the [`Beatmap`] based on whether the frequency is from a stream or not
     pub fn update_bpm_frequencies(&mut self, added_frequency: i16, bpm: i16, is_stream: bool) {
         self.bpm_frequencies.insert(
             bpm,
@@ -61,15 +72,21 @@ impl Beatmap {
     }
 }
 
+/// A struct representing a Stream in the [`Beatmap`]
 #[derive(Clone, Default)]
 pub struct Stream {
+    /// A HashMap that contains the BPM frequencies of the stream
     pub bpm_frequencies: HashMap<i16, i16>,
+    /// The last interval of the stream
     pub last_interval: i16,
+    /// The length of the stream
     pub length: i16,
+    /// The total spacing of the stream
     pub spacing: f64,
 }
 
 impl Stream {
+    /// Adds the BPM frequency and spacing to the [`Stream`]
     pub fn add_bpm_frequencies(&mut self, bpm: i16, spacing: f64) {
         self.bpm_frequencies
             .insert(bpm, self.bpm_frequencies.get(&bpm).unwrap_or(&0) + 1);
@@ -78,6 +95,7 @@ impl Stream {
         self.spacing += spacing;
     }
 
+    /// Resets the state of the [`Stream`]
     pub fn reset(&mut self) {
         self.bpm_frequencies = HashMap::default();
         self.length = 0;
@@ -86,32 +104,41 @@ impl Stream {
     }
 }
 
+/// A struct representing an interval in a [`Beatmap`], defined by the BPM,
+/// start time, end time, and spacing between two [`HitObject`]s.
 pub struct Interval {
+    /// The BPM value for the interval
     pub bpm: f64,
+    /// The end time of the interval, in milliseconds
     pub end_time: f64,
+    /// The spacing between the two `HitObject`s that define the interval, in pixels
     pub spacing: f64,
+    /// The start time of the interval, in milliseconds
     pub start_time: f64,
 }
 
 impl Interval {
-    pub fn new(first_hit_object: &HitObject, second_hit_object: &HitObject) -> Self {
-        let x_distance = (first_hit_object.pos.x - second_hit_object.pos.x) as f64;
-        let y_distance = (first_hit_object.pos.y - second_hit_object.pos.y) as f64;
+    /// Creates a new [`Interval`] instance based on two [`HitObject`]s.
+    pub fn new(first: &HitObject, second: &HitObject) -> Self {
         Self {
-            bpm: 60000.0 / (second_hit_object.start_time - first_hit_object.start_time),
-            end_time: second_hit_object.start_time,
-            spacing: ((x_distance.powi(2) + y_distance.powi(2)).sqrt() * 100.0).round() / 100.0,
-            start_time: first_hit_object.start_time,
+            bpm: 60000.0 / (second.start_time - first.start_time),
+            end_time: second.start_time,
+            spacing: second.pos.distance(first.pos) as f64,
+            start_time: first.start_time,
         }
     }
 }
 
+/// A struct representing a frequency of BPM in a beatmap, divided into two categories: non-streams and streams.
 pub struct BpmFrequency {
+    /// The frequency of BPM in non-streams
     pub non_streams: i16,
+    /// The frequency of BPM in streams
     pub streams: i16,
 }
 
 impl BpmFrequency {
+    /// Creates a new [`BpmFrequency`] instance with the given non-streams and streams frequency values.
     pub fn new(non_streams: i16, streams: i16) -> Self {
         Self {
             non_streams,
@@ -120,18 +147,17 @@ impl BpmFrequency {
     }
 }
 
+/// A struct representing the predominant BPM (beats per minute) in a beatmap.
 pub struct PredominantBpm {
+    /// The BPM value
     pub bpm: i16,
+    /// The frequency at which the BPM occurs
     pub frequency: i16,
 }
 
 impl PredominantBpm {
+    /// Creates a new [`PredominantBpm`] instance with the given BPM and frequency values.
     pub fn new(bpm: i16, frequency: i16) -> Self {
         Self { bpm, frequency }
     }
-}
-
-pub struct TimingPoint {
-    pub bpm: f64,
-    pub start_time: f64,
 }

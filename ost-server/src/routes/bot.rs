@@ -27,8 +27,8 @@ const TRACKING_CACHE_EXPIRATION: usize = 86_400;
 
 async fn request_beatmap(
     Extension(database): Extension<Pool<Postgres>>,
-    Json(payload): Json<Vec<Filter>>,
     Query(parameters): Query<HashMap<String, String>>,
+    Json(payload): Json<Vec<Filter>>,
 ) -> ServerResult<impl IntoResponse> {
     if let Some(beatmap) = beatmap::retrieve_request(
         &database,
@@ -111,7 +111,7 @@ async fn retrieve_language(
     Extension(mut osu_api): Extension<osu_api::Client>,
     Path(username): Path<String>,
 ) -> ServerResult<impl IntoResponse> {
-    let date = Utc::now().date();
+    let date = Utc::now().date_naive();
     let date_id = (date.year() * 10000) + (date.month() as i32 * 100) + date.day() as i32;
     track_activity(&mut cache, &database, date_id, username.clone()).await?;
     if let Ok(language) = cache.get::<String, String>(username.clone()).await {
@@ -162,8 +162,8 @@ async fn update_language(
     Extension(mut cache): Extension<ConnectionManager>,
     Extension(database): Extension<Pool<Postgres>>,
     Extension(mut osu_api): Extension<osu_api::Client>,
-    Json(payload): Json<UserLanguage>,
     Path(username): Path<String>,
+    Json(payload): Json<UserLanguage>,
 ) -> ServerResult<impl IntoResponse> {
     if let Some(user) = osu_api.retrieve_user(payload.id, false).await? {
         let new_username = user.username.replace(' ', "_");

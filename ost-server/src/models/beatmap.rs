@@ -147,17 +147,17 @@ pub async fn retrieve_request(
     filters: &[Filter],
     use_double_time: bool,
 ) -> ServerResult<Option<Beatmap>> {
-    let table = if use_double_time {
-        "double_time_beatmaps"
-    } else {
-        "beatmaps"
-    };
     let beatmap_sql = format!(
         r#"SELECT accuracy, approach_rate, bpm, circle_size, difficulty_rating,
                 id, last_updated, length, longest_stream, performance_100,
                 performance_95, ranked_status, streams_density, streams_length,
                 streams_spacing, title
-            FROM {table} {} ORDER BY random() LIMIT 1"#,
+            FROM {} {} ORDER BY random() LIMIT 1"#,
+        if use_double_time {
+            "double_time_beatmaps"
+        } else {
+            "beatmaps"
+        },
         Filter::parse_multiple(filters, false)
     );
     let mut beatmap = query_as::<_, Beatmap>(&beatmap_sql);
@@ -166,6 +166,3 @@ pub async fn retrieve_request(
     }
     Ok(beatmap.fetch_optional(database).await?)
 }
-
-#[cfg(test)]
-mod tests {}

@@ -14,10 +14,10 @@ struct Moderator {
 
 async fn create(
     Extension(database): Extension<Pool<Postgres>>,
-    Json(payload): Json<Moderator>,
     _: Session,
+    Json(payload): Json<Moderator>,
 ) -> ServerResult<impl IntoResponse> {
-    moderator::create(&database, payload.password, payload.username).await?;
+    moderator::create(&database, &payload.password, &payload.username).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -28,10 +28,10 @@ struct Credentials {
 
 async fn update_password(
     Extension(database): Extension<Pool<Postgres>>,
-    Json(payload): Json<Credentials>,
     session: Session,
+    Json(payload): Json<Credentials>,
 ) -> ServerResult<impl IntoResponse> {
-    if moderator::update_password(&database, session.id, payload.credentials).await? {
+    if moderator::update_password(&database, session.id, &payload.credentials).await? {
         Ok(StatusCode::NO_CONTENT)
     } else {
         Ok(StatusCode::NOT_FOUND)
@@ -40,10 +40,10 @@ async fn update_password(
 
 async fn update_username(
     Extension(database): Extension<Pool<Postgres>>,
-    Json(payload): Json<Credentials>,
     session: Session,
+    Json(payload): Json<Credentials>,
 ) -> ServerResult<impl IntoResponse> {
-    if moderator::update_username(&database, session.id, payload.credentials).await? {
+    if moderator::update_username(&database, session.id, &payload.credentials).await? {
         Ok(StatusCode::NO_CONTENT)
     } else {
         Ok(StatusCode::NOT_FOUND)

@@ -12,7 +12,7 @@ use sqlx::{
 pub struct Filter {
     pub operator: Operator,
     pub property: Property,
-    value: Value,
+    pub value: Value,
 }
 
 impl Filter {

@@ -1,4 +1,5 @@
-import { type Beatmap, RankedStatus } from '@models/beatmap';
+import { type Beatmap, RankedStatus, parseStreamsLength } from '@models/beatmap';
+import { AverageType } from '@models/botFilter';
 import styles from '@styles/components/beatmaps/card.module.scss';
 import { useState } from 'react';
 import Image from 'next/image';
@@ -45,7 +46,7 @@ export default function Card({ beatmap }: CardProps) {
 			>
 				<Image
 					alt={beatmap.title}
-					layout="fill"
+					fill
 					onError={() => setBackgound('/cover.png')}
 					priority
 					src={background}
@@ -111,6 +112,9 @@ export default function Card({ beatmap }: CardProps) {
 					<div className={styles['card-performance']}>
 						<div>100%: {beatmap.performance_100}PP</div>
 						<div>95%: {beatmap.performance_95}PP</div>
+					</div>
+					<div className={styles['card-streams-type']}>
+						{t(AverageType[parseStreamsLength(beatmap.streams_length)])}
 					</div>
 				</>
 			)}

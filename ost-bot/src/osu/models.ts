@@ -7,7 +7,9 @@ export type I18nResponse = {
 	analysisNotFound: string;
 	availableLanguages: string;
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) => string;
+	bursts: string;
 	commandNotFount: string;
+	deathstreams: string;
 	didYouMean: (suggestion: string) => string;
 	genericHelp: string;
 	help: string;
@@ -17,6 +19,7 @@ export type I18nResponse = {
 	loved: string;
 	ranked: string;
 	requestNotFound: string;
+	streams: string;
 	unexpectedError: string;
 	unranked: string;
 };

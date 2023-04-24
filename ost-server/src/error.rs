@@ -37,8 +37,7 @@ impl fmt::Display for Error {
             Self::Database(database) => database.fmt(formatter),
             Self::DynamicFilter(filter) => write!(
                 formatter,
-                "Incorrect data type for filter with property {:?}",
-                filter
+                "Incorrect data type for filter with property {filter:?}"
             ),
             Self::Extension(extension) => extension.fmt(formatter),
             Self::FileStorage(storage) => storage.fmt(formatter),

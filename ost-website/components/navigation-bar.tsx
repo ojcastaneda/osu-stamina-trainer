@@ -110,7 +110,7 @@ export default function NavigationBar({ activeSession }: NavigationBarProps) {
 						</div>
 						<button id={styles['theme-button']} onClick={switchTheme}>
 							<div>{darkTheme === 'dark' ? <FaMoon size={20} /> : <FaSun size={20} />}</div>
-							<div>Theme</div>
+							<div>{t('theme')}</div>
 						</button>
 					</div>
 				</div>

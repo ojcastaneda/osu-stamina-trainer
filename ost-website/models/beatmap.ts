@@ -162,6 +162,12 @@ export function parseQuery(filters: Filters): Filter[] {
 	return parsedFilters;
 }
 
+export function parseStreamsLength(streams_length: number): AverageType {
+	if (streams_length < 9) return AverageType.bursts;
+	else if (streams_length < 25) return AverageType.streams;
+	return AverageType.deathstreams;
+}
+
 function parseAverageType(type: AverageType): Filter[] {
 	if (type === AverageType.streams) {
 		return [
