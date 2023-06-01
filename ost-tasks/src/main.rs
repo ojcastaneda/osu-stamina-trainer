@@ -46,10 +46,13 @@ async fn main() -> TaskResult<()> {
             add_beatmaps(current_time, services.clone()).await?;
             check_submissions(services.clone()).await?;
             process_submissions(services).await?;
+            let sleep_duration = Duration::from_secs(86_000);
             sleep(
-                Duration::from_secs(
-                    86_000 - Instant::now().duration_since(starting_time).as_secs() % 86_000,
-                ) - starting_time.elapsed(),
+                if let Some(remaining_time) = sleep_duration.checked_sub(starting_time.elapsed()) {
+                    remaining_time
+                } else {
+                    sleep_duration
+                },
             )
             .await;
         }
