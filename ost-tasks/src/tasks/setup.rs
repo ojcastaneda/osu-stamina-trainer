@@ -162,11 +162,17 @@ pub async fn update_collection(limit_date: i64, services: Services) -> TaskResul
 async fn update_submission(
     beatmap: Beatmap,
     database: Pool<Postgres>,
+    mut osu_files: osu_files::Client,
     storage: storage::Client,
 ) -> TaskResult<()> {
-    let file = storage
+    let file = if let Ok(file) = storage
         .retrieve(format!("beatmaps/{}.osu", beatmap.id))
-        .await?;
+        .await
+    {
+        file
+    } else {
+        osu_files.download(beatmap.id).await?.unwrap()
+    };
     if !create_beatmap(&beatmap, &database, &file).await? {
         beatmap::delete(&database, beatmap.id, true).await?;
     }
@@ -192,6 +198,7 @@ async fn updated_submissions(mut services: Services, submissions: Vec<i32>) -> T
                 .spawn(update_submission(
                     submission,
                     services.database.clone(),
+                    services.osu_files.clone(),
                     services.storage.clone(),
                 ))
                 .await?;

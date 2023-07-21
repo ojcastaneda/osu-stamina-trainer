@@ -99,7 +99,7 @@ pub fn process_beatmap(parsed_beatmap: &rosu_pp::Beatmap) -> Beatmap {
         process_intervals(&mut beatmap, parsed_beatmap);
     }
     calculate_streams_statistics(&mut beatmap);
-    if beatmap.longest_stream > 1 {
+    if beatmap.longest_stream > 0 {
         beatmap.longest_stream += 1;
         beatmap.streams_length += 1;
     } else {
