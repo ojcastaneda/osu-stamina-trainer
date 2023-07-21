@@ -175,7 +175,6 @@ fn process_interval(
 fn terminate_stream(beatmap: &mut Beatmap, stream: &mut Stream) {
     match stream.length {
         0 => return,
-        1 => beatmap.update_bpm_frequencies(-1, stream.last_interval, true),
         _ => beatmap.streams.push(stream.clone()),
     }
     stream.reset();

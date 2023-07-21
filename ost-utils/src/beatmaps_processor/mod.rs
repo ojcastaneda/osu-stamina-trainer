@@ -176,4 +176,24 @@ mod tests {
         compare_beatmaps(beatmap, test_beatmap);
         Ok(())
     }
+    #[tokio::test]
+    async fn test_doubles() -> Result<(), Box<dyn Error>> {
+        let beatmap = process_beatmap(&fs::read("./test_files/test_doubles.osu").await?).await?;
+        let test_beatmap = Beatmap {
+            accuracy: ModDecimal::new(1, 10.1, 8.5),
+            approach_rate: ModDecimal::new(1, 10.5, 9.2),
+            bpm: ModInteger::new(255.0, 170.0),
+            circle_size: 4.0,
+            difficulty_rating: ModDecimal::new(1, 0.0, 0.0),
+            longest_stream: 9,
+            performance_100: ModInteger::new(0.0, 0.0),
+            performance_95: ModInteger::new(0.0, 0.0),
+            streams_density: 0.46,
+            streams_spacing: 0.6,
+            streams_length: 4,
+            total_length: 100,
+        };
+        compare_beatmaps(beatmap, test_beatmap);
+        Ok(())
+    }
 }
