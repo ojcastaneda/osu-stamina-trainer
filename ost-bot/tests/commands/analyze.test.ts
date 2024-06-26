@@ -18,6 +18,22 @@ botTest(
 
 botTest(
 	{
+		assertions: new Assertion(
+			expectedTestBeatmap,
+			'is listening to [https://osu.ppy.sh/b/1219148 Thaehan - Doki-Doki (BarkingMadDog) [Adrenaline Rush]]'
+		),
+		bot: 'osu!',
+		description: 'Reply to now playing command lazer'
+	},
+	async (handleMessage) => {
+		mockFetch(testBeatmap, `${process.env.API_URL}/api/bot/beatmap/1219148`);
+		await handleMessage();
+		expect(fetch).toBeCalledWith(`${process.env.API_URL}/api/bot/beatmap/1219148`);
+	}
+);
+
+botTest(
+	{
 		assertions: new Assertion(expectedTestBeatmap, '!check 2766688'),
 		description: 'Reply to analyze beatmap command'
 	},

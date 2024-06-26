@@ -9,8 +9,11 @@ import { ModificationIndicator } from './request';
  * @returns The i18n property for `command not found` or the beatmap id.
  */
 function parseNowPlaying(nowPlaying: string): 'commandNotFount' | number {
-	const idStart = nowPlaying.indexOf('#/');
-	if (idStart < 0) return 'commandNotFount';
+	let idStart = nowPlaying.indexOf('#/');
+	if (idStart < 0) {
+		idStart = nowPlaying.indexOf('b/');
+		if (idStart < 0) return 'commandNotFount'
+	};
 	const splittedString = nowPlaying.slice(idStart + 2);
 	const id = parseInt(splittedString.slice(0, splittedString.indexOf(' ')));
 	return isNaN(id) ? 'commandNotFount' : id;
