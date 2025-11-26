@@ -1,0 +1,160 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build-ost-server:
+    name:  Build ost-server docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+
+      - name: Build docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile.ost-server
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/ost-server:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ost-server:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ost-server:buildcache,mode=max
+
+  build-ost-bot:
+    name:  Build ost-bot docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+
+      - name: Build docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile.ost-bot
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/ost-bot:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ost-bot:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ost-bot:buildcache,mode=max
+
+  build-ost-website:
+    name:  Build ost-website docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+
+      - name: Build docker image
+        uses: docker/build-push-action@v3
+        with:
+          build-args: API_URL=http://ost-server:8080
+          context: .
+          file: ./Dockerfile.ost-website
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/ost-website:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ost-website:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ost-website:buildcache,mode=max
+
+  build-ost-tasks:
+    name: Build ost-tasks docker image
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v2
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v2
+        with:
+          password: ${{ secrets.DOCKER_HUB_TOKEN }}
+          username: ${{ secrets.DOCKER_HUB_USERNAME }}
+
+      - name: Build docker image
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          file: ./Dockerfile.ost-tasks
+          push: true
+          tags: ${{ secrets.DOCKER_HUB_USERNAME }}/ost-tasks:latest
+          cache-from: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ost-tasks:buildcache
+          cache-to: type=registry,ref=${{ secrets.DOCKER_HUB_USERNAME }}/ost-tasks:buildcache,mode=max
+
+  pre-deploy:
+    runs-on: ubuntu-latest
+    name: Pre-deploy docker compose
+    needs: [build-ost-server, build-ost-bot, build-ost-website, build-ost-tasks]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Copy docker-compose file
+        uses: appleboy/scp-action@v0.1.3
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          source: docker-compose.yml,Caddyfile
+          target: ost-build
+          rm: true
+
+  deploy:
+    runs-on: ubuntu-latest
+    name: Deploy docker compose
+    needs: pre-deploy
+    steps:
+      - name: Execute docker compose
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.HOST }}
+          username: ${{ secrets.USERNAME }}
+          key: ${{ secrets.SSH_KEY }}
+          script: |
+            cd ost-build
+            docker-compose pull
+            export NODE_ENV=${{ secrets.NODE_ENV }}
+            export AWS_ACCESS_KEY_ID=${{ secrets.AWS_ACCESS_KEY_ID }}
+            export AWS_BUCKET=${{ secrets.AWS_BUCKET }}
+            export AWS_REGION=${{ secrets.AWS_REGION }}
+            export AWS_SECRET_ACCESS_KEY=${{ secrets.AWS_SECRET_ACCESS_KEY }}
+            export BASE_USERNAME=${{ secrets.BASE_USERNAME }}
+            export BASE_PASSWORD=${{ secrets.BASE_PASSWORD }}
+            export DATABASE_URL=${{ secrets.DATABASE_URL }}
+            export DISCORD_TOKEN=${{ secrets.DISCORD_TOKEN }}
+            export OSU_API_CLIENT_ID=${{ secrets.OSU_API_CLIENT_ID }}
+            export OSU_API_CLIENT_SECRET=${{ secrets.OSU_API_CLIENT_SECRET }}
+            export OSU_PASSWORD=${{ secrets.OSU_PASSWORD }}
+            export OSU_USERNAME=${{ secrets.OSU_USERNAME }}
+            docker-compose up -d --remove-orphans
+            yes | docker image prune
