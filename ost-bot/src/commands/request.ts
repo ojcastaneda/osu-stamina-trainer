@@ -330,13 +330,9 @@ export async function request(
 > {
 	const parsedRequest = parseRequest(parameters, guessCommand);
 	if (typeof parsedRequest === 'string') return ['didYouMean', `${command} ${parsedRequest}`];
-	const filters =
-		skippedIds.length > 0
-			? [new Filter('different', 'id', skippedIds)].concat(parsedRequest[0])
-			: parsedRequest[0];
 	let addMinimumBpm = true;
-	let addMinimumDensity = false;
-	for (const filter of filters) {
+	let addMinimumDensity = true;
+	for (const filter of parsedRequest[0]) {
 		if (filter.property === 'bpm') {
 			if (
 				(filter.operator === 'minimum' &&
@@ -355,8 +351,12 @@ export async function request(
 				addMinimumBpm = false;
 		}
 	}
-	if (addMinimumBpm) filters.push(new Filter('minimum', 'bpm', 100));
-	if (addMinimumDensity) filters.push(new Filter('minimum', 'streams_density', 0.25));
+	if (addMinimumBpm) parsedRequest[0].push(new Filter('minimum', 'bpm', 100));
+	if (addMinimumDensity) parsedRequest[0].push(new Filter('minimum', 'streams_density', 0.25));
+	const filters =
+		skippedIds.length > 0
+			? [new Filter('different', 'id', skippedIds)].concat(parsedRequest[0])
+			: parsedRequest[0];
 	if (parsedRequest[1] !== Modification.FreeMod) {
 		const useDoubleTime = parsedRequest[1] === Modification.DoubleTime;
 		const request = await fetchRequest(false, filters, useDoubleTime);

@@ -22,16 +22,18 @@ interface IndexProps {
 	beatmaps: Beatmap[];
 	filters: Filters;
 	limit: number;
+	fullCollection: boolean;
 	order: Order;
 	title: string;
 }
 
-function Index({ beatmaps, filters, limit, order, title }: IndexProps) {
+function Index({ beatmaps, filters, fullCollection, limit, order, title }: IndexProps) {
 	return (
 		<FiltersContext.Provider value={useState<Filters>(filters)}>
 			<BeatmapsSearchBar queryFilters={filters} queryOrder={order} queryTitle={title} />
 			<SearchFilters
 				allowCollapse
+				fullCollection={fullCollection}
 				properties={[
 					Property.accuracy,
 					Property.approach_rate,
@@ -70,7 +72,12 @@ export default Index;
 export async function getServerSideProps(
 	context: GetServerSidePropsContext
 ): Promise<GetServerSidePropsResult<IndexProps>> {
-	const { botFilters, filters, order, page, title } = parseParameters(context.query);
+	const { botFilters, filters, fullCollection, order, page, title } = parseParameters(context.query);
+	if (!fullCollection) {
+		filters.push(new Filter('minimum', 'bpm', 100));
+		filters.push(new Filter('minimum', 'streams_density', 0.25));
+	}
+	console.log(filters)
 	const request = await fetch(
 		`${
 			typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_API_URL
@@ -96,6 +103,7 @@ export async function getServerSideProps(
 				beatmaps,
 				filters: botFilters,
 				limit,
+				fullCollection,
 				order,
 				title,
 				...(await serverSideProps(context, ['components/beatmaps', 'components/common']))
@@ -107,6 +115,7 @@ export async function getServerSideProps(
 export interface Search {
 	botFilters: Filters;
 	filters: Filter[];
+	fullCollection: boolean;
 	order: Order;
 	page: number;
 	title?: string;
@@ -115,6 +124,7 @@ export interface Search {
 function parseParameters(parameters: ParsedUrlQuery): Search {
 	const page = parseInt(typeof parameters['page'] === 'string' ? parameters['page'] : '1');
 	const order = typeof parameters['order'] === 'string' ? parameters['order'].split('-') : [];
+	const fullCollection = "full" in parameters;
 	const operator = parseInt(order[1]);
 	const property = parseInt(order[0]);
 	const botFilters = decompressQuery(
@@ -123,6 +133,7 @@ function parseParameters(parameters: ParsedUrlQuery): Search {
 	return {
 		botFilters,
 		filters: parseQuery(botFilters),
+		fullCollection,
 		order: {
 			operator: isNaN(operator)
 				? 'descending'

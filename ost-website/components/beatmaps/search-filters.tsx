@@ -10,22 +10,25 @@ import {
 } from '@models/botFilter';
 import styles from '@styles/components/beatmaps/search-filters.module.scss';
 import { useTranslation } from 'next-i18next';
+import { useRouter } from 'next/router';
 import { ChangeEvent, FormEvent, ReactElement, useCallback, useContext } from 'react';
 import { useEffect } from 'react';
 import { useState } from 'react';
 import { FaMinus, FaQuestion } from 'react-icons/fa';
 
 interface SearchFiltersProps {
+	fullCollection?: boolean;
 	allowCollapse?: boolean;
 	properties: Property[];
 }
 
-export default function SearchFilters({ allowCollapse = false, properties }: SearchFiltersProps) {
+export default function SearchFilters({ allowCollapse = false, fullCollection = false, properties }: SearchFiltersProps) {
 	const { t } = useTranslation('components/beatmaps');
 	const [expanded, setExpanded] = useState(false);
 	const [filters, setFilters] = useContext(FiltersContext);
 	const [activeFilters, setActiveFilters] = useState<ReactElement[]>([]);
 	const [availableFilters, setAvailableFilters] = useState<ReactElement[]>([]);
+	const router = useRouter();
 
 	function addFilter({ target }: ChangeEvent<HTMLSelectElement>) {
 		const property = parseInt(target.value);
@@ -41,6 +44,16 @@ export default function SearchFilters({ allowCollapse = false, properties }: Sea
 					: Operator.default,
 				[0, 0]
 			)
+		});
+	}
+
+	function toggleOnlyStamina() {
+		const query = { ...router.query };
+		if (fullCollection) delete query["full"]
+		else query["full"] = "";
+		return router.push({
+			pathname: router.pathname,
+			query,
 		});
 	}
 
@@ -83,6 +96,9 @@ export default function SearchFilters({ allowCollapse = false, properties }: Sea
 
 	return expanded || !allowCollapse ? (
 		<>
+			{allowCollapse && (<button id={styles['stamina']} onClick={toggleOnlyStamina}>
+				{t(fullCollection ? "display_stamina" : "display_all")}
+			</button>)}
 			<div className={styles['filters']}>
 				<table>
 					<tbody>{activeFilters}</tbody>
