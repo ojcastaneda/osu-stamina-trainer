@@ -334,6 +334,29 @@ export async function request(
 		skippedIds.length > 0
 			? [new Filter('different', 'id', skippedIds)].concat(parsedRequest[0])
 			: parsedRequest[0];
+	let addMinimumBpm = true;
+	let addMinimumDensity = false;
+	for (const filter of filters) {
+		if (filter.property === 'bpm') {
+			if (
+				(filter.operator === 'minimum' &&
+					typeof filter.value === 'number' &&
+					filter.value <= 100) ||
+				filter.operator === 'exact'
+			)
+				addMinimumBpm = false;
+		} else if (filter.property === 'streams_density') {
+			if (
+				(filter.operator === 'minimum' &&
+					typeof filter.value === 'number' &&
+					filter.value <= 0.25) ||
+				filter.operator === 'exact'
+			)
+				addMinimumBpm = false;
+		}
+	}
+	if (addMinimumBpm) filters.push(new Filter('minimum', 'bpm', 100));
+	if (addMinimumDensity) filters.push(new Filter('minimum', 'streams_density', 0.25));
 	if (parsedRequest[1] !== Modification.FreeMod) {
 		const useDoubleTime = parsedRequest[1] === Modification.DoubleTime;
 		const request = await fetchRequest(false, filters, useDoubleTime);

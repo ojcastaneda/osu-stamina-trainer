@@ -5,8 +5,12 @@ import { availableLanguages, formatLength, genericHelp, I18nResponse } from '../
  * English i18n responses.
  */
 export const en: Readonly<I18nResponse> = {
-	analysisNotFound:
-		'Beatmap analysis is only available for ranked beatmaps or beatmaps that are part of the collection',
+	analysisNotFound: (np: boolean) => {
+		let response =
+			'Beatmap analysis is only available for ranked beatmaps or beatmaps that are part of the collection';
+		if (np) response += '. Type !submit to submit this beatmap to the collection';
+		return response;
+	},
 	availableLanguages,
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
 		`${
@@ -38,10 +42,13 @@ export const en: Readonly<I18nResponse> = {
 	languageUpdate: 'Language updated successfully',
 	languageUpdateForbidden: 'The provided id does not match your username',
 	loved: 'Loved',
+	missingNowPlaying: 'Selecting a beatmap with "/np" is required to use this command',
 	ranked: 'Ranked',
 	requestNotFound:
 		'No beatmaps found that match the provided filters, reduce the number of filters or change their values',
 	streams: 'Streams',
+	submit: 'Beatmap submitted successfully',
+	submitConflict: 'This beatmap is already part of the collection',
 	unexpectedError: `The bot failed unexpectedly, please report this error via [${process.env.DISCORD_URL} Discord]`,
 	unranked: 'Unranked'
 };

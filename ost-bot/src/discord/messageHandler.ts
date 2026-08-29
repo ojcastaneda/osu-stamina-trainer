@@ -3,6 +3,7 @@ import { analyzeId } from '../commands/analyze';
 import { request } from '../commands/request';
 import { log } from '../models';
 import { formatResponse, I18nProperties } from './formatter';
+import { MessageQueue } from '../messageDispatcher';
 
 /**
  * Handles the incoming messages for the Discord bot.
@@ -14,10 +15,10 @@ import { formatResponse, I18nProperties } from './formatter';
  */
 export async function handleDiscordMessage(
 	message: Message,
-	skippedIds: number[]
+	queue: MessageQueue<Message>
 ): Promise<number | undefined> {
 	try {
-		const response = await processDiscordMessage(message.content, skippedIds);
+		const response = await processDiscordMessage(message.content, queue.requests);
 		if (response === undefined) return;
 		const responseMessage = formatResponse(response);
 		if (process.env.NODE_ENV === 'production') await message.reply(responseMessage);

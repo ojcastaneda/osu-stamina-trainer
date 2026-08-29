@@ -5,8 +5,12 @@ import { availableLanguages, formatLength, genericHelp, I18nResponse } from '../
  * Spanish i18n responses.
  */
 export const es: Readonly<I18nResponse> = {
-	analysisNotFound:
-		'El análisis de mapas solo está disponible para mapas clasificados o mapas que sean parte de la colección',
+	analysisNotFound: (np: boolean) => {
+		let response =
+			'El análisis de mapas solo está disponible para mapas clasificados o mapas que sean parte de la colección';
+		if (np) response += '. Escriba !submit para proponer este mapa para la colección';
+		return response;
+	},
 	availableLanguages,
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
 		`${
@@ -39,10 +43,13 @@ export const es: Readonly<I18nResponse> = {
 	languageUpdate: 'Lenguaje actualizado exitosamente',
 	languageUpdateForbidden: 'El id suministrado no concuerda con su nombre de usuario',
 	loved: 'Amado',
+	missingNowPlaying: 'Es necesario seleccionar un mapa con "/np" para usar este comando',
 	ranked: 'Clasificado',
 	requestNotFound:
 		'No se encontraron mapas que coincidan con los filtros suministrados, reduzca el número de filtros o cambie sus valores',
 	streams: 'Streams',
+	submit: 'Mapa propuesto correctamente',
+	submitConflict: 'Este mapa ya forma parte de la colección',
 	unexpectedError: `El bot falló inesperadamente, por favor reporte este error vía [${process.env.DISCORD_URL} Discord]`,
 	unranked: 'No clasificado'
 };

@@ -4,10 +4,10 @@ const cacheDuration = 900000;
  * Message dispatcher for incoming messages from users.
  */
 export class MessageDispatcher<T> {
-	dispatcher: (message: T, skipIds: number[]) => Promise<number | undefined>;
+	dispatcher: (message: T, queue: MessageQueue<T>) => Promise<number | undefined>;
 	users: Record<string, MessageQueue<T>>;
 
-	constructor(dispatcher: (message: T, skipIds: number[]) => Promise<number | undefined>) {
+	constructor(dispatcher: (message: T, queue: MessageQueue<T>) => Promise<number | undefined>) {
 		this.dispatcher = dispatcher;
 		this.users = {};
 		setInterval(() => {
@@ -34,14 +34,15 @@ export class MessageDispatcher<T> {
 /**
  * Queue for processing messages for a specific user.
  */
-class MessageQueue<T> {
+export class MessageQueue<T> {
 	active: boolean;
-	dispatcher: (message: T, skipIds: number[]) => Promise<number | undefined>;
+	dispatcher: (message: T, queue: MessageQueue<T>) => Promise<number | undefined>;
 	lastActivity: number;
 	queue: T[];
 	requests: number[];
+	nowPlaying?: number;
 
-	constructor(dispatcher: (message: T, skipIds: number[]) => Promise<number | undefined>) {
+	constructor(dispatcher: (message: T, queue: MessageQueue<T>) => Promise<number | undefined>) {
 		this.active = false;
 		this.dispatcher = dispatcher;
 		this.lastActivity = new Date().getTime();
@@ -71,7 +72,7 @@ class MessageQueue<T> {
 	async dequeue() {
 		let message = this.queue.shift();
 		while (message !== undefined) {
-			const request = await this.dispatcher(message, this.requests);
+			const request = await this.dispatcher(message, this);
 			message = this.queue.shift();
 			if (request === undefined) continue;
 			this.requests.push(request);

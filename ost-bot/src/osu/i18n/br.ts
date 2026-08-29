@@ -5,8 +5,12 @@ import { availableLanguages, formatLength, genericHelp, I18nResponse } from '../
  * Brazilian portuguese i18n responses.
  */
 export const br: Readonly<I18nResponse> = {
-	analysisNotFound:
-		'A análise do Beatmap só está disponível para os beatmaps ou beatmaps classificados que fazem parte da coleção',
+	analysisNotFound: (np: boolean) => {
+		let response =
+			'A análise do Beatmap só está disponível para os beatmaps ou beatmaps classificados que fazem parte da coleção';
+		if (np) response += '. Digite !submit para propor este mapa para a coleção';
+		return response;
+	},
 	availableLanguages,
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) =>
 		`${
@@ -39,10 +43,13 @@ export const br: Readonly<I18nResponse> = {
 	languageUpdate: 'Idioma atualizado com sucesso',
 	languageUpdateForbidden: 'A identificação fornecida não corresponde ao seu nome de usuário',
 	loved: 'Loved',
+	missingNowPlaying: 'É necessário selecionar um beatmap com "/np" para usar este comando',
 	ranked: 'Ranqueado',
 	requestNotFound:
 		'Nenhum mapa de batidas encontrado que combine com os filtros fornecidos, reduza o número de filtros ou altere seus valores',
 	streams: 'Streams',
+	submit: 'Mapa proposto com sucesso',
+	submitConflict: 'Este beatmap já faz parte da coleção',
 	unexpectedError: `O bot falhou inesperadamente, favor reportar este erro via [${process.env.DISCORD_URL} Discord]`,
 	unranked: 'Não ranqueado'
 };

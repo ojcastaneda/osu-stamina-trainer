@@ -4,7 +4,7 @@ import { Beatmap } from '../models';
  * i18n responses.
  */
 export type I18nResponse = {
-	analysisNotFound: string;
+	analysisNotFound: (np: boolean) => string;
 	availableLanguages: string;
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) => string;
 	bursts: string;
@@ -17,9 +17,12 @@ export type I18nResponse = {
 	languageUpdate: string;
 	languageUpdateForbidden: string;
 	loved: string;
+	missingNowPlaying: string;
 	ranked: string;
 	requestNotFound: string;
 	streams: string;
+	submit: string;
+	submitConflict: string;
 	unexpectedError: string;
 	unranked: string;
 };

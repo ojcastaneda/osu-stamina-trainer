@@ -14,6 +14,8 @@ use sqlx::{
 use std::collections::{HashMap, HashSet};
 use tokio::try_join;
 
+const AUTO_APPROVE_PLAY_COUNT: i32 = 20_000;
+
 pub async fn add_beatmap(
     beatmap: Beatmap,
     database: Pool<Postgres>,
@@ -89,6 +91,10 @@ async fn check_beatmaps(mut services: Services, submissions: Vec<i32>) -> TaskRe
                     .await?;
                 continue;
             }
+            let play_count = match beatmap.beatmapset.as_ref() {
+                Some(beatmapset) => beatmapset.play_count,
+                None => 0
+            };
             let title = format!(
                 "{} [{}]",
                 &beatmap.beatmapset.unwrap().title,
@@ -103,7 +109,11 @@ async fn check_beatmaps(mut services: Services, submissions: Vec<i32>) -> TaskRe
                         &title,
                     )
                     .await?;
-                    unchecked_submission::delete(&database, beatmap.id).await
+                    unchecked_submission::delete(&database, beatmap.id).await?;
+                    if play_count > AUTO_APPROVE_PLAY_COUNT {
+                        submission::approve(&database, beatmap.id).await?;
+                    }
+                    Ok(())
                 })
                 .await?;
         }
@@ -140,7 +150,11 @@ async fn check_beatmapset(
                         beatmap.id,
                         &title,
                     )
-                    .await
+                    .await?;
+                    if beatmapset.play_count > AUTO_APPROVE_PLAY_COUNT {
+                        submission::approve(&database_clone, beatmap.id).await?;
+                    }
+                    Ok(())
                 })
                 .await?;
         }

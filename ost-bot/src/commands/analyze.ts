@@ -12,8 +12,8 @@ function parseNowPlaying(nowPlaying: string): 'commandNotFount' | number {
 	let idStart = nowPlaying.indexOf('#/');
 	if (idStart < 0) {
 		idStart = nowPlaying.indexOf('b/');
-		if (idStart < 0) return 'commandNotFount'
-	};
+		if (idStart < 0) return 'commandNotFount';
+	}
 	const splittedString = nowPlaying.slice(idStart + 2);
 	const id = parseInt(splittedString.slice(0, splittedString.indexOf(' ')));
 	return isNaN(id) ? 'commandNotFount' : id;
@@ -30,7 +30,7 @@ function parseNowPlaying(nowPlaying: string): 'commandNotFount' | number {
 export async function analyzeNowPlaying(
 	nowPlaying: string
 ): Promise<
-	| 'analysisNotFound'
+	| ['analysisNotFound', number]
 	| 'commandNotFount'
 	| ['beatmapInformation', Beatmap, ModificationIndicator, boolean]
 > {
@@ -38,7 +38,7 @@ export async function analyzeNowPlaying(
 	if (typeof id === 'string') return id;
 	const response = await fetch(`${process.env.API_URL}/api/bot/beatmap/${id}`);
 	return response.status === 404
-		? 'analysisNotFound'
+		? ['analysisNotFound', id]
 		: ['beatmapInformation', await response.json(), '', false];
 }
 
@@ -68,4 +68,12 @@ export async function analyzeId(
 	return response.status === 404
 		? 'analysisNotFound'
 		: ['beatmapInformation', await response.json(), '', false];
+}
+
+export async function submit(
+	id: number | undefined
+): Promise<'missingNowPlaying' | 'submitConflict' | 'submit'> {
+	if (id === undefined) return 'missingNowPlaying';
+	const response = await fetch(`${process.env.API_URL}/api/submission/${id}`);
+	return response.status === 409 ? 'submitConflict' : 'submit';
 }

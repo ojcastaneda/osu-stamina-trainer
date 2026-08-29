@@ -40,7 +40,7 @@ export interface I18nResponse {
  * English Discord responses.
  */
 export const responses: I18nResponse = {
-	analysisNotFound: { embeds: [new EmbedBuilder({ description: en.analysisNotFound })] },
+	analysisNotFound: { embeds: [new EmbedBuilder({ description: en.analysisNotFound(false) })] },
 	beatmapInformation: (beatmap: Beatmap, modification: string, alreadyRequested: boolean) => ({
 		embeds: [
 			new EmbedBuilder({

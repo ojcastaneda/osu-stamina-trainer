@@ -1,10 +1,11 @@
 import { PrivateMessage } from 'bancho.js';
 import levenary from 'levenary';
-import { analyzeId, analyzeNowPlaying } from '../commands/analyze';
+import { analyzeId, analyzeNowPlaying, submit } from '../commands/analyze';
 import { request } from '../commands/request';
 import { updateLanguage } from '../commands/language';
 import { log } from '../models';
 import { formatResponse, I18nProperties, languages, retrieveLanguage } from './formatter';
+import { MessageQueue } from '../messageDispatcher';
 
 /**
  * Handles the incoming messages for the osu! bot.
@@ -16,12 +17,12 @@ import { formatResponse, I18nProperties, languages, retrieveLanguage } from './f
  */
 export async function handleOsuPM(
 	{ message, user }: PrivateMessage,
-	skippedIds: number[]
+	queue: MessageQueue<PrivateMessage>
 ): Promise<number | undefined> {
 	try {
 		const [language, response] = await Promise.all([
 			retrieveLanguage(user.ircUsername),
-			processOsuMessage(message, skippedIds, user.ircUsername)
+			processOsuMessage(message, queue, user.ircUsername)
 		]);
 		const responseMessage = formatResponse(language, response);
 		if (process.env.NODE_ENV === 'production') await user.sendMessage(responseMessage);
@@ -55,7 +56,7 @@ export async function handleOsuPM(
  */
 async function processOsuMessage(
 	message: string,
-	skippedIds: number[],
+	queue: MessageQueue<PrivateMessage>,
 	username: string
 ): Promise<I18nProperties | 'genericHelp'> {
 	const parameters = message
@@ -64,14 +65,22 @@ async function processOsuMessage(
 		.filter((parameter) => parameter !== '');
 	const command = parameters.shift();
 	if (command === undefined) return 'commandNotFount';
-	if (command[0] !== '!') return analyzeNowPlaying(message);
+	if (command[0] !== '!') {
+		const response = await analyzeNowPlaying(message);
+		if (Array.isArray(response) && response[0] === 'analysisNotFound') {
+			queue.nowPlaying = response[1];
+			return [response[0], true];
+		}
+		return response;
+	}
 	switch (command) {
 		case '!r':
 		case '!request':
-			return request(command, parameters, skippedIds);
+			return request(command, parameters, queue.requests);
 		case '!c':
 		case '!check':
-			return analyzeId(command, parameters[0]);
+			const response = await analyzeId(command, parameters[0]);
+			return response === 'analysisNotFound' ? [response, false] : response;
 		case '!h':
 		case '!help':
 			if (parameters.length === 0) return 'genericHelp';
@@ -83,6 +92,9 @@ async function processOsuMessage(
 			return updateLanguage(parameters[0], parameters[1], username);
 		case '!languages':
 			return 'availableLanguages';
+		case '!s':
+		case '!submit':
+			return submit(queue.nowPlaying);
 		default:
 			return 'commandNotFount';
 	}

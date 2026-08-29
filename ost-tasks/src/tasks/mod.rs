@@ -101,9 +101,6 @@ pub async fn create_beatmap(
     file: &[u8],
 ) -> TaskResult<bool> {
     let statistics = process_beatmap(file).await?;
-    if statistics.streams_density < 0.25 || statistics.bpm.no_modification < 100 {
-        return Ok(false);
-    }
     let (no_modification, double_time) = beatmap::parse_beatmap(beatmap, statistics);
     beatmap::create_or_update(database, no_modification, double_time).await?;
     Ok(true)

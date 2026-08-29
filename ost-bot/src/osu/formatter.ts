@@ -9,11 +9,16 @@ import { I18nResponse } from './models';
  * i18n properties for responses.
  */
 export type I18nProperties =
+	| ['analysisNotFound', boolean]
+	| ['beatmapInformation', Beatmap, ModificationIndicator, boolean]
 	| ['beatmapInformation', Beatmap, ModificationIndicator, boolean]
 	| ['didYouMean', string]
 	| ['help', Languages]
 	| ['languageUpdate', Languages]
-	| keyof Omit<I18nResponse, 'beatmapInformation' | 'didYouMean' | 'help' | 'languageUpdate'>;
+	| keyof Omit<
+			I18nResponse,
+			'analysisNotFound' | 'beatmapInformation' | 'didYouMean' | 'help' | 'languageUpdate'
+	  >;
 
 export type Languages = keyof typeof languages;
 
@@ -37,6 +42,8 @@ export function formatResponse(language: Languages, properties: I18nProperties):
 	const response = languages[language];
 	if (typeof properties === 'string') return response[properties];
 	switch (properties[0]) {
+		case 'analysisNotFound':
+			return response.analysisNotFound(properties[1]);
 		case 'beatmapInformation':
 			return response.beatmapInformation(properties[1], properties[2], properties[3]);
 		case 'didYouMean':
