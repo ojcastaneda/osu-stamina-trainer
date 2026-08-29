@@ -348,7 +348,7 @@ export async function request(
 					filter.value <= 0.25) ||
 				filter.operator === 'exact'
 			)
-				addMinimumBpm = false;
+				addMinimumDensity = false;
 		}
 	}
 	if (addMinimumBpm) parsedRequest[0].push(new Filter('minimum', 'bpm', 100));
