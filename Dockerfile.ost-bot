@@ -6,7 +6,7 @@ WORKDIR /ost-bot
 COPY ost-bot/package.json ost-bot/pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 
-FROM node:alpine AS build
+FROM node:20.0.0-alpine AS build
 
 RUN npm install -g pnpm
 
@@ -23,7 +23,6 @@ RUN npm install -g pnpm
 WORKDIR /ost-bot
 COPY --from=build /ost-bot/package.json ./package.json
 COPY --from=build /ost-bot/node_modules ./node_modules
-COPY --from=build /ost-bot/package.json ./package.json
 COPY --from=build /ost-bot/build ./
 
 CMD ["node", "/ost-bot/app.js"]
