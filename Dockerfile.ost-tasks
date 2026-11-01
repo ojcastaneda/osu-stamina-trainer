@@ -12,12 +12,13 @@ RUN rm ./target/release/deps/ost_tasks*
 COPY ost-tasks ./
 RUN cargo build --release
 
-FROM debian:bullseye-slim
+FROM debian:trixie-slim
 
 COPY --from=build /ost-tasks/target/release/ost-tasks /ost-tasks
 
-RUN apt-get update -y
-RUN apt-get install -y ca-certificates
-RUN update-ca-certificates
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends ca-certificates \
+    && update-ca-certificates \
+    && rm -rf /var/lib/apt/lists/*
 
 CMD ["/ost-tasks"]
