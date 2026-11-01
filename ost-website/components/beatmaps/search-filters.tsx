@@ -22,7 +22,11 @@ interface SearchFiltersProps {
 	properties: Property[];
 }
 
-export default function SearchFilters({ allowCollapse = false, fullCollection = false, properties }: SearchFiltersProps) {
+export default function SearchFilters({
+	allowCollapse = false,
+	fullCollection = false,
+	properties
+}: SearchFiltersProps) {
 	const { t } = useTranslation('components/beatmaps');
 	const [expanded, setExpanded] = useState(false);
 	const [filters, setFilters] = useContext(FiltersContext);
@@ -49,11 +53,11 @@ export default function SearchFilters({ allowCollapse = false, fullCollection = 
 
 	function toggleOnlyStamina() {
 		const query = { ...router.query };
-		if (fullCollection) delete query["full"]
-		else query["full"] = "";
+		if (fullCollection) delete query['full'];
+		else query['full'] = '';
 		return router.push({
 			pathname: router.pathname,
-			query,
+			query
 		});
 	}
 
@@ -96,9 +100,11 @@ export default function SearchFilters({ allowCollapse = false, fullCollection = 
 
 	return expanded || !allowCollapse ? (
 		<>
-			{allowCollapse && (<button id={styles['stamina']} onClick={toggleOnlyStamina}>
-				{t(fullCollection ? "display_stamina" : "display_all")}
-			</button>)}
+			{allowCollapse && (
+				<button id={styles['stamina']} onClick={toggleOnlyStamina}>
+					{t(fullCollection ? 'display_stamina' : 'display_all')}
+				</button>
+			)}
 			<div className={styles['filters']}>
 				<table>
 					<tbody>{activeFilters}</tbody>

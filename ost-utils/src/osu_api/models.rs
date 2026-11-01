@@ -62,8 +62,8 @@ pub struct ClientToken {
 
 #[derive(Deserialize)]
 pub struct Cursor {
-    pub approved_date: String,
-    pub id: String,
+    pub approved_date: i64,
+    pub id: i32,
 }
 
 #[derive(Clone, Serialize)]

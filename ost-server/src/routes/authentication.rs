@@ -62,7 +62,9 @@ async fn create_session(
     OsRng.fill_bytes(&mut session_bytes);
     let session = STANDARD.encode(session_bytes);
     let cookie = format!("{SESSION_COOKIE}={session}; SameSite=Strict; Path=/");
-    cache.set_ex(session, id, SESSION_CACHE_EXPIRATION).await?;
+    cache
+        .set_ex::<_, _, ()>(session, id, SESSION_CACHE_EXPIRATION)
+        .await?;
     headers.insert(SET_COOKIE, HeaderValue::from_str(&cookie)?);
     Ok(())
 }
@@ -86,7 +88,7 @@ async fn logout(
     Extension(mut cache): Extension<ConnectionManager>,
     session: Session,
 ) -> ServerResult<impl IntoResponse> {
-    cache.del(session.cookie).await?;
+    cache.del::<_, ()>(session.cookie).await?;
     Ok(StatusCode::NO_CONTENT)
 }
 
@@ -94,7 +96,7 @@ async fn refresh(
     Extension(mut cache): Extension<ConnectionManager>,
     session: Session,
 ) -> ServerResult<impl IntoResponse> {
-    cache.del(session.cookie).await?;
+    cache.del::<_, ()>(session.cookie).await?;
     let mut headers = HeaderMap::new();
     create_session(&mut cache, &mut headers, session.id).await?;
     Ok((StatusCode::NO_CONTENT, headers))

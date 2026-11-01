@@ -72,12 +72,14 @@ export default Index;
 export async function getServerSideProps(
 	context: GetServerSidePropsContext
 ): Promise<GetServerSidePropsResult<IndexProps>> {
-	const { botFilters, filters, fullCollection, order, page, title } = parseParameters(context.query);
+	const { botFilters, filters, fullCollection, order, page, title } = parseParameters(
+		context.query
+	);
 	if (!fullCollection) {
 		filters.push(new Filter('minimum', 'bpm', 100));
 		filters.push(new Filter('minimum', 'streams_density', 0.25));
 	}
-	console.log(filters)
+	console.log(filters);
 	const request = await fetch(
 		`${
 			typeof window !== 'undefined' ? '' : process.env.NEXT_PUBLIC_API_URL
@@ -124,7 +126,7 @@ export interface Search {
 function parseParameters(parameters: ParsedUrlQuery): Search {
 	const page = parseInt(typeof parameters['page'] === 'string' ? parameters['page'] : '1');
 	const order = typeof parameters['order'] === 'string' ? parameters['order'].split('-') : [];
-	const fullCollection = "full" in parameters;
+	const fullCollection = 'full' in parameters;
 	const operator = parseInt(order[1]);
 	const property = parseInt(order[0]);
 	const botFilters = decompressQuery(

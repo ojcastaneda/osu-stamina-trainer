@@ -17,6 +17,7 @@ import { MessageQueue } from '../messageDispatcher';
  */
 export async function handleOsuPM(
 	{ message, user }: PrivateMessage,
+	arrival: Date,
 	queue: MessageQueue<PrivateMessage>
 ): Promise<number | undefined> {
 	try {
@@ -27,7 +28,7 @@ export async function handleOsuPM(
 		const responseMessage = formatResponse(language, response);
 		if (process.env.NODE_ENV === 'production') await user.sendMessage(responseMessage);
 		log(
-			`${user.ircUsername} | ${message} | ${language} | ${JSON.stringify(response)}`,
+			`${arrival} | ${user.ircUsername} | ${message} | ${language} | ${JSON.stringify(response)}`,
 			'INFO',
 			'osu!'
 		);
@@ -35,7 +36,7 @@ export async function handleOsuPM(
 			return response[1].id;
 	} catch (error) {
 		log(
-			`${user.ircUsername} | ${message} | ${
+			`${arrival} | ${user.ircUsername} | ${message} | ${
 				error instanceof Error ? error.message : JSON.stringify(error)
 			}`,
 			'ERROR',
@@ -78,15 +79,17 @@ async function processOsuMessage(
 		case '!request':
 			return request(command, parameters, queue.requests);
 		case '!c':
-		case '!check':
+		case '!check': {
 			const response = await analyzeId(command, parameters[0]);
 			return response === 'analysisNotFound' ? [response, false] : response;
+		}
 		case '!h':
-		case '!help':
+		case '!help': {
 			if (parameters.length === 0) return 'genericHelp';
 			return languages[parameters[0]] !== undefined
 				? ['help', parameters[0]]
 				: ['didYouMean', `!help ${levenary(parameters[0], Object.keys(languages))}`];
+		}
 		case '!l':
 		case '!language':
 			return updateLanguage(parameters[0], parameters[1], username);

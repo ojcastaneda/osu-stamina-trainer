@@ -15,6 +15,7 @@ import { MessageQueue } from '../messageDispatcher';
  */
 export async function handleDiscordMessage(
 	message: Message,
+	arrival: Date,
 	queue: MessageQueue<Message>
 ): Promise<number | undefined> {
 	try {
@@ -23,7 +24,7 @@ export async function handleDiscordMessage(
 		const responseMessage = formatResponse(response);
 		if (process.env.NODE_ENV === 'production') await message.reply(responseMessage);
 		log(
-			`${message.author.username} | ${message.content} | ${JSON.stringify(response)}`,
+			`${arrival} | ${message.author.username} | ${message.content} | ${JSON.stringify(response)}`,
 			'INFO',
 			'Discord'
 		);
@@ -31,7 +32,7 @@ export async function handleDiscordMessage(
 			return response[1].id;
 	} catch (error) {
 		log(
-			`${message.author.username} | ${message.content} | ${
+			`${arrival} | ${message.author.username} | ${message.content} | ${
 				error instanceof Error ? error.message : JSON.stringify(error)
 			}`,
 			'ERROR',

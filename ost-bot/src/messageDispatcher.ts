@@ -4,10 +4,12 @@ const cacheDuration = 900000;
  * Message dispatcher for incoming messages from users.
  */
 export class MessageDispatcher<T> {
-	dispatcher: (message: T, queue: MessageQueue<T>) => Promise<number | undefined>;
+	dispatcher: (message: T, arrival: Date, queue: MessageQueue<T>) => Promise<number | undefined>;
 	users: Record<string, MessageQueue<T>>;
 
-	constructor(dispatcher: (message: T, queue: MessageQueue<T>) => Promise<number | undefined>) {
+	constructor(
+		dispatcher: (message: T, arrival: Date, queue: MessageQueue<T>) => Promise<number | undefined>
+	) {
 		this.dispatcher = dispatcher;
 		this.users = {};
 		setInterval(() => {
@@ -36,13 +38,15 @@ export class MessageDispatcher<T> {
  */
 export class MessageQueue<T> {
 	active: boolean;
-	dispatcher: (message: T, queue: MessageQueue<T>) => Promise<number | undefined>;
+	dispatcher: (message: T, arrival: Date, queue: MessageQueue<T>) => Promise<number | undefined>;
 	lastActivity: number;
-	queue: T[];
+	queue: [T, Date][];
 	requests: number[];
 	nowPlaying?: number;
 
-	constructor(dispatcher: (message: T, queue: MessageQueue<T>) => Promise<number | undefined>) {
+	constructor(
+		dispatcher: (message: T, arrival: Date, queue: MessageQueue<T>) => Promise<number | undefined>
+	) {
 		this.active = false;
 		this.dispatcher = dispatcher;
 		this.lastActivity = new Date().getTime();
@@ -57,8 +61,9 @@ export class MessageQueue<T> {
 	 * @param message - The message to be processed by the dispatcher.
 	 */
 	enqueue(message: T) {
-		this.lastActivity = new Date().getTime();
-		this.queue.push(message);
+		const arrival = new Date();
+		this.lastActivity = arrival.getTime();
+		this.queue.push([message, arrival]);
 		if (!this.active) {
 			this.active = true;
 			this.dequeue();
@@ -72,7 +77,7 @@ export class MessageQueue<T> {
 	async dequeue() {
 		let message = this.queue.shift();
 		while (message !== undefined) {
-			const request = await this.dispatcher(message, this);
+			const request = await this.dispatcher(...message, this);
 			message = this.queue.shift();
 			if (request === undefined) continue;
 			this.requests.push(request);

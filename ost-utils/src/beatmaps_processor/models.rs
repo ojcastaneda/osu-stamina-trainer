@@ -109,12 +109,8 @@ impl Stream {
 pub struct Interval {
     /// The BPM value for the interval
     pub bpm: f64,
-    /// The end time of the interval, in milliseconds
-    pub end_time: f64,
     /// The spacing between the two `HitObject`s that define the interval, in pixels
     pub spacing: f64,
-    /// The start time of the interval, in milliseconds
-    pub start_time: f64,
 }
 
 impl Interval {
@@ -122,9 +118,7 @@ impl Interval {
     pub fn new(first: &HitObject, second: &HitObject) -> Self {
         Self {
             bpm: 60000.0 / (second.start_time - first.start_time),
-            end_time: second.start_time,
             spacing: second.pos.distance(first.pos) as f64,
-            start_time: first.start_time,
         }
     }
 }

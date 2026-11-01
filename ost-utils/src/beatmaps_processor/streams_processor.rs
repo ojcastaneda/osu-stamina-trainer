@@ -112,7 +112,6 @@ pub fn process_beatmap(parsed_beatmap: &rosu_pp::Beatmap) -> Beatmap {
     beatmap
 }
 
-///
 fn process_intervals(beatmap: &mut Beatmap, parsed_beatmap: &rosu_pp::Beatmap) {
     let mut previous = None;
     let mut stream = Stream::default();

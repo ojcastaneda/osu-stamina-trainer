@@ -11,8 +11,8 @@ use tokio::{spawn, task::JoinHandle};
 pub mod periodic;
 pub mod setup;
 
-const REQUESTS_RATE: usize = 300;
-const THREADS: usize = 64;
+const REQUESTS_RATE: usize = 50;
+const THREADS: usize = 8;
 
 #[derive(Clone)]
 pub struct Services {

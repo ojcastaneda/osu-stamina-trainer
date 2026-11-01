@@ -19,7 +19,7 @@ use axum::{
 use chrono::{Datelike, Utc};
 use ost_utils::{beatmaps_processor::process_beatmap, osu_api, storage};
 use redis::{aio::ConnectionManager, AsyncCommands};
-use serde::{Deserialize, Serialize};
+use serde::Deserialize;
 use sqlx::{Pool, Postgres};
 
 const LANGUAGE_CACHE_EXPIRATION: usize = 14_400;
@@ -41,17 +41,6 @@ async fn request_beatmap(
     } else {
         Ok(StatusCode::NOT_FOUND.into_response())
     }
-}
-
-#[derive(Serialize)]
-pub struct SimpleBeatmap {
-    bpm: i16,
-    longest_stream: i16,
-    performance_100: i16,
-    performance_95: i16,
-    streams_density: f32,
-    streams_length: i16,
-    streams_spacing: f32,
 }
 
 async fn retrieve_beatmap(
@@ -118,7 +107,7 @@ async fn retrieve_language(
         Ok(language)
     } else if let Some(user) = user::retrieve(&database, username.clone()).await? {
         cache
-            .set_ex(username, user.language.clone(), LANGUAGE_CACHE_EXPIRATION)
+            .set_ex::<_, _, ()>(username, user.language.clone(), LANGUAGE_CACHE_EXPIRATION)
             .await?;
         Ok(user.language)
     } else {
@@ -128,7 +117,7 @@ async fn retrieve_language(
             String::from("en")
         };
         cache
-            .set_ex(username, language.clone(), LANGUAGE_CACHE_EXPIRATION)
+            .set_ex::<_, _, ()>(username, language.clone(), LANGUAGE_CACHE_EXPIRATION)
             .await?;
         Ok(language)
     }
@@ -146,7 +135,7 @@ async fn track_activity(
         add_unique_user = user_date_id < date_id;
     }
     cache
-        .set_ex(tracking_username, date_id, TRACKING_CACHE_EXPIRATION)
+        .set_ex::<_, _, ()>(tracking_username, date_id, TRACKING_CACHE_EXPIRATION)
         .await?;
     record_activity(add_unique_user, database, date_id).await?;
     Ok(())
@@ -178,7 +167,7 @@ async fn update_language(
         )
         .await?;
         cache
-            .set_ex(new_username, payload.language, LANGUAGE_CACHE_EXPIRATION)
+            .set_ex::<_, _, ()>(new_username, payload.language, LANGUAGE_CACHE_EXPIRATION)
             .await?;
         Ok(StatusCode::NO_CONTENT)
     } else {

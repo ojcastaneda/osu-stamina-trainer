@@ -42,10 +42,10 @@ async fn main() -> TaskResult<()> {
         loop {
             let current_time = SystemTime::now().duration_since(UNIX_EPOCH)?.as_millis() as i64;
             let services = Services::setup().await?;
-            synchronize_with_osu_api(services.clone()).await?;
             add_beatmaps(current_time, services.clone()).await?;
             check_submissions(services.clone()).await?;
-            process_submissions(services).await?;
+            process_submissions(services.clone()).await?;
+            synchronize_with_osu_api(services).await?;
             let sleep_duration = Duration::from_secs(86_000);
             sleep(
                 if let Some(remaining_time) = sleep_duration.checked_sub(starting_time.elapsed()) {

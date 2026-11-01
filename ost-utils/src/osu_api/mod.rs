@@ -202,7 +202,7 @@ impl Client {
         let ranked_beatmaps = response?.json::<LeaderboardBeatmapsets>().await?;
         let mut beatmaps = Vec::<Beatmap>::new();
         let (mut new_approved_date, mut new_id) = if let Some(new_cursor) = ranked_beatmaps.cursor {
-            (new_cursor.approved_date.parse()?, new_cursor.id.parse()?)
+            (new_cursor.approved_date, new_cursor.id)
         } else {
             (limit_date, id)
         };
@@ -380,12 +380,12 @@ mod tests {
         assert_eq!(beatmaps.len(), 70);
         let beatmap = &beatmaps[0];
         assert_eq!(beatmap.beatmapset_id, 1);
-        assert_eq!(beatmap.checksum, "a5b99395a42bd55bc5eb1d2411cbdf8b");
+        assert_eq!(beatmap.checksum, "233f55099932d0696a3ef192041bc30d");
         assert_eq!(beatmap.total_length, 142);
         assert_eq!(beatmap.id, 75);
         assert_eq!(
             beatmap.last_updated,
-            DateTime::<Utc>::from_str("2014-05-18T17:16:42+00:00")?
+            DateTime::<Utc>::from_str("2024-06-13T15:43:27+00:00")?
         );
         assert_eq!(beatmap.mode, "osu");
         assert_eq!(beatmap.ranked, 1);
@@ -432,7 +432,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_retrieve_user() -> Result<(), Box<dyn Error>> {
-        let mut client = setup_test(2)?;
+        let mut client = setup_test(4)?;
         assert_eq!(
             client
                 .retrieve_user(6484647, false)

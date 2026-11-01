@@ -16,7 +16,6 @@ pub struct CollectionBeatmap {
     pub checksum: String,
     pub difficulty_rating: f32,
     pub id: i32,
-    pub streams_length: i16,
 }
 
 /// Returns a `.osdb` or a `.db` buffer generated from a collection of
@@ -88,7 +87,6 @@ mod tests {
                 id: 847314,
                 beatmapset_id: 128931,
                 bpm: 175,
-                streams_length: 10,
                 difficulty_rating: 5.14,
                 checksum: String::from("e4ad76f1a6b4e3bcfb1652d49159eff9"),
             },
@@ -96,7 +94,6 @@ mod tests {
                 id: 476149,
                 beatmapset_id: 153776,
                 bpm: 190,
-                streams_length: 5,
                 difficulty_rating: 4.88,
                 checksum: String::from("d6c8ba1406ad3de9381f51abf74be544"),
             },
@@ -104,7 +101,6 @@ mod tests {
                 id: 1949106,
                 beatmapset_id: 933630,
                 bpm: 210,
-                streams_length: 30,
                 difficulty_rating: 7.49,
                 checksum: String::from("1ff6975c142ac59e4731cb09f5d46bcc"),
             },
