@@ -16,6 +16,8 @@ services:
         restart: on-failure
         depends_on:
             - cache
+        security_opt:
+            - seccomp=unconfined
         environment:
             - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
             - AWS_BUCKET=${AWS_BUCKET}
@@ -57,6 +59,8 @@ services:
     ost-tasks:
         image: ojcastaneda/ost-tasks:latest
         restart: on-failure
+        security_opt:
+            - seccomp=unconfined
         environment:
             - AWS_ACCESS_KEY_ID=${AWS_ACCESS_KEY_ID}
             - AWS_BUCKET=${AWS_BUCKET}
